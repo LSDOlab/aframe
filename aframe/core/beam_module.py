@@ -1,7 +1,7 @@
 from lsdo_modules.module_csdl.module_csdl import ModuleCSDL
 from lsdo_modules.module.module import Module
 from caddee.caddee_core.system_model.design_scenario.design_condition.mechanics_group.mechanics_model.mechanics_model import MechanicsModel
-from aframe.aframe import Aframe
+from aframe.core.aframe import Aframe
 import numpy as np
 
 import csdl

@@ -1,7 +1,7 @@
 import numpy as np
 import csdl
 import python_csdl_backend
-from aframe.aframe import Aframe
+from aframe.core.aframe import Aframe
 from modopt.scipy_library import SLSQP
 from modopt.csdl_library import CSDLProblem
 import matplotlib.pyplot as plt
