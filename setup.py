@@ -4,15 +4,15 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name='lsdo_project_template',
+    name='aframe',
     version='0.1.0',
-    author='Author name',
-    author_email='author@gmail.com',
-    license='LGPLv3+',
-    keywords='python project template repository package',
-    url='http://github.com/LSDOlab/lsdo_project_template',
-    download_url='http://pypi.python.org/pypi/lsdo_project_template',
-    description='A template repository/package for LSDOlab projects',
+    author='Nicholas Orndorff',
+    author_email='norndorff@ucsd.edu',
+    license='MIT',
+    # keywords='python project template repository package',
+    url='https://github.com/LSDOlab/aframe',
+    download_url='https://github.com/LSDOlab/aframe',
+    description='A linear beam solver written in CSDL',
     long_description=long_description,
     long_description_content_type='text/markdown',
     packages=find_packages(),
