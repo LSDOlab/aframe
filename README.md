@@ -1,4 +1,4 @@
-# lsdo_project_template
+# A linear beam solver written in CSDL
 
 <!---
 [![Python](https://img.shields.io/pypi/pyversions/lsdo_project_template)](https://img.shields.io/pypi/pyversions/lsdo_project_template)
