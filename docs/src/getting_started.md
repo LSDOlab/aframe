@@ -2,7 +2,6 @@
 This page provides instructions for installing aframe 
 and running a minimal example.
 
-## Installation
 
 ### Installation instructions for users
 For direct installation with all dependencies, run on the terminal or command line
