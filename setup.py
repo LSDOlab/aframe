@@ -31,8 +31,7 @@ setup(
         'sphinxcontrib-bibtex',
         'setuptools',
         'wheel',
-        'twine'
-        'csdl',
+        'twine',
     ],
     classifiers=[
         'Programming Language :: Python',
