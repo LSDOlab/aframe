@@ -1,4 +1,4 @@
-# Welcome to lsdo_project_template
+# Aframe linear beam solver
 
 ![alt text](/src/images/walrus.png "Title displayed")
 
