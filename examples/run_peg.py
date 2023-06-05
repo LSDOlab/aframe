@@ -9,11 +9,11 @@ plt.rcParams.update(plt.rcParamsDefault)
 import scipy.io as sio
 
 
-axis_nodes_dict = sio.loadmat('data/axis_nodes.mat')
+axis_nodes_dict = sio.loadmat('examples/data/axis_nodes.mat')
 axis_nodes = axis_nodes_dict['axis_nodes']/39.3700787
 # add the initial node:
 axis_nodes = np.concatenate([np.array([[9.86,0,1.042]]),axis_nodes])
-airfoil_ribs_points_dict = sio.loadmat('data/ribs_oml_points.mat')
+airfoil_ribs_points_dict = sio.loadmat('examples/data/ribs_oml_points.mat')
 airfoil_ribs_points = airfoil_ribs_points_dict['airfoil_ribs_points']/39.3700787
 
 
@@ -34,7 +34,7 @@ for i in range(1,len(axis_nodes) - 1):
 w[0] = w[1]
 h[0] = h[1]
 
-loads_dict = sio.loadmat('data/loads_2p5g_n1g_aero_static.mat')
+loads_dict = sio.loadmat('examples/data/loads_2p5g_n1g_aero_static.mat')
 static_forces = loads_dict['forces']
 static_moments = loads_dict['moments']
 
@@ -101,6 +101,10 @@ if __name__ == '__main__':
     optimizer = SLSQP(prob, maxiter=1000, ftol=1E-8)
     optimizer.solve()
     optimizer.print_results()
+
+
+    print('displacement: ', sim['wing_displacement'])
+    print('stress', sim['stress'])
 
 
     print(sim['wing_tcap'])
