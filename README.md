@@ -47,4 +47,4 @@ For details on documentation, refer to the README in `docs` directory.
 For details on testing/pull requests, refer to the README in `tests` directory.
 
 # License
-This project is licensed under the terms of the **GNU Lesser General Public License v3.0**.
+This project is licensed under the terms of the **MIT License**.
