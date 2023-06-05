@@ -31,14 +31,15 @@ setup(
         'sphinxcontrib-bibtex',
         'setuptools',
         'wheel',
-        'twine',
+        'twine'
+        'csdl',
     ],
     classifiers=[
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
-        'License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)',
+        'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Intended Audience :: Developers',
         'Natural Language :: English',
