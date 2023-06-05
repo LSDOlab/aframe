@@ -16,9 +16,9 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'lsdo_project_template'
-copyright = '2023, Anugrah'
-author = 'Anugrah'
+project = 'aframe'
+copyright = '2023, Nicholas Orndorff'
+author = 'Nicholas Orndorff'
 version = '0.1'
 # release = 0.1.0rtc
 
@@ -50,7 +50,7 @@ nb_execution_mode = 'off'
 # autodoc_typehints = 'description'
 
 # autoapi options
-autoapi_dirs = ["../lsdo_project_template/core"]
+autoapi_dirs = ["../aframe/core"]
 autoapi_root = 'src/autoapi'
 autoapi_type = 'python'
 autoapi_file_patterns = ['*.py', '*.pyi']
@@ -158,52 +158,52 @@ def split_first_string_between_quotes(code_string, quotes):
     else:
         raise SyntaxError('Docstring for title and description is not declared correctly')
 
-collections = {
+# collections = {
     
-    # copy_tutorials collection copies the contents inside `/tutorials` 
-    # directory into `/src/_temp/tutorials`
-   'copy_tutorials': {
-      'driver': 'copy_folder',
-      'source': '../tutorials', # source relative to path of makefile, not wrt /src
-      'target': 'tutorials/',
-      'ignore': [],
-    #   'active': True,         # default: True. If False, this collection is ignored during doc build.
-    #   'safe': True,           # default: True. If True, any problem will raise an exception and stops the build.
-      'clean': True,            # default: True. If False, no cleanup is done before collections get executed.
-      'final_clean': True,      # default: True. If True, a final cleanup is done at the end of a Sphinx build.
-    #   'tags': ['my_collection', 'dummy'],     # List of tags, which trigger an activation of the collection.
-                                        # Should be used together with active set to False, 
-                                        # otherwise the collection gets always executed.
-                                        # Use -t tag option of sphinx-build command to trigger related collections.
-                                        # e.g. : `sphinx-build -b html -t dummy . _build/html`
-   },
+#     # copy_tutorials collection copies the contents inside `/tutorials` 
+#     # directory into `/src/_temp/tutorials`
+#    'copy_tutorials': {
+#       'driver': 'copy_folder',
+#       'source': '../tutorials', # source relative to path of makefile, not wrt /src
+#       'target': 'tutorials/',
+#       'ignore': [],
+#     #   'active': True,         # default: True. If False, this collection is ignored during doc build.
+#     #   'safe': True,           # default: True. If True, any problem will raise an exception and stops the build.
+#       'clean': True,            # default: True. If False, no cleanup is done before collections get executed.
+#       'final_clean': True,      # default: True. If True, a final cleanup is done at the end of a Sphinx build.
+#     #   'tags': ['my_collection', 'dummy'],     # List of tags, which trigger an activation of the collection.
+#                                         # Should be used together with active set to False, 
+#                                         # otherwise the collection gets always executed.
+#                                         # Use -t tag option of sphinx-build command to trigger related collections.
+#                                         # e.g. : `sphinx-build -b html -t dummy . _build/html`
+#    },
 
-   'copy_examples': {
-      'driver': 'copy_folder',
-      'source': '../examples',  # source relative to path of makefile, not wrt /src
-      'target': 'examples/',
-      'ignore': [],
-      'clean': True,            # default: True. If False, no cleanup is done before collections get executed.
-      'final_clean': True,      # default: True. If True, a final cleanup is done at the end of a Sphinx build.
-   },
+#    'copy_examples': {
+#       'driver': 'copy_folder',
+#       'source': '../examples',  # source relative to path of makefile, not wrt /src
+#       'target': 'examples/',
+#       'ignore': [],
+#       'clean': True,            # default: True. If False, no cleanup is done before collections get executed.
+#       'final_clean': True,      # default: True. If True, a final cleanup is done at the end of a Sphinx build.
+#    },
 
-    # convert_examples collection converts all .py files to .md files recursively inside `_temp/examples` 
-    # directory and also extracts the docstrings from the .py files to generate title and descriptions
-    # for those examples
-   'convert_examples': {
-      'driver': 'writer_function',  # uses custom WriterFunctionDriver written by Anugrah
-      'from'  : '_temp/examples/',  # source relative to path of makefile, not wrt /src
-      'source': py2md,              # custom function written above in `conf.py`
-      'target': 'examples/',        # target was a file for original FunctionDriver, e.g., 'target': 'examples/temp.txt'
-                                    # the original FunctionDriver was supposed to write only 1 file.
-      'clean': True,       
-      'final_clean': True,      
-    #   'write_result': True,   # this prevents original FunctionDriver from writing to the target file
-   },
-}
+#     # convert_examples collection converts all .py files to .md files recursively inside `_temp/examples` 
+#     # directory and also extracts the docstrings from the .py files to generate title and descriptions
+#     # for those examples
+#    'convert_examples': {
+#       'driver': 'writer_function',  # uses custom WriterFunctionDriver written by Anugrah
+#       'from'  : '_temp/examples/',  # source relative to path of makefile, not wrt /src
+#       'source': py2md,              # custom function written above in `conf.py`
+#       'target': 'examples/',        # target was a file for original FunctionDriver, e.g., 'target': 'examples/temp.txt'
+#                                     # the original FunctionDriver was supposed to write only 1 file.
+#       'clean': True,       
+#       'final_clean': True,      
+#     #   'write_result': True,   # this prevents original FunctionDriver from writing to the target file
+#    },
+# }
 
-collections_target = 'src/_temp'    # default : '_collections', the default storage location for all collections
-collections_clean  = True           # default : True, all configured target locations get wiped out at the beginning
-                                    # can be overwritten for individual collection by setting value for the 'clean' key
-collections_final_clean  = True     # default : True, all collections start their clean-up routine after a Sphinx build is done
-                                    # can be overwritten for individual collection by setting value for the 'final_clean' key
+# collections_target = 'src/_temp'    # default : '_collections', the default storage location for all collections
+# collections_clean  = True           # default : True, all configured target locations get wiped out at the beginning
+#                                     # can be overwritten for individual collection by setting value for the 'clean' key
+# collections_final_clean  = True     # default : True, all collections start their clean-up routine after a Sphinx build is done
+#                                     # can be overwritten for individual collection by setting value for the 'final_clean' key
