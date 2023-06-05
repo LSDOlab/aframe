@@ -13,7 +13,7 @@
 [![Issues](https://img.shields.io/github/issues/LSDOlab/lsdo_project_template.svg)](https://github.com/LSDOlab/lsdo_project_template/issues)
 
 
-A template repository for LSDOlab projects
+A linear beam solver written in CSDL
 
 This repository serves as a template for all LSDOlab projects with regard to documentation, testing and hosting of open-source code.
 
