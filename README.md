@@ -15,8 +15,6 @@
 
 A linear beam solver written in CSDL
 
-# Installation
-
 ## Installation instructions for users
 For direct installation with all dependencies, run on the terminal or command line
 ```sh
