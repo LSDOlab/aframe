@@ -30,7 +30,7 @@ pip install git+https://github.com/LSDOlab/aframe.git@branch
 **Enabled by**: `packages=find_packages()` in the `setup.py` file.
 
 ## Installation instructions for developers
-To install `lsdo_aframe`, first clone the repository and install using pip.
+To install `aframe`, first clone the repository and install using pip.
 On the terminal or command line, run
 ```sh
 git clone https://github.com/LSDOlab/aframe.git
