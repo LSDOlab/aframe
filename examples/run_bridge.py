@@ -10,7 +10,7 @@ plt.rcParams.update(plt.rcParamsDefault)
 
 
 
-n = 10
+n = 5
 
 class Run(csdl.Model):
     def initialize(self):
