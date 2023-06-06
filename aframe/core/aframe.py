@@ -454,7 +454,7 @@ class Aframe(ModuleCSDL):
         self.register_output('max_stress', max_stress)
         
         # output dummy forces and moments for CADDEE:
-        zero = self.declare_variable('zero_vec',shape=(3),val=0)
+        zero = self.declare_variable('zero_vec', shape=(3), val=0)
         self.register_output('F', 1*zero)
         self.register_output('M', 1*zero)
 
