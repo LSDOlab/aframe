@@ -61,8 +61,8 @@ class Run(csdl.Model):
 
         self.create_input('wing_h', shape=(len(axis_nodes)-1), val=h[0:-1])
         self.create_input('wing_w', shape=(len(axis_nodes)-1), val=w[0:-1])
-        self.create_input('wing_tcap', shape=(len(axis_nodes) - 1), val=0.01)
-        self.create_input('wing_tweb', shape=(len(axis_nodes) - 1), val=0.01)
+        self.create_input('wing_tcap', shape=(len(axis_nodes) - 1), val=0.003)
+        self.create_input('wing_tweb', shape=(len(axis_nodes) - 1), val=0.003)
         self.create_input('wing_forces', shape=(len(axis_nodes),3), val=forces)
         # self.create_input('wing_moments', shape=(len(axis_nodes),3), val=moments)
 
@@ -97,10 +97,10 @@ if __name__ == '__main__':
     sim.run()
 
 
-    prob = CSDLProblem(problem_name='run_opt', simulator=sim)
-    optimizer = SLSQP(prob, maxiter=1000, ftol=1E-8)
-    optimizer.solve()
-    optimizer.print_results()
+    # prob = CSDLProblem(problem_name='run_opt', simulator=sim)
+    # optimizer = SLSQP(prob, maxiter=1000, ftol=1E-8)
+    # optimizer.solve()
+    # optimizer.print_results()
 
 
     print('displacement: ', sim['wing_displacement'])
