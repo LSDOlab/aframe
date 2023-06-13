@@ -13,12 +13,13 @@ axis_nodes_dict = sio.loadmat('examples/data/axis_nodes.mat')
 axis_nodes = axis_nodes_dict['axis_nodes']/39.3700787
 # add the initial node:
 axis_nodes = np.concatenate([np.array([[9.86471328,0,1.04225493]]),axis_nodes])
+
 airfoil_ribs_points_dict = sio.loadmat('examples/data/ribs_oml_points.mat')
 airfoil_ribs_points = airfoil_ribs_points_dict['airfoil_ribs_points']/39.3700787
 
 
 w, h = np.zeros((len(axis_nodes))), np.zeros((len(axis_nodes)))
-for i in range(len(axis_nodes) - 1):
+for i in range(1, len(axis_nodes) - 1):
     top_left = airfoil_ribs_points[0,:,i]
     top_right = airfoil_ribs_points[9,:,i]
     bot_left = airfoil_ribs_points[19,:,i]
@@ -98,7 +99,7 @@ if __name__ == '__main__':
 
 
     prob = CSDLProblem(problem_name='run_opt', simulator=sim)
-    optimizer = SLSQP(prob, maxiter=1000, ftol=1E-8)
+    optimizer = SLSQP(prob, maxiter=1000, ftol=1E-9)
     optimizer.solve()
     optimizer.print_results()
 

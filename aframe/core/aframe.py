@@ -22,8 +22,6 @@ class Aframe(ModuleCSDL):
         Iz = np.pi * (r2**4 - r1**4) / 4.0
         J = np.pi * (r2**4 - r1**4) / 2.0
 
-        self.print_var(A)
-
         self.register_output(element_name + '_A', A)
         self.register_output(element_name + '_Iy', Iy)
         self.register_output(element_name + '_Iz', Iz)
