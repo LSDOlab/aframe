@@ -36,13 +36,14 @@ w[0] = w[1]
 h[0] = h[1]
 
 loads_dict = sio.loadmat('examples/data/loads_2p5g_n1g_aero_static.mat')
-static_forces = loads_dict['forces']*4.4482
+static_forces = loads_dict['forces']# *4.4482
 static_moments = loads_dict['moments']*0.11298
+
 
 forces, moments = np.zeros((len(axis_nodes),3)), np.zeros((len(axis_nodes),3))
 for i in range(len(axis_nodes) - 2):
-    forces[i,:] = static_forces[0,i,:]
-    moments[i,:] = static_moments[0,i,:]
+    forces[i+1,:] = static_forces[0,i,:]
+    moments[i+1,:] = static_moments[0,i,:]
 
 
 
