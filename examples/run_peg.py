@@ -12,13 +12,13 @@ import scipy.io as sio
 axis_nodes_dict = sio.loadmat('examples/data/axis_nodes.mat')
 axis_nodes = axis_nodes_dict['axis_nodes']/39.3700787
 # add the initial node:
-axis_nodes = np.concatenate([np.array([[9.86,0,1.042]]),axis_nodes])
+axis_nodes = np.concatenate([np.array([[9.86471328,0,1.04225493]]),axis_nodes])
 airfoil_ribs_points_dict = sio.loadmat('examples/data/ribs_oml_points.mat')
 airfoil_ribs_points = airfoil_ribs_points_dict['airfoil_ribs_points']/39.3700787
 
 
 w, h = np.zeros((len(axis_nodes))), np.zeros((len(axis_nodes)))
-for i in range(1,len(axis_nodes) - 1):
+for i in range(len(axis_nodes) - 1):
     top_left = airfoil_ribs_points[0,:,i]
     top_right = airfoil_ribs_points[9,:,i]
     bot_left = airfoil_ribs_points[19,:,i]
@@ -35,13 +35,13 @@ w[0] = w[1]
 h[0] = h[1]
 
 loads_dict = sio.loadmat('examples/data/loads_2p5g_n1g_aero_static.mat')
-static_forces = loads_dict['forces']
-static_moments = loads_dict['moments']
+static_forces = loads_dict['forces']*4.4482
+static_moments = loads_dict['moments']*0.11298
 
 forces, moments = np.zeros((len(axis_nodes),3)), np.zeros((len(axis_nodes),3))
 for i in range(len(axis_nodes) - 2):
-    forces[i+1,:] = static_forces[0,i,:]
-    moments[i+1,:] = static_moments[0,i,:]
+    forces[i,:] = static_forces[0,i,:]
+    moments[i,:] = static_moments[0,i,:]
 
 
 
@@ -61,8 +61,8 @@ class Run(csdl.Model):
 
         self.create_input('wing_h', shape=(len(axis_nodes)-1), val=h[0:-1])
         self.create_input('wing_w', shape=(len(axis_nodes)-1), val=w[0:-1])
-        self.create_input('wing_tcap', shape=(len(axis_nodes) - 1), val=0.003)
-        self.create_input('wing_tweb', shape=(len(axis_nodes) - 1), val=0.003)
+        self.create_input('wing_tcap', shape=(len(axis_nodes) - 1), val=0.001)
+        self.create_input('wing_tweb', shape=(len(axis_nodes) - 1), val=0.001)
         self.create_input('wing_forces', shape=(len(axis_nodes),3), val=forces)
         # self.create_input('wing_moments', shape=(len(axis_nodes),3), val=moments)
 
@@ -71,9 +71,9 @@ class Run(csdl.Model):
         self.add(Aframe(beams=beams, bounds=bounds, joints=joints), name='Aframe')
 
 
-        self.add_constraint('stress', upper=450E6/1, scaler=1E-8)
-        self.add_design_variable('wing_tcap', lower=0.001, scaler=1E2)
-        self.add_design_variable('wing_tweb', lower=0.001, scaler=1E3)
+        self.add_constraint('stress', upper=450E6, scaler=1E-8)
+        self.add_design_variable('wing_tcap', lower=0.001, upper=0.2, scaler=1E2)
+        self.add_design_variable('wing_tweb', lower=0.001, upper=0.2, scaler=1E3)
         self.add_objective('mass', scaler=1E-2)
 
         mass = self.declare_variable('mass')
@@ -97,13 +97,13 @@ if __name__ == '__main__':
     sim.run()
 
 
-    # prob = CSDLProblem(problem_name='run_opt', simulator=sim)
-    # optimizer = SLSQP(prob, maxiter=1000, ftol=1E-8)
-    # optimizer.solve()
-    # optimizer.print_results()
+    prob = CSDLProblem(problem_name='run_opt', simulator=sim)
+    optimizer = SLSQP(prob, maxiter=1000, ftol=1E-8)
+    optimizer.solve()
+    optimizer.print_results()
 
 
-    print('displacement: ', sim['wing_displacement'])
+    #print('displacement: ', sim['wing_displacement'])
     print('stress', sim['stress'])
 
 
