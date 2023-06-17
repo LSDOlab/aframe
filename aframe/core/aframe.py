@@ -23,6 +23,7 @@ class Aframe(ModuleCSDL):
         J = np.pi * (r2**4 - r1**4) / 2.0
 
         self.register_output(element_name + '_A', A)
+        self.register_output(element_name + '_Ix', 1*J)
         self.register_output(element_name + '_Iy', Iy)
         self.register_output(element_name + '_Iz', Iz)
         self.register_output(element_name + '_J', J)
@@ -38,6 +39,7 @@ class Aframe(ModuleCSDL):
         Q = 2*(h/2)*tweb*(h/4) + (w - 2*tweb)*tcap*((h/2) - (tcap/2))
 
         self.register_output(element_name + '_A', A)
+        self.register_output(element_name + '_Ix', 1*J) # I think J is the same as Ix...
         self.register_output(element_name + '_Iy', Iy)
         self.register_output(element_name + '_Iz', Iz)
         self.register_output(element_name + '_J', J)
@@ -46,7 +48,7 @@ class Aframe(ModuleCSDL):
 
     def local_mass(self, element_name, E, G, node_dict, node_index, dim, i, element_density_list):
         A = self.declare_variable(element_name + '_A')
-        Ix = self.declare_variable(element_name + '_Ix') # still need to compute !!!!!!!!
+        Ix = self.declare_variable(element_name + '_Ix')
         Iy = self.declare_variable(element_name + '_Iy')
         Iz = self.declare_variable(element_name + '_Iz')
         J = self.declare_variable(element_name + '_J')
@@ -108,7 +110,7 @@ class Aframe(ModuleCSDL):
         ll, mm, nn = cp[0], cp[1], cp[2]
         D = (ll**2 + mm**2)**0.5
 
-        block = self.create_output(element_name + 'block',shape=(3,3),val=0)
+        block = self.create_output(element_name + 'mass_block',shape=(3,3),val=0)
         block[0,0] = csdl.reshape(ll, (1,1))
         block[0,1] = csdl.reshape(mm, (1,1))
         block[0,2] = csdl.reshape(nn, (1,1))
