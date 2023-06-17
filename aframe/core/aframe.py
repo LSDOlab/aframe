@@ -127,7 +127,7 @@ class Aframe(ModuleCSDL):
         tmt = csdl.matmat(csdl.transpose(MT), csdl.matmat(mp, MT))
 
         # expand the transformed mass matrix to the global dimensions:
-        mass_matrix = self.create_output(element_name + 'mass_matrix', shape=(dim,dim), val=0)
+        element_mass_matrix = self.create_output(element_name + 'element_mass_matrix', shape=(dim,dim), val=0)
 
         # parse tmt:
         m11 = tmt[0:6,0:6] # upper left
@@ -143,25 +143,25 @@ class Aframe(ModuleCSDL):
         row_f = node_a_index*6 + 6
         col_i = node_a_index*6
         col_f = node_a_index*6 + 6
-        mass_matrix[row_i:row_f, col_i:col_f] = m11
+        element_mass_matrix[row_i:row_f, col_i:col_f] = m11
 
         row_i = node_a_index*6
         row_f = node_a_index*6 + 6
         col_i = node_b_index*6
         col_f = node_b_index*6 + 6
-        mass_matrix[row_i:row_f, col_i:col_f] = m12
+        element_mass_matrix[row_i:row_f, col_i:col_f] = m12
 
         row_i = node_b_index*6
         row_f = node_b_index*6 + 6
         col_i = node_a_index*6
         col_f = node_a_index*6 + 6
-        mass_matrix[row_i:row_f, col_i:col_f] = m21
+        element_mass_matrix[row_i:row_f, col_i:col_f] = m21
 
         row_i = node_b_index*6
         row_f = node_b_index*6 + 6
         col_i = node_b_index*6
         col_f = node_b_index*6 + 6
-        mass_matrix[row_i:row_f, col_i:col_f] = m22
+        element_mass_matrix[row_i:row_f, col_i:col_f] = m22
 
 
 
@@ -310,7 +310,7 @@ class Aframe(ModuleCSDL):
         return Fi
 
 
-    def add_beam(self, beam_name, nodes, cs, e, g, rho, node_dict, node_index, dim):
+    def add_beam(self, beam_name, nodes, cs, e, g, rho, node_dict, node_index, dim, element_density_list):
         n = len(nodes)
 
         default_val = np.zeros((n, 3))
@@ -356,7 +356,7 @@ class Aframe(ModuleCSDL):
 
 
 
-        # calculate the stiffness matrix for each element:
+        # calculate the stiffness matrix and the mass matrix for each element:
         for i in range(n - 1):
             element_name = beam_name + '_element_' + str(i)
 
@@ -367,6 +367,15 @@ class Aframe(ModuleCSDL):
                                  node_index=node_index, 
                                  dim=dim,
                                  i=i)
+            
+            self.local_mass(element_name=element_name, 
+                                 E=e, 
+                                 G=g, 
+                                 node_dict=node_dict, 
+                                 node_index=node_index, 
+                                 dim=dim,
+                                 i=i,
+                                 element_density_list=element_density_list)
 
 
     def define(self):
@@ -425,15 +434,19 @@ class Aframe(ModuleCSDL):
                           rho=beams[beam_name]['rho'],
                           node_dict=node_dict[beam_name],
                           node_index=node_index,
-                          dim=dim)
+                          dim=dim,
+                          element_density_list=element_density_list)
 
 
-        # compute the global stiffness matrix:
+        # compute the global stiffness matrix and the global mass matrix:
         helper = self.create_output('helper', shape=(num_elements,dim,dim), val=0)
+        mass_helper = self.create_output('mass_helper', shape=(num_elements,dim,dim), val=0)
         for i, element_name in enumerate(elements):
             helper[i,:,:] = csdl.reshape(self.declare_variable(element_name + 'k', shape=(dim,dim)), (1,dim,dim))
+            mass_helper[i,:,:] = csdl.reshape(self.declare_variable(element_name + 'element_mass_matrix', shape=(dim,dim)), (1,dim,dim))
 
         sum_k = csdl.sum(helper, axes=(0, ))
+        sum_m = csdl.sum(mass_helper, axes=(0, ))
 
         b_index_list = []
         for b_name in bounds:
@@ -451,9 +464,10 @@ class Aframe(ModuleCSDL):
         zero, one = self.create_input('zero', shape=(1,1), val=0), self.create_input('one', shape=(1,1), val=1)
         [(mask.__setitem__((i,i),1*zero), mask_eye.__setitem__((i,i),1*one)) for i in range(dim) if i in b_index_list]
 
-        # modify the global stiffness matrix with boundary conditions:
+        # modify the global stiffness matrix and the global mass matrix with boundary conditions:
         # first remove the row/column with a boundary condition, then add a 1:
         K = self.register_output('K', csdl.matmat(csdl.matmat(mask, sum_k), mask) + mask_eye)
+        mass_matrix = self.register_output('mass_matrix', csdl.matmat(csdl.matmat(mask, sum_m), mask) + mask_eye)
 
 
 
