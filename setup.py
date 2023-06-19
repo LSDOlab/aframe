@@ -32,6 +32,7 @@ setup(
         'setuptools',
         'wheel',
         'twine',
+        'm3l @ git+https://github.com/LSDOlab/m3l.git'
     ],
     classifiers=[
         'Programming Language :: Python',
