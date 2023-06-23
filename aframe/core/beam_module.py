@@ -61,6 +61,14 @@ class EBBeam(m3l.ExplicitOperation):
         self.num_nodes = None
 
     def compute(self):
+        '''
+        Creates a CSDL model to compute the solver outputs.
+
+        Returns
+        -------
+        csdl_model : csdl.Model
+            The csdl model which computes the outputs (the normal solver)
+        '''
         beams = self.parameters['beams']
         bounds = self.parameters['bounds']
         joints = self.parameters['joints']
@@ -75,6 +83,11 @@ class EBBeam(m3l.ExplicitOperation):
 
     # # optional - for dynamic or conservative coupling
     # def compute_derivatives(self, inputs, derivatives):
+    #     '''
+    #     Creates a CSDL model to compute the derivatives of the solver outputs.
+
+
+    #     '''
     #     geo_mesh = inputs['geo_mesh']
     #     displacement_nodes = inputs['displacement_nodes']
     #     derivatives['nodal_displacement', 'displacement'] = displacement_map(geo_mesh, displacement_nodes)
@@ -98,8 +111,11 @@ class EBBeam(m3l.ExplicitOperation):
             The rotations of the mesh nodes.
 
         '''
+
+        # Assembles the CSDL model
         operation_csdl = self.compute()
 
+        # Gets information for naming/shapes
         beam_name = list(self.parameters['beams'].keys())[0]   # this is only taking the first mesh added to the solver.
         mesh = list(self.parameters['mesh'].parameters['meshes'].values())[0]   # this is only taking the first mesh added to the solver.
 
@@ -109,7 +125,9 @@ class EBBeam(m3l.ExplicitOperation):
         if moments is not None:
             arguments[f'{beam_name}_moments'] = moments
 
+        # Create the M3L graph operation
         beam_operation = m3l.CSDLOperation(name='eb_beam_model', arguments=arguments, operation_csdl=operation_csdl)
+        # Create the M3L variables that are being output
         displacements = m3l.Variable(name=f'{beam_name}_displacements', shape=mesh.shape, operation=beam_operation)
         rotations = m3l.Variable(name=f'{beam_name}_rotations', shape=mesh.shape, operation=beam_operation)
 
