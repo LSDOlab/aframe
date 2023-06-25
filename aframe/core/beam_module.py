@@ -147,9 +147,13 @@ class EBBeamForces(m3l.ExplicitOperation):
 
         force_map = self.fmap(mesh.value.reshape((-1,3)), oml=nodal_forces_mesh.value.reshape((-1,3)))
 
+        flattened_nodal_forces_shape = (np.prod(nodal_forces.shape[:-1]), nodal_forces.shape[-1])
         nodal_forces = csdl_model.register_module_input(name='nodal_forces', shape=nodal_forces.shape)
+        flattened_nodal_forces = csdl.reshape(nodal_forces, new_shape=flattened_nodal_forces_shape)
         force_map_csdl = csdl_model.create_input(f'nodal_to_{beam_name}_forces_map', val=force_map)
-        beam_mesh_forces = csdl.matmat(force_map_csdl, nodal_forces)
+        flatenned_beam_mesh_forces = csdl.matmat(force_map_csdl, flattened_nodal_forces)
+        output_shape = tuple(mesh.shape[:-1]) + (nodal_forces.shape[-1],)
+        beam_mesh_forces = csdl.reshape(flatenned_beam_mesh_forces, new_shape=output_shape)
         csdl_model.register_module_output(f'{beam_name}_forces', beam_mesh_forces)
 
         return csdl_model
@@ -177,7 +181,8 @@ class EBBeamForces(m3l.ExplicitOperation):
 
         arguments = {'nodal_forces': nodal_forces}
         force_map_operation = m3l.CSDLOperation(name='ebbeam_force_map', arguments=arguments, operation_csdl=operation_csdl)
-        beam_forces = m3l.Variable(name=f'{beam_name}_forces', shape=mesh.shape, operation=force_map_operation)
+        output_shape = tuple(mesh.shape[:-1]) + (nodal_forces.shape[-1],)
+        beam_forces = m3l.Variable(name=f'{beam_name}_forces', shape=output_shape, operation=force_map_operation)
         return beam_forces
 
 
