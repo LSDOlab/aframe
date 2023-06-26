@@ -1,7 +1,7 @@
 from lsdo_modules.module_csdl.module_csdl import ModuleCSDL
 from lsdo_modules.module.module import Module
 from caddee.caddee_core.system_model.design_scenario.design_condition.mechanics_group.mechanics_model.mechanics_model import MechanicsModel
-from aframe.core.aframe import Aframe
+from aframe.core.aframe import Aframe, AframeResidual, AframeResidualJacobian
 import numpy as np
 
 import csdl
@@ -11,41 +11,41 @@ import array_mapper as am
 
 import m3l
 
-# class BeamM3LDisplacement(m3l.ImplicitOperation):
-#     def initialize(self):        
-#         # self.parameters.declare('connectivity', types=list)        
-#         # self.parameters.declare('out_name', types=str)
+class BeamM3LDisplacement(m3l.ImplicitOperation):
+    def initialize(self):        
+        # self.parameters.declare('connectivity', types=list)        
+        # self.parameters.declare('out_name', types=str)
 
-#         self.parameters.declare('component', default=None)
-#         self.parameters.declare('mesh', default=None)
-#         self.parameters.declare('struct_solver', True)
-#         self.parameters.declare('compute_mass_properties', default=True, types=bool)
+        self.parameters.declare('component', default=None)
+        self.parameters.declare('mesh', default=None)
+        self.parameters.declare('struct_solver', True)
+        self.parameters.declare('compute_mass_properties', default=True, types=bool)
 
-#         self.parameters.declare('beams', default={})
-#         self.parameters.declare('bounds', default={})
-#         self.parameters.declare('joints', default={})
-#         self.num_nodes = None
+        self.parameters.declare('beams', default={})
+        self.parameters.declare('bounds', default={})
+        self.parameters.declare('joints', default={})
+        self.num_nodes = None
 
-#     def evaluate_residuals(self, inputs, outputs, residuals, num_nodes):
-#         geo_mesh = inputs['geo_mesh']
-#         thickness_mesh = inputs['thickness_mesh']
-#         forces = inputs['forces']
-#         displacement = outputs['displacement']
-#         residuals['displacement'] = residual_CSDL(geo_mesh, thickness_mesh, forces, displacement, num_nodes)
+    def evaluate_residuals(self, inputs, outputs, residuals, num_nodes):
+        geo_mesh = inputs['geo_mesh']
+        thickness_mesh = inputs['thickness_mesh']
+        forces = inputs['forces']
+        displacement = outputs['displacement']
+        residuals['displacement'] = LinearBeamResidualCSDL(geo_mesh, thickness_mesh, forces, displacement, num_nodes)
 
-#     # required for dynamic, not needed for static
-#     def compute_derivatives(self, inputs, outputs, derivatives, num_nodes):
-#         geo_mesh = inputs['geo_mesh']
-#         thickness_mesh = inputs['thickness_mesh']
-#         forces = inputs['forces']
-#         displacement = outputs['displacement']
+    # required for dynamic, not needed for static
+    def compute_derivatives(self, inputs, outputs, derivatives, num_nodes):
+        geo_mesh = inputs['geo_mesh']
+        thickness_mesh = inputs['thickness_mesh']
+        forces = inputs['forces']
+        displacement = outputs['displacement']
         
-#         derivatives['displacement', 'forces'] = force_jacobian_CSDL(geo_mesh, thickness_mesh, forces, displacement, num_nodes)
-#         derivatives['displacement', 'displacement'] = displacement_jacobian_CSDL(geo_mesh, thickness_mesh, forces, displacement, num_nodes)
+        derivatives['displacement', 'forces'] = AframeResidualJacobian(geo_mesh, thickness_mesh, forces, displacement, num_nodes)
+        derivatives['displacement', 'displacement'] = AframeResidualJacobian(geo_mesh, thickness_mesh, forces, displacement, num_nodes)
 
-#     # optional method
-#     def solve_residual_equations(self, inputs, outputs):
-#         pass
+    # optional method
+    def solve_residual_equations(self, inputs, outputs):
+        pass
 
 
 class EBBeam(m3l.ExplicitOperation):
@@ -619,3 +619,33 @@ class LinearBeamCSDL(ModuleCSDL):
 
         # solve the beam group:
         self.add_module(Aframe(beams=beams, bounds=bounds, joints=joints), name='Aframe')
+
+class LinearBeamResidualCSDL(ModuleCSDL):
+    def initialize(self):
+        self.parameters.declare('beams')
+        self.parameters.declare('bounds')
+        self.parameters.declare('joints')
+    
+    def define(self):
+        beams = self.parameters['beams']
+        bounds = self.parameters['bounds']
+        joints = self.parameters['joints']
+
+        for beam_name in beams:
+            n = len(beams[beam_name]['nodes'])
+            cs = beams[beam_name]['cs']
+
+            if cs == 'box':
+                xweb = self.register_module_input(beam_name+'t_web_in',shape=(n-1), computed_upstream=False)
+                xcap = self.register_module_input(beam_name+'t_cap_in',shape=(n-1), computed_upstream=False)
+                self.register_output(beam_name+'_tweb',1*xweb)
+                self.register_output(beam_name+'_tcap',1*xcap)
+                
+            elif cs == 'tube':
+                thickness = self.register_module_input(beam_name+'thickness_in',shape=(n-1), computed_upstream=False)
+                radius = self.register_module_input(beam_name+'radius_in',shape=(n-1), computed_upstream=False)
+                self.register_output(beam_name+'_t', 1*thickness)
+                self.register_output(beam_name+'_r', 1*radius)
+
+        # solve the beam group:
+        self.add_module(AframeResidual(beams=beams, bounds=bounds, joints=joints), name='Aframe')
