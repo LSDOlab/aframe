@@ -128,8 +128,8 @@ class EBBeam(m3l.ExplicitOperation):
         # Create the M3L graph operation
         beam_operation = m3l.CSDLOperation(name='eb_beam_model', arguments=arguments, operation_csdl=operation_csdl)
         # Create the M3L variables that are being output
-        displacements = m3l.Variable(name=f'{beam_name}_displacements', shape=mesh.shape, operation=beam_operation)
-        rotations = m3l.Variable(name=f'{beam_name}_rotations', shape=mesh.shape, operation=beam_operation)
+        displacements = m3l.Variable(name=f'{beam_name}_displacement', shape=mesh.shape, operation=beam_operation)
+        rotations = m3l.Variable(name=f'{beam_name}_rotation', shape=mesh.shape, operation=beam_operation)
 
         return displacements, rotations
 
@@ -316,7 +316,7 @@ class EBBeamNodalDisplacements(m3l.ExplicitOperation):
         beam_displacements = csdl_model.register_module_input(name=f'{beam_name}_displacement', shape=beam_displacements.shape)
         displacement_map_csdl = csdl_model.create_input(f'{beam_name}_displacements_to_nodal_displacements', val=displacement_map)
         nodal_displacements = csdl.matmat(displacement_map_csdl, beam_displacements)
-        csdl_model.register_module_output(f'{beam_name}_nodal_displacements', nodal_displacements)
+        csdl_model.register_module_output(f'{beam_name}_nodal_displacement', nodal_displacements)
 
         return csdl_model
 
@@ -340,9 +340,9 @@ class EBBeamNodalDisplacements(m3l.ExplicitOperation):
 
         beam_name = list(self.parameters['beams'].keys())[0]   # this is only taking the first mesh added to the solver.
 
-        arguments = {f'{beam_name}_displacements': beam_displacements}
-        displacement_map_operation = m3l.CSDLOperation(name='ebbeam_displacement_map', arguments=arguments, operation_csdl=operation_csdl)
-        nodal_displacements = m3l.Variable(name=f'{beam_name}_nodal_displacements', shape=nodal_displacements_mesh.shape, 
+        arguments = {f'{beam_name}_displacement': beam_displacements}
+        displacement_map_operation = m3l.CSDLOperation(name='eb_beam_displacement_map', arguments=arguments, operation_csdl=operation_csdl)
+        nodal_displacements = m3l.Variable(name=f'{beam_name}_nodal_displacement', shape=nodal_displacements_mesh.shape, 
                                            operation=displacement_map_operation)
         return nodal_displacements
 
