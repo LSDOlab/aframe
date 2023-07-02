@@ -1,6 +1,6 @@
 from lsdo_modules.module_csdl.module_csdl import ModuleCSDL
 from lsdo_modules.module.module import Module
-from caddee.caddee_core.system_model.design_scenario.design_condition.mechanics_group.mechanics_model.mechanics_model import MechanicsModel
+# from caddee.core.caddee_core.system_model.design_scenario.design_condition.mechanics_group.mechanics_model.mechanics_model import MechanicsModel
 from aframe.core.aframe import Aframe
 import numpy as np
 
@@ -227,7 +227,11 @@ class EBBeam(m3l.ExplicitOperation):
         # Create the M3L variables that are being output
         displacements = m3l.Variable(name=f'{beam_name}_displacement', shape=mesh.shape, operation=self)
         rotations = m3l.Variable(name=f'{beam_name}_rotation', shape=mesh.shape, operation=self)
-        return displacements, rotations
+        mass = m3l.Variable(name='mass', shape=(1,), operation=self)
+        cg = m3l.Variable(name='cg_vector', shape=(3,), operation=self)
+        inertia_tensor = m3l.Variable(name='inertia_tensor', shape=(3,3), operation=self)
+        return displacements, rotations, mass, cg, inertia_tensor
+
 
 # class EBBeamForces(m3l.ExplicitOperation):
 #     def initialize(self, kwargs):
@@ -575,6 +579,10 @@ class EBBeamNodalDisplacements(m3l.ExplicitOperation):
 
         return weights
     
+# class EBBeamMass(m3l.ExplicitOperation):
+#     def initialize(self, kwargs):
+#         self.parameters.declare('elements')
+#         self.parameters.declare('element_density_list')
 
 class BeamM3LStrain(m3l.ExplicitOperation):
     def compute():
