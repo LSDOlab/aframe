@@ -1,7 +1,7 @@
 import numpy as np
 import csdl
 import python_csdl_backend
-from aframe.core.massprop import MassPropModule as MassProp
+from aframe.core.massprop import MassProp
 from aframe.core.model import Model
 from aframe.core.stress import StressTube, StressBox
 from lsdo_modules.module_csdl.module_csdl import ModuleCSDL
@@ -565,7 +565,7 @@ class Aframe(ModuleCSDL):
 
 
         # perform a stress recovery:
-        stress = self.create_output('vm_stress', shape=(len(elements)), val=0)
+        stress = self.create_output('stress', shape=(len(elements)), val=0)
         index = 0
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])
