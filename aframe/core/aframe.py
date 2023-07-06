@@ -55,7 +55,7 @@ class Aframe(ModuleCSDL):
 
         node_a = self.declare_variable(element_name + 'node_a', shape=(3))
         node_b = self.declare_variable(element_name + 'node_b', shape=(3))
-        L = csdl.pnorm(node_b - node_a, pnorm_type=2)
+        L = csdl.pnorm(node_b - node_a, pnorm_type=2) + 1E-12
 
         a = L/2
         rho = element_density_list[i]
@@ -177,7 +177,7 @@ class Aframe(ModuleCSDL):
         node_a = self.declare_variable(element_name + 'node_a', shape=(3))
         node_b = self.declare_variable(element_name + 'node_b', shape=(3))
 
-        L = self.register_output(element_name + 'L', csdl.pnorm(node_b - node_a, pnorm_type=2))
+        L = self.register_output(element_name + 'L', csdl.pnorm(node_b - node_a, pnorm_type=2)) + 1E-12
 
         kp = self.create_output(element_name + 'kp', shape=(12,12), val=0)
         # the upper left block
