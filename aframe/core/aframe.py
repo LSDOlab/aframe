@@ -1,7 +1,7 @@
 import numpy as np
 import csdl
 import python_csdl_backend
-from aframe.core.massprop import MassProp
+from aframe.core.massprop import MassPropModule as MassProp
 from aframe.core.model import Model
 from aframe.core.stress import StressTube, StressBox
 from lsdo_modules.module_csdl.module_csdl import ModuleCSDL
@@ -32,7 +32,7 @@ class Aframe(ModuleCSDL):
     def box(self, element_name, w, h, tweb, tcap):
         w_i = w - 2*tweb
         h_i = h - 2*tcap
-        A = (((w*h) - (w_i*h_i))**2 + 1E-16)**0.5 # for robustness
+        A = (w*h) - (w_i*h_i)
         Iz = ((w**3)*h - (w_i**3)*h_i)/12
         Iy = (w*(h**3) - w_i*(h_i**3))/12
         J = (w*h*(h**2 + w**2)/12) - (w_i*h_i*(h_i**2 + w_i**2)/12)
@@ -55,7 +55,7 @@ class Aframe(ModuleCSDL):
 
         node_a = self.declare_variable(element_name + 'node_a', shape=(3))
         node_b = self.declare_variable(element_name + 'node_b', shape=(3))
-        L = csdl.pnorm(node_b - node_a, pnorm_type=2) + 1E-16 # for robustness
+        L = csdl.pnorm(node_b - node_a, pnorm_type=2)
 
         a = L/2
         rho = element_density_list[i]
@@ -565,7 +565,7 @@ class Aframe(ModuleCSDL):
 
 
         # perform a stress recovery:
-        stress = self.create_output('stress', shape=(len(elements)), val=0)
+        stress = self.create_output('vm_stress', shape=(len(elements)), val=0)
         index = 0
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])

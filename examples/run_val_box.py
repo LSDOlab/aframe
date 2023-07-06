@@ -64,7 +64,7 @@ if __name__ == '__main__':
     print(sim['wing_displacement'])
 
 
-    stress = sim['stress']
+    stress = sim['vm_stress']
     print(stress)
 
 
