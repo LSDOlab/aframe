@@ -146,10 +146,12 @@ class StressBox(csdl.Model):
         max_stress_a = csdl.max(1E-3*stress_a)/1E-3
         max_stress_b = csdl.max(1E-3*stress_b)/1E-3
 
-        stress_ab = self.create_output(name + 'stress_ab', shape=(2), val=0)
-        stress_ab[0] = max_stress_a
-        stress_ab[1] = max_stress_b
+        #stress_ab = self.create_output(name + 'stress_ab', shape=(2), val=0)
+        #stress_ab[0] = max_stress_a
+        #stress_ab[1] = max_stress_b
 
         # self.register_output(name + '_stress', csdl.max(1E-3*stress_ab)/1E-3)
         self.register_output(name + '_stress', (max_stress_a + max_stress_b)/2)
+
+        self.register_output(name + '_stress_array', (stress_a + stress_b)/2) # a more reliable stress constraint
         
