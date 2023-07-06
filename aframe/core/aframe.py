@@ -319,6 +319,7 @@ class Aframe(ModuleCSDL):
         default_val[:,1] = np.linspace(0,n,n)
         # mesh = self.declare_variable(name + '_mesh', shape=(n,3), val=default_val)
         mesh = self.register_module_input(beam_name + '_mesh', shape=(n,3), promotes=True, val=default_val)
+        self.print_var(mesh)
         
         # iterate over each element:
         for i in range(n - 1):
@@ -343,12 +344,22 @@ class Aframe(ModuleCSDL):
         elif cs == 'box':
             # w = self.declare_variable(beam_name + '_w', shape=(n-1))
             # h = self.declare_variable(beam_name + '_h', shape=(n-1))
-            w = self.register_module_input(beam_name + '_w', shape=(n - 1), promotes=True)
-            h = self.register_module_input(beam_name + '_h', shape=(n - 1), promotes=True)
+            width = self.register_module_input(beam_name + '_width', shape=(n), promotes=True)
+            height = self.register_module_input(beam_name + '_height', shape=(n), promotes=True)
+
+            w = self.create_output(beam_name + '_w', shape=(n - 1), val=0)
+            h = self.create_output(beam_name + '_h', shape=(n - 1), val=0)
+            for i in range(n - 1):
+                w[i] = (width[i] + width[i + 1])/2
+                h[i] = (height[i] + height[i + 1])/2
+
             # tweb = self.declare_variable(beam_name + '_tweb', shape=(n-1))
             # tcap = self.declare_variable(beam_name + '_tcap', shape=(n-1))
             tweb = self.register_module_input(beam_name + '_tweb', shape=(n - 1))
             tcap = self.register_module_input(beam_name + '_tcap', shape=(n - 1))
+
+            self.print_var(w)
+            self.print_var(h)
 
             for i in range(n - 1):
                 element_name = beam_name + '_element_' + str(i)
