@@ -61,8 +61,8 @@ class Run(csdl.Model):
 
         self.create_input('wing_mesh', shape=(len(axis_nodes),3), val=axis_nodes)
 
-        self.create_input('wing_h', shape=(len(axis_nodes)-1), val=h[0:-1])
-        self.create_input('wing_w', shape=(len(axis_nodes)-1), val=w[0:-1])
+        self.create_input('wing_height', shape=(len(axis_nodes)), val=h)
+        self.create_input('wing_width', shape=(len(axis_nodes)), val=w)
         self.create_input('wing_tcap', shape=(len(axis_nodes) - 1), val=0.001)
         self.create_input('wing_tweb', shape=(len(axis_nodes) - 1), val=0.001)
         self.create_input('wing_forces', shape=(len(axis_nodes),3), val=forces)
@@ -73,7 +73,7 @@ class Run(csdl.Model):
         self.add(Aframe(beams=beams, bounds=bounds, joints=joints), name='Aframe')
 
 
-        self.add_constraint('stress', upper=450E6, scaler=1E-8)
+        self.add_constraint('new_stress', upper=450E6, scaler=1E-8)
         self.add_design_variable('wing_tcap', lower=0.001, upper=0.2, scaler=1E2)
         self.add_design_variable('wing_tweb', lower=0.001, upper=0.2, scaler=1E3)
         self.add_objective('mass', scaler=1E-2)
@@ -106,7 +106,7 @@ if __name__ == '__main__':
 
 
     #print('displacement: ', sim['wing_displacement'])
-    print('stress', sim['stress'])
+    print('new stress', sim['new_stress'])
 
 
     print(sim['wing_tcap'])
