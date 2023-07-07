@@ -106,11 +106,11 @@ if __name__ == '__main__':
 
 
     #print('displacement: ', sim['wing_displacement'])
-    print('new stress', sim['new_stress'])
+    print('new stress: ', sim['new_stress'])
 
 
-    print(sim['wing_tcap'])
-    print(sim['wing_tweb'])
+    print('tcap: ', sim['wing_tcap'])
+    print('tweb: ', sim['wing_tweb'])
 
 
     fig = plt.figure()

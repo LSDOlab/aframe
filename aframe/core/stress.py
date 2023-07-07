@@ -139,8 +139,8 @@ class StressBox(csdl.Model):
             tau_a = s_torsional_a + transverse_shear_stress_a[point]
             tau_b = s_torsional_b + transverse_shear_stress_b[point]
 
-            stress_a[point] = (s_axial_a**2 + 3*tau_a**2)**0.5
-            stress_b[point] = (s_axial_b**2 + 3*tau_b**2)**0.5
+            stress_a[point] = (s_axial_a**2 + 3*tau_a**2 + 1E-14)**0.5
+            stress_b[point] = (s_axial_b**2 + 3*tau_b**2 + 1E-14)**0.5
             
 
         max_stress_a = csdl.max(1E-3*stress_a)/1E-3

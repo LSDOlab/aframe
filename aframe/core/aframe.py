@@ -32,7 +32,8 @@ class Aframe(ModuleCSDL):
     def box(self, element_name, w, h, tweb, tcap):
         w_i = w - 2*tweb
         h_i = h - 2*tcap
-        A = (w*h) - (w_i*h_i)
+        # A = (w*h) - (w_i*h_i)
+        A = (((w*h) - (w_i*h_i))**2 + 1E-14)**0.5 # for robustness
         Iz = ((w**3)*h - (w_i**3)*h_i)/12
         Iy = (w*(h**3) - w_i*(h_i**3))/12
         J = (w*h*(h**2 + w**2)/12) - (w_i*h_i*(h_i**2 + w_i**2)/12)
@@ -498,7 +499,7 @@ class Aframe(ModuleCSDL):
         # solve the linear system
         solve_res = self.create_implicit_operation(Model(dim=dim))
         solve_res.declare_state(state='U', residual='R')
-        solve_res.nonlinear_solver = csdl.NewtonSolver(solve_subsystems=False,maxiter=100,iprint=False,atol=1E-6,)
+        solve_res.nonlinear_solver = csdl.NewtonSolver(solve_subsystems=False,maxiter=100,iprint=False,atol=1E-7,)
         solve_res.linear_solver = csdl.ScipyKrylov()
         U = solve_res(K, Fi)
 
