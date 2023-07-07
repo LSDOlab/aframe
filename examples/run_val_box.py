@@ -62,6 +62,7 @@ if __name__ == '__main__':
     # optimizer.print_results()
 
     print(sim['wing_displacement'])
+    print(sim['new_stress'])
 
 
     stress = sim['vm_stress']

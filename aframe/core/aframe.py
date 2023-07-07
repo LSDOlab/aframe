@@ -576,7 +576,14 @@ class Aframe(ModuleCSDL):
 
 
         # perform a stress recovery:
+        boxflag = False
+        for beam_name in beams:
+            if beams[beam_name]['cs'] == 'box': boxflag = True
+
+        if boxflag: new_stress = self.create_output('new_stress', shape=(len(elements),5), val=0)
+
         stress = self.create_output('vm_stress', shape=(len(elements)), val=0)
+
         index = 0
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])
@@ -595,12 +602,14 @@ class Aframe(ModuleCSDL):
                     self.add(StressBox(name=element_name), name=element_name + 'StressBox')
                     
                     stress[index] = self.declare_variable(element_name + '_stress')
+                    new_stress[index,:] = csdl.reshape(self.declare_variable(element_name + '_stress_array', shape=(5)), new_shape=(1,5)) # no ks max
+
                     index += 1
 
 
         # compute the maximum stress in the entire system:
-        max_stress = csdl.max(stress)
-        self.register_output('max_stress', max_stress)
+        # max_stress = csdl.max(stress)
+        # self.register_output('max_stress', max_stress)
         
         # output dummy forces and moments for CADDEE:
         zero = self.declare_variable('zero_vec', shape=(3), val=0)
