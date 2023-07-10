@@ -36,18 +36,18 @@ class Run(csdl.Model):
         self.create_input('wing_mesh', shape=(len(mesh),3), val=mesh)
         self.create_input('wing_height', shape=(len(mesh)), val=h)
         self.create_input('wing_width', shape=(len(mesh)), val=w)
-        self.create_input('wing_tcap', shape=(len(mesh) - 1), val=0.001)
-        self.create_input('wing_tweb', shape=(len(mesh) - 1), val=0.001)
+        self.create_input('wing_tcap', shape=(len(mesh) - 1), val=0.0001)
+        self.create_input('wing_tweb', shape=(len(mesh) - 1), val=0.0001)
         self.create_input('wing_forces', shape=(len(mesh),3), val=forces)
 
         
         # solve the beam group:
-        self.add(Aframe(beams=beams, bounds=bounds, joints=joints), name='Aframe')
+        self.add(Aframe(beams=beams, bounds=bounds, joints=joints, mesh_units='ft'), name='Aframe')
 
 
         self.add_constraint('new_stress', upper=450E6, scaler=1E-8)
-        self.add_design_variable('wing_tcap', lower=0.0001, upper=0.2, scaler=1E3)
-        self.add_design_variable('wing_tweb', lower=0.0001, upper=0.2, scaler=1E3)
+        self.add_design_variable('wing_tcap', lower=0.00001, upper=0.5, scaler=1E4)
+        self.add_design_variable('wing_tweb', lower=0.00001, upper=0.5, scaler=1E4)
         self.add_objective('mass', scaler=1E-2)
 
         mass = self.declare_variable('mass')
@@ -72,7 +72,7 @@ if __name__ == '__main__':
 
 
     prob = CSDLProblem(problem_name='run_opt', simulator=sim)
-    optimizer = SLSQP(prob, maxiter=1000, ftol=1E-10)
+    optimizer = SLSQP(prob, maxiter=1000, ftol=1E-6)
     optimizer.solve()
     optimizer.print_results()
 
@@ -83,6 +83,8 @@ if __name__ == '__main__':
 
     print('tcap: ', sim['wing_tcap'])
     print('tweb: ', sim['wing_tweb'])
+
+    cg = sim['cg_vector']
 
 
     fig = plt.figure()
@@ -102,6 +104,8 @@ if __name__ == '__main__':
             ax.scatter(na[0], na[1], na[2],color='yellow',edgecolors='black',linewidth=1,zorder=10,label='_nolegend_',s=30)
             ax.scatter(nb[0], nb[1], nb[2],color='yellow',edgecolors='black',linewidth=1,zorder=10,label='_nolegend_',s=30)
 
+
+    ax.scatter(cg[0],cg[1],cg[2],color='blue',s=50,edgecolors='black')
 
 
     ax.set_xlim(-5,5)

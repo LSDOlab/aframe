@@ -13,6 +13,7 @@ class Aframe(ModuleCSDL):
         self.parameters.declare('beams', default={})
         self.parameters.declare('joints', default={})
         self.parameters.declare('bounds', default={})
+        self.parameters.declare('mesh_units', default='m')
 
 
     def tube(self, element_name, t, r):
@@ -314,12 +315,17 @@ class Aframe(ModuleCSDL):
 
 
     def add_beam(self, beam_name, nodes, cs, e, g, rho, node_dict, node_index, dim, element_density_list):
+        mesh_units = self.parameters['mesh_units']
         n = len(nodes)
 
         default_val = np.zeros((n, 3))
         default_val[:,1] = np.linspace(0,n,n)
         # mesh = self.declare_variable(name + '_mesh', shape=(n,3), val=default_val)
-        mesh = self.register_module_input(beam_name + '_mesh', shape=(n,3), promotes=True, val=default_val)
+        mesh_in = self.register_module_input(beam_name + '_mesh', shape=(n,3), promotes=True, val=default_val)
+
+        if mesh_units == 'm': mesh = 1*mesh_in
+        elif mesh_units == 'ft': mesh = 0.304*mesh_in
+        
         self.print_var(mesh)
         
         # iterate over each element:
@@ -335,7 +341,10 @@ class Aframe(ModuleCSDL):
             # t = self.declare_variable(beam_name + '_t', shape=(n-1), val=0.001)
             # r = self.declare_variable(beam_name + '_r', shape=(n-1), val=0.1)
             t = self.register_module_input(beam_name + '_t', shape=(n-1), val=0.001)
-            r = self.register_module_input(beam_name + '_r', shape=(n-1), val=0.1)
+            r_in = self.register_module_input(beam_name + '_r', shape=(n-1), val=0.1)
+
+            if mesh_units == 'm': r = r_in
+            elif mesh_units == 'ft': r = 0.304*r_in
 
             for i in range(n - 1):
                 element_name = beam_name + '_element_' + str(i)
@@ -351,16 +360,23 @@ class Aframe(ModuleCSDL):
             w = self.create_output(beam_name + '_w', shape=(n - 1), val=0)
             h = self.create_output(beam_name + '_h', shape=(n - 1), val=0)
             for i in range(n - 1):
-                w[i] = (width[i] + width[i + 1])/2
-                h[i] = (height[i] + height[i + 1])/2
+                if mesh_units == 'm':
+                    w[i] = (width[i] + width[i + 1])/2
+                    h[i] = (height[i] + height[i + 1])/2
+                elif mesh_units == 'ft':
+                    w[i] = 0.304*(width[i] + width[i + 1])/2
+                    h[i] = 0.304*(height[i] + height[i + 1])/2
+
+            #self.print_var(w)
+            #self.print_var(h)
 
             # tweb = self.declare_variable(beam_name + '_tweb', shape=(n-1))
             # tcap = self.declare_variable(beam_name + '_tcap', shape=(n-1))
             tweb = self.register_module_input(beam_name + '_tweb', shape=(n - 1))
             tcap = self.register_module_input(beam_name + '_tcap', shape=(n - 1))
 
-            self.print_var(w)
-            self.print_var(h)
+            self.print_var(tweb)
+            self.print_var(tcap)
 
             for i in range(n - 1):
                 element_name = beam_name + '_element_' + str(i)
@@ -396,6 +412,7 @@ class Aframe(ModuleCSDL):
         beams = self.parameters['beams']
         joints = self.parameters['joints']
         bounds = self.parameters['bounds']
+        mesh_units = self.parameters['mesh_units']
 
 
         if not beams: raise Exception('Error: empty beam dictionary')
@@ -611,6 +628,8 @@ class Aframe(ModuleCSDL):
         # compute the maximum stress in the entire system:
         # max_stress = csdl.max(stress)
         # self.register_output('max_stress', max_stress)
+
+        # self.print_var(new_stress)
         
         # output dummy forces and moments for CADDEE:
         zero = self.declare_variable('zero_vec', shape=(3), val=0)
