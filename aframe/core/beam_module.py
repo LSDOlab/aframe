@@ -147,6 +147,7 @@ class EBBeam(m3l.ExplicitOperation):
         self.parameters.declare('beams', default={})
         self.parameters.declare('bounds', default={})
         self.parameters.declare('joints', default={})
+        self.parameters.declare('mesh_units', default='m')
         self.num_nodes = None
 
     def assign_attributes(self):
@@ -158,6 +159,7 @@ class EBBeam(m3l.ExplicitOperation):
         self.beams = self.parameters['beams']
         self.bounds = self.parameters['bounds']
         self.joints = self.parameters['joints']
+        self.mesh_units = self.parameters['mesh_units']
 
     def compute(self):
         '''
@@ -171,12 +173,14 @@ class EBBeam(m3l.ExplicitOperation):
         beams = self.parameters['beams']
         bounds = self.parameters['bounds']
         joints = self.parameters['joints']
+        mesh_units = self.parameters['mesh_units']
 
         csdl_model = LinearBeamCSDL(
             module=self,
             beams=beams,  
             bounds=bounds,
-            joints=joints)
+            joints=joints,
+            mesh_units=mesh_units,)
         
         return csdl_model
 
@@ -799,11 +803,13 @@ class LinearBeamCSDL(ModuleCSDL):
         self.parameters.declare('beams')
         self.parameters.declare('bounds')
         self.parameters.declare('joints')
+        self.parameters.declare('mesh_units')
     
     def define(self):
         beams = self.parameters['beams']
         bounds = self.parameters['bounds']
         joints = self.parameters['joints']
+        mesh_units = self.parameters['mesh_units']
 
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])
@@ -822,4 +828,4 @@ class LinearBeamCSDL(ModuleCSDL):
                 self.register_output(beam_name+'_r', 1*radius)
 
         # solve the beam group:
-        self.add_module(Aframe(beams=beams, bounds=bounds, joints=joints), name='Aframe')
+        self.add_module(Aframe(beams=beams, bounds=bounds, joints=joints, mesh_units='ft'), name='Aframe')
