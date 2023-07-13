@@ -1,17 +1,64 @@
 import numpy as np
 import csdl
 from lsdo_modules.module_csdl.module_csdl import ModuleCSDL
-
+from lsdo_modules.module.module import Module
+import m3l
 
 # this file contains an entirely separate mass computation model for aframe
 # it requires the same inputs as an ordinary aframe beam model 
 # only valid for box beams
 
 
+
+class Mass(m3l.ExplicitOperation):
+    def initialize(self, kwargs):
+        self.parameters.declare('component', default=None)
+        self.parameters.declare('mesh', default=None)
+        self.parameters.declare('struct_solver', True)
+        self.parameters.declare('compute_mass_properties', default=True, types=bool)
+
+        self.parameters.declare('beams', default={})
+        self.parameters.declare('mesh_units', default='ft')
+        self.num_nodes = None
+
+    def assign_attributes(self):
+        self.component = self.parameters['component']
+        self.mesh = self.parameters['mesh']
+        self.struct_solver = self.parameters['struct_solver']
+        self.compute_mass_properties = self.parameters['compute_mass_properties']
+
+        self.beams = self.parameters['beams']
+        self.mesh_units = self.parameters['mesh_units']
+
+    def compute(self):
+        beams = self.parameters['beams']
+        mesh_units = self.parameters['mesh_units']
+
+        csdl_model = Mass(
+            module=self,
+            beams=beams,
+            mesh_units=mesh_units,)
+        
+        return csdl_model
+
+    def evaluate(self):
+        
+        mass = m3l.Variable('mass', shape=(1,), operation=self)
+
+        return mass
+
+
+class MassMesh(Module):
+    def initialize(self, kwargs):
+        self.parameters.declare('meshes', types=dict)
+        self.parameters.declare('mesh_units', default='ft')
+
+
+
 class Mass(ModuleCSDL):
     def initialize(self):
         self.parameters.declare('beams', default={})
-        self.parameters.declare('mesh_units', default='m')
+        self.parameters.declare('mesh_units', default='ft')
 
     def define(self):
         beams = self.parameters['beams']
