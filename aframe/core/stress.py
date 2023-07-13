@@ -139,17 +139,19 @@ class StressBox(csdl.Model):
             tau_a = s_torsional_a + transverse_shear_stress_a[point]
             tau_b = s_torsional_b + transverse_shear_stress_b[point]
 
-            stress_a[point] = (s_axial_a**2 + 3*tau_a**2)**0.5
-            stress_b[point] = (s_axial_b**2 + 3*tau_b**2)**0.5
+            stress_a[point] = (s_axial_a**2 + 3*tau_a**2 + 1E-14)**0.5
+            stress_b[point] = (s_axial_b**2 + 3*tau_b**2 + 1E-14)**0.5
             
 
         max_stress_a = csdl.max(1E-3*stress_a)/1E-3
         max_stress_b = csdl.max(1E-3*stress_b)/1E-3
 
-        stress_ab = self.create_output(name + 'stress_ab', shape=(2), val=0)
-        stress_ab[0] = max_stress_a
-        stress_ab[1] = max_stress_b
+        #stress_ab = self.create_output(name + 'stress_ab', shape=(2), val=0)
+        #stress_ab[0] = max_stress_a
+        #stress_ab[1] = max_stress_b
 
         # self.register_output(name + '_stress', csdl.max(1E-3*stress_ab)/1E-3)
         self.register_output(name + '_stress', (max_stress_a + max_stress_b)/2)
+
+        self.register_output(name + '_stress_array', (stress_a + stress_b)/2) # a more reliable stress constraint
         

@@ -28,8 +28,8 @@ class Run(csdl.Model):
 
         
         self.create_input('wing_mesh', shape=(n,3), val=mesh)
-        self.create_input('wing_h', shape=(n-1), val=0.1)
-        self.create_input('wing_w', shape=(n-1), val=0.1)
+        self.create_input('wing_height', shape=(n), val=0.1)
+        self.create_input('wing_width', shape=(n), val=0.1)
         self.create_input('wing_tcap', shape=(n - 1), val=0.003)
         self.create_input('wing_tweb', shape=(n - 1), val=0.003)
         self.create_input('wing_forces', shape=(n,3), val=forces)
@@ -62,9 +62,10 @@ if __name__ == '__main__':
     # optimizer.print_results()
 
     print(sim['wing_displacement'])
+    print(sim['new_stress'])
 
 
-    stress = sim['stress']
+    stress = sim['vm_stress']
     print(stress)
 
 

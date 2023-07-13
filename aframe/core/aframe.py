@@ -1,7 +1,7 @@
 import numpy as np
 import csdl
 import python_csdl_backend
-from aframe.core.massprop import MassProp
+from aframe.core.massprop import MassPropModule as MassProp
 from aframe.core.model import Model
 from aframe.core.stress import StressTube, StressBox
 from lsdo_modules.module_csdl.module_csdl import ModuleCSDL
@@ -15,6 +15,7 @@ class Aframe(ModuleCSDL):
         self.parameters.declare('beams', default={})
         self.parameters.declare('joints', default={})
         self.parameters.declare('bounds', default={})
+        self.parameters.declare('mesh_units', default='m')
 
 
     def tube(self, element_name, t, r):
@@ -34,7 +35,8 @@ class Aframe(ModuleCSDL):
     def box(self, element_name, w, h, tweb, tcap):
         w_i = w - 2*tweb
         h_i = h - 2*tcap
-        A = (w*h) - (w_i*h_i)
+        # A = (w*h) - (w_i*h_i)
+        A = (((w*h) - (w_i*h_i))**2 + 1E-14)**0.5 # for robustness
         Iz = ((w**3)*h - (w_i**3)*h_i)/12
         Iy = (w*(h**3) - w_i*(h_i**3))/12
         J = (w*h*(h**2 + w**2)/12) - (w_i*h_i*(h_i**2 + w_i**2)/12)
@@ -57,7 +59,7 @@ class Aframe(ModuleCSDL):
 
         node_a = self.declare_variable(element_name + 'node_a', shape=(3))
         node_b = self.declare_variable(element_name + 'node_b', shape=(3))
-        L = csdl.pnorm(node_b - node_a, pnorm_type=2)
+        L = csdl.pnorm(node_b - node_a, pnorm_type=2) + 1E-12
 
         a = L/2
         rho = element_density_list[i]
@@ -296,7 +298,7 @@ class Aframe(ModuleCSDL):
         node_a = self.declare_variable(element_name + 'node_a', shape=(3))
         node_b = self.declare_variable(element_name + 'node_b', shape=(3))
 
-        L = self.register_output(element_name + 'L', csdl.pnorm(node_b - node_a, pnorm_type=2))
+        L = self.register_output(element_name + 'L', csdl.pnorm(node_b - node_a, pnorm_type=2)) + 1E-12
 
         kp = self.create_output(element_name + 'kp', shape=(12,12), val=0)
         # the upper left block
@@ -432,12 +434,18 @@ class Aframe(ModuleCSDL):
 
 
     def add_beam(self, beam_name, nodes, cs, e, g, rho, node_dict, node_index, dim, element_density_list):
+        mesh_units = self.parameters['mesh_units']
         n = len(nodes)
 
         default_val = np.zeros((n, 3))
         default_val[:,1] = np.linspace(0,n,n)
         # mesh = self.declare_variable(name + '_mesh', shape=(n,3), val=default_val)
-        mesh = self.register_module_input(beam_name + '_mesh', shape=(n,3), promotes=True, val=default_val)
+        mesh_in = self.register_module_input(beam_name + '_mesh', shape=(n,3), promotes=True, val=default_val)
+
+        if mesh_units == 'm': mesh = 1*mesh_in
+        elif mesh_units == 'ft': mesh = 0.304*mesh_in
+        
+        self.print_var(mesh)
         
         # iterate over each element:
         for i in range(n - 1):
@@ -452,7 +460,10 @@ class Aframe(ModuleCSDL):
             # t = self.declare_variable(beam_name + '_t', shape=(n-1), val=0.001)
             # r = self.declare_variable(beam_name + '_r', shape=(n-1), val=0.1)
             t = self.register_module_input(beam_name + '_t', shape=(n-1), val=0.001)
-            r = self.register_module_input(beam_name + '_r', shape=(n-1), val=0.1)
+            r_in = self.register_module_input(beam_name + '_r', shape=(n-1), val=0.1)
+
+            if mesh_units == 'm': r = r_in
+            elif mesh_units == 'ft': r = 0.304*r_in
 
             for i in range(n - 1):
                 element_name = beam_name + '_element_' + str(i)
@@ -462,12 +473,29 @@ class Aframe(ModuleCSDL):
         elif cs == 'box':
             # w = self.declare_variable(beam_name + '_w', shape=(n-1))
             # h = self.declare_variable(beam_name + '_h', shape=(n-1))
-            w = self.register_module_input(beam_name + '_w', shape=(n - 1), promotes=True)
-            h = self.register_module_input(beam_name + '_h', shape=(n - 1), promotes=True)
+            width = self.register_module_input(beam_name + '_width', shape=(n), promotes=True)
+            height = self.register_module_input(beam_name + '_height', shape=(n), promotes=True)
+
+            w = self.create_output(beam_name + '_w', shape=(n - 1), val=0)
+            h = self.create_output(beam_name + '_h', shape=(n - 1), val=0)
+            for i in range(n - 1):
+                if mesh_units == 'm':
+                    w[i] = (width[i] + width[i + 1])/2
+                    h[i] = (height[i] + height[i + 1])/2
+                elif mesh_units == 'ft':
+                    w[i] = 0.304*(width[i] + width[i + 1])/2
+                    h[i] = 0.304*(height[i] + height[i + 1])/2
+
+            #self.print_var(w)
+            #self.print_var(h)
+
             # tweb = self.declare_variable(beam_name + '_tweb', shape=(n-1))
             # tcap = self.declare_variable(beam_name + '_tcap', shape=(n-1))
             tweb = self.register_module_input(beam_name + '_tweb', shape=(n - 1))
             tcap = self.register_module_input(beam_name + '_tcap', shape=(n - 1))
+
+            self.print_var(tweb)
+            self.print_var(tcap)
 
             for i in range(n - 1):
                 element_name = beam_name + '_element_' + str(i)
@@ -503,6 +531,7 @@ class Aframe(ModuleCSDL):
         beams = self.parameters['beams']
         joints = self.parameters['joints']
         bounds = self.parameters['bounds']
+        mesh_units = self.parameters['mesh_units']
 
 
         if not beams: raise Exception('Error: empty beam dictionary')
@@ -601,7 +630,7 @@ class Aframe(ModuleCSDL):
         # solve the linear system
         solve_res = self.create_implicit_operation(Model(dim=dim))
         solve_res.declare_state(state='U', residual='R')
-        solve_res.nonlinear_solver = csdl.NewtonSolver(solve_subsystems=False,maxiter=100,iprint=False,atol=1E-6,)
+        solve_res.nonlinear_solver = csdl.NewtonSolver(solve_subsystems=False,maxiter=100,iprint=False,atol=1E-7,)
         solve_res.linear_solver = csdl.ScipyKrylov()
         U = solve_res(K, Fi)
 
@@ -679,7 +708,14 @@ class Aframe(ModuleCSDL):
 
 
         # perform a stress recovery:
-        stress = self.create_output('stress', shape=(len(elements)), val=0)
+        boxflag = False
+        for beam_name in beams:
+            if beams[beam_name]['cs'] == 'box': boxflag = True
+
+        if boxflag: new_stress = self.create_output('new_stress', shape=(len(elements),5), val=0)
+
+        stress = self.create_output('vm_stress', shape=(len(elements)), val=0)
+
         index = 0
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])
@@ -698,12 +734,16 @@ class Aframe(ModuleCSDL):
                     self.add(StressBox(name=element_name), name=element_name + 'StressBox')
                     
                     stress[index] = self.declare_variable(element_name + '_stress')
+                    new_stress[index,:] = csdl.reshape(self.declare_variable(element_name + '_stress_array', shape=(5)), new_shape=(1,5)) # no ks max
+
                     index += 1
 
 
         # compute the maximum stress in the entire system:
-        max_stress = csdl.max(stress)
-        self.register_output('max_stress', max_stress)
+        # max_stress = csdl.max(stress)
+        # self.register_output('max_stress', max_stress)
+
+        # self.print_var(new_stress)
         
         # output dummy forces and moments for CADDEE:
         zero = self.declare_variable('zero_vec', shape=(3), val=0)
