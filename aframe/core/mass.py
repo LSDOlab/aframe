@@ -42,16 +42,27 @@ class Mass(m3l.ExplicitOperation):
         return csdl_model
 
     def evaluate(self):
+
+        self.name = 'mass_model'
+        self.arguments = {}
         
         mass = m3l.Variable('mass', shape=(1,), operation=self)
 
         return mass
 
 
+
+
+
+
+
 class MassMesh(Module):
     def initialize(self, kwargs):
         self.parameters.declare('meshes', types=dict)
         self.parameters.declare('mesh_units', default='ft')
+
+
+
 
 
 
@@ -92,8 +103,10 @@ class Mass(ModuleCSDL):
                     h[i] = 0.304*(height[i] + height[i + 1])/2
 
             # the box-beam thicknesses:
-            tweb = self.register_module_input(beam_name + '_tweb', shape=(n - 1))
-            tcap = self.register_module_input(beam_name + '_tcap', shape=(n - 1))
+            tweb = self.declare_variable(beam_name + '_tweb', shape=(n - 1))
+            tcap = self.declare_variable(beam_name + '_tcap', shape=(n - 1))
+            #tweb = self.register_module_input(beam_name + '_tweb', shape=(n - 1))
+            #tcap = self.register_module_input(beam_name + '_tcap', shape=(n - 1))
 
             # get cs area:
             w_i = w - 2*tweb
