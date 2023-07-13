@@ -34,7 +34,7 @@ class Mass(m3l.ExplicitOperation):
         beams = self.parameters['beams']
         mesh_units = self.parameters['mesh_units']
 
-        csdl_model = Mass(
+        csdl_model = MassCSDL(
             module=self,
             beams=beams,
             mesh_units=mesh_units,)
@@ -66,7 +66,7 @@ class MassMesh(Module):
 
 
 
-class Mass(ModuleCSDL):
+class MassCSDL(ModuleCSDL):
     def initialize(self):
         self.parameters.declare('beams', default={})
         self.parameters.declare('mesh_units', default='ft')
@@ -108,6 +108,9 @@ class Mass(ModuleCSDL):
             #tweb = self.register_module_input(beam_name + '_tweb', shape=(n - 1))
             #tcap = self.register_module_input(beam_name + '_tcap', shape=(n - 1))
 
+            self.print_var(tweb)
+            self.print_var(tcap)
+
             # get cs area:
             w_i = w - 2*tweb
             h_i = h - 2*tcap
@@ -131,3 +134,5 @@ class Mass(ModuleCSDL):
 
         total_mass = csdl.sum(m_vec) # sums the beam masses
         self.register_module_output('mass', total_mass)
+
+        self.print_var(total_mass)
