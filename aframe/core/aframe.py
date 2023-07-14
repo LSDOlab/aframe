@@ -38,7 +38,9 @@ class Aframe(ModuleCSDL):
         Iz = ((w**3)*h - (w_i**3)*h_i)/12
         Iy = (w*(h**3) - w_i*(h_i**3))/12
         J = (w*h*(h**2 + w**2)/12) - (w_i*h_i*(h_i**2 + w_i**2)/12)
-        Q = 2*(h/2)*tweb*(h/4) + (w - 2*tweb)*tcap*((h/2) - (tcap/2))
+        # Q = 2*(h/2)*tweb*(h/4) + (w - 2*tweb)*tcap*((h/2) - (tcap/2))
+
+        Q = (A/2)*(h/4)
 
         self.register_output(element_name + '_A', A)
         self.register_output(element_name + '_Ix', 1*J) # I think J is the same as Ix...
@@ -326,7 +328,7 @@ class Aframe(ModuleCSDL):
         if mesh_units == 'm': mesh = 1*mesh_in
         elif mesh_units == 'ft': mesh = 0.304*mesh_in
         
-        self.print_var(mesh)
+        # self.print_var(mesh)
         
         # iterate over each element:
         for i in range(n - 1):
@@ -381,6 +383,8 @@ class Aframe(ModuleCSDL):
             for i in range(n - 1):
                 element_name = beam_name + '_element_' + str(i)
                 self.box(element_name=element_name, w=w[i], h=h[i], tweb=tweb[i], tcap=tcap[i])
+
+                self.register_output(element_name + '_tweb', tweb[i])
         
         else: raise NotImplementedError('Error: cs type for' + beam_name + 'is not implemented')
 

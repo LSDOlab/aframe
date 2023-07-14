@@ -89,6 +89,8 @@ class StressBox(csdl.Model):
 
         # get the local loads:
         local_loads = self.declare_variable(name+'local_loads',shape=(12))
+        # self.print_var(local_loads)
+
         loads_a = local_loads[0:6]
         loads_b = local_loads[6:12]
 
@@ -114,13 +116,15 @@ class StressBox(csdl.Model):
 
 
         # compute the stress at each point:
-        transverse_shear_stress_a = self.create_output(name + 'shear_stress_a',shape=(5), val=0)
-        transverse_shear_stress_b = self.create_output(name + 'shear_stress_b',shape=(5), val=0)
+        shear_a = self.create_output(name + 'shear_a',shape=(5), val=0)
+        shear_b = self.create_output(name + 'shear_b',shape=(5), val=0)
         stress_a = self.create_output(name + 'stress_a', shape=(5), val=0)
         stress_b = self.create_output(name + 'stress_b', shape=(5), val=0)
 
-        t_web = self.declare_variable(name + '_tweb')
+        tweb = self.declare_variable(name + '_tweb')
         Q = self.declare_variable(name + '_Q')
+
+        # self.print_var(tweb)
 
         for point in range(5):
             x = x_coord[point]
@@ -133,11 +137,12 @@ class StressBox(csdl.Model):
             s_torsional_b = loads_b[3]*r/J
 
             if point == 4: # the max shear at the neutral axis:
-                transverse_shear_stress_a[point] = loads_a[2]*Q/(Iy*2*t_web)
-                transverse_shear_stress_b[point] = loads_b[2]*Q/(Iy*2*t_web)
+                shear_a[point] = loads_a[2]*Q/(Iy*2*tweb)
+                shear_b[point] = loads_b[2]*Q/(Iy*2*tweb)
+                # self.print_var(transverse_shear_stress_a)
 
-            tau_a = s_torsional_a + transverse_shear_stress_a[point]
-            tau_b = s_torsional_b + transverse_shear_stress_b[point]
+            tau_a = s_torsional_a + shear_a[point]
+            tau_b = s_torsional_b + shear_b[point]
 
             stress_a[point] = (s_axial_a**2 + 3*tau_a**2 + 1E-14)**0.5
             stress_b[point] = (s_axial_b**2 + 3*tau_b**2 + 1E-14)**0.5
@@ -152,6 +157,7 @@ class StressBox(csdl.Model):
 
         # self.register_output(name + '_stress', csdl.max(1E-3*stress_ab)/1E-3)
         self.register_output(name + '_stress', (max_stress_a + max_stress_b)/2)
+        
 
         self.register_output(name + '_stress_array', (stress_a + stress_b)/2) # a more reliable stress constraint
         
