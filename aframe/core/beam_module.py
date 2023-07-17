@@ -15,10 +15,7 @@ from typing import Tuple, Dict
 import m3l
 
 class BeamM3LDisplacement(m3l.ImplicitOperation):
-    def initialize(self):        
-        # self.parameters.declare('connectivity', types=list)        
-        # self.parameters.declare('out_name', types=str)
-
+    def initialize(self, kwargs):
         self.parameters.declare('component', default=None)
         self.parameters.declare('mesh', default=None)
         self.parameters.declare('struct_solver', True)
@@ -27,28 +24,131 @@ class BeamM3LDisplacement(m3l.ImplicitOperation):
         self.parameters.declare('beams', default={})
         self.parameters.declare('bounds', default={})
         self.parameters.declare('joints', default={})
-        self.num_nodes = None
+        self.parameters.declare('mesh_units', default='m')
 
-    def evaluate_residuals(self, inputs, outputs, residuals, num_nodes):
-        geo_mesh = inputs['geo_mesh']
-        thickness_mesh = inputs['thickness_mesh']
-        forces = inputs['forces']
-        displacement = outputs['displacement']
-        residuals['displacement'] = LinearBeamResidualCSDL(geo_mesh, thickness_mesh, forces, displacement, num_nodes)
+    def assign_attributes(self):
+        self.component = self.parameters['component']
+        self.mesh = self.parameters['mesh']
+        self.struct_solver = self.parameters['struct_solver']
+        self.compute_mass_properties = self.parameters['compute_mass_properties']
 
-    # required for dynamic, not needed for static
-    def compute_derivatives(self, inputs, outputs, derivatives, num_nodes):
-        geo_mesh = inputs['geo_mesh']
-        thickness_mesh = inputs['thickness_mesh']
-        forces = inputs['forces']
-        displacement = outputs['displacement']
+        self.beams = self.parameters['beams']
+        self.bounds = self.parameters['bounds']
+        self.joints = self.parameters['joints']
+        self.mesh_units = self.parameters['mesh_units']
+
+    def evaluate(self, forces:m3l.Variable=None, moments:m3l.Variable=None, displacements:m3l.Variable=None):
+        '''
+        Evaluates the beam model.
         
-        derivatives['displacement', 'forces'] = AframeResidualJacobian(geo_mesh, thickness_mesh, forces, displacement, num_nodes)
-        derivatives['displacement', 'displacement'] = AframeResidualJacobian(geo_mesh, thickness_mesh, forces, displacement, num_nodes)
+        Parameters
+        ----------
+        forces : m3l.Variable = None
+            The forces on the mesh nodes.
+        moments : m3l.Variable = None
+            The moments on the mesh nodes.
+        displacements : m3l.Variable
+            The displacements & rotations of the mesh nodes.
+        '''
 
-#     # optional method
-#     def solve_residual_equations(self, arguments, outputs):
-#         pass
+        # TODO: I don't like forces and moments being seperate variables, think about changing that.
+
+        # Gets information for naming/shapes
+        beam_name = list(self.parameters['beams'].keys())[0]   # this is only taking the first mesh added to the solver.
+        mesh = list(self.parameters['mesh'].parameters['meshes'].values())[0]   # this is only taking the first mesh added to the solver.
+
+        # Define operation inputs
+        self.name = f'{self.component.name}_eb_beam_model'
+
+        self.arguments = {}
+        self.inputs = {}
+        if forces is not None:
+            self.inputs[f'{beam_name}_forces'] = forces
+            self.arguments[f'{beam_name}_forces'] = forces
+        if moments is not None:
+            self.inputs[f'{beam_name}_moments'] = moments
+            self.arguments[f'{beam_name}_moments'] = moments
+
+        # Define operation outputs (still an input to the residual) (It may not be necessary to distinguish these two, we'll see)
+        self.outputs ={}
+        if displacements is not None:
+            self.outputs[f'{beam_name}_displacements'] = displacements
+
+        # Declare residual partials - key is the residual csdl name, value is the m3l variable that's being partialed
+        self.residual_partials = {}
+        self.residual_partials['displacement_jacobian'] = displacements
+        # self.residual_partials['force_jacobian'] = forces
+
+        # create residual variable
+        self.size = 6*2*mesh.shape[0]
+        residual = m3l.Variable(name=f'{beam_name}_displacement', shape=(6*2*mesh.shape[0],), operation=self)
+
+        return residual
+
+    def compute_residual(self):
+        beams = self.parameters['beams']
+        bounds = self.parameters['bounds']
+        joints = self.parameters['joints']
+        mesh_units = self.parameters['mesh_units']
+
+        # Need to define what the residual is called in the csdl model
+        beam_name = list(self.parameters['beams'].keys())[0]
+        self.residual_name = f'{beam_name}_residual'
+
+        # CSDL model computing residuals - inputs are named as defined in evaluate()
+        csdl_model = LinearBeamResidualCSDL(
+            module=self,
+            beams=beams,
+            bounds=bounds,
+            joints=joints,
+            mesh_units=mesh_units)
+        
+        return csdl_model
+    
+    # optional method
+    def solve_residual_equations(self):
+        '''
+        Creates a CSDL model to compute the solver outputs.
+
+        Returns
+        -------
+        csdl_model : csdl.Model
+            The csdl model which computes the outputs (the normal solver)
+        '''
+        beams = self.parameters['beams']
+        bounds = self.parameters['bounds']
+        joints = self.parameters['joints']
+        mesh_units = self.parameters['mesh_units']
+
+        # inputs/outputs named as defined in evaluate()
+        csdl_model = LinearBeamCSDL(
+            module=self,
+            beams=beams,  
+            bounds=bounds,
+            joints=joints,
+            mesh_units=mesh_units,)
+        
+        return csdl_model
+        
+
+    # optional-ish for dynamic, not needed for static
+    # The idea here is that, if this method is not defined, m3l will finite difference to get the relevant values. 
+    # Alternitively, a solver dev could finite difference for themselves and put it here.
+    def compute_derivatives(self):
+        beams = self.parameters['beams']
+        bounds = self.parameters['bounds']
+        joints = self.parameters['joints']
+        mesh_units = self.parameters['mesh_units']
+
+        # CSDL model computing residual jacobian - inputs and partials are named as defined in evaluate()
+        csdl_model = LinearBeamResidualJacobiansCSDL(
+            module=self,
+            beams=beams,
+            bounds=bounds,
+            joints=joints,
+            mesh_units=mesh_units)
+        
+        return csdl_model
 
 
 # class EBBeam(m3l.ExplicitOperation):
@@ -836,11 +936,13 @@ class LinearBeamResidualCSDL(ModuleCSDL):
         self.parameters.declare('beams')
         self.parameters.declare('bounds')
         self.parameters.declare('joints')
+        self.parameters.declare('mesh_units')
     
     def define(self):
         beams = self.parameters['beams']
         bounds = self.parameters['bounds']
         joints = self.parameters['joints']
+        mesh_units = self.parameters['mesh_units']
 
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])
@@ -860,4 +962,35 @@ class LinearBeamResidualCSDL(ModuleCSDL):
 
         # solve the beam group:
         self.add_module(AframeResidual(beams=beams, bounds=bounds, joints=joints), name='Aframe')
-        
+
+class LinearBeamResidualJacobiansCSDL(ModuleCSDL):
+    def initialize(self):
+        self.parameters.declare('beams')
+        self.parameters.declare('bounds')
+        self.parameters.declare('joints')
+        self.parameters.declare('mesh_units')
+    
+    def define(self):
+        beams = self.parameters['beams']
+        bounds = self.parameters['bounds']
+        joints = self.parameters['joints']
+        mesh_units = self.parameters['mesh_units']
+
+        for beam_name in beams:
+            n = len(beams[beam_name]['nodes'])
+            cs = beams[beam_name]['cs']
+
+            if cs == 'box':
+                xweb = self.register_module_input(beam_name+'t_web_in',shape=(n-1), computed_upstream=False)
+                xcap = self.register_module_input(beam_name+'t_cap_in',shape=(n-1), computed_upstream=False)
+                self.register_output(beam_name+'_tweb',1*xweb)
+                self.register_output(beam_name+'_tcap',1*xcap)
+                
+            elif cs == 'tube':
+                thickness = self.register_module_input(beam_name+'thickness_in',shape=(n-1), computed_upstream=False)
+                radius = self.register_module_input(beam_name+'radius_in',shape=(n-1), computed_upstream=False)
+                self.register_output(beam_name+'_t', 1*thickness)
+                self.register_output(beam_name+'_r', 1*radius)
+
+        # solve the beam group:
+        self.add_module(AframeResidualJacobian(beams=beams, bounds=bounds, joints=joints), name='Aframe')

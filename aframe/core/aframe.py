@@ -586,7 +586,12 @@ class Aframe(ModuleCSDL):
                           node_index=node_index,
                           dim=dim,
                           element_density_list=element_density_list)
- # TODO: check this
+        
+
+        # compute the global stiffness matrix and the global mass matrix:
+        helper = self.create_output('helper', shape=(num_elements,dim,dim), val=0)
+        mass_helper = self.create_output('mass_helper', shape=(num_elements,dim,dim), val=0)
+        for i, element_name in enumerate(elements):
             helper[i,:,:] = csdl.reshape(self.declare_variable(element_name + 'k', shape=(dim,dim)), (1,dim,dim))
             mass_helper[i,:,:] = csdl.reshape(self.declare_variable(element_name + 'element_mass_matrix', shape=(dim,dim)), (1,dim,dim))
 
@@ -754,7 +759,7 @@ class Aframe(ModuleCSDL):
 
 
 
-def AframeResidual(Aframe):
+class AframeResidual(Aframe):
     def add_beam(self, beam_name, nodes, cs, e, g, rho, node_dict, node_index, dim, element_density_list):
         n = len(nodes)
 
@@ -813,7 +818,7 @@ def AframeResidual(Aframe):
                                  dim=dim,
                                  i=i)
             
-            self.local_lumped_mass(element_name=element_name, 
+            self.lumped_local_mass(element_name=element_name, 
                                  E=e, 
                                  G=g, 
                                  node_dict=node_dict, 
@@ -912,7 +917,11 @@ def AframeResidual(Aframe):
         # first remove the row/column with a boundary condition, then add a 1:
         K = self.register_output('K', csdl.matmat(csdl.matmat(mask, sum_k), mask) + mask_eye)
         mass_matrix = self.register_output('mass_matrix', csdl.matmat(csdl.matmat(mask, sum_m), mask) + mask_eye)
-        mass_matrix_inverse = mass_matrix # TODO: fix this
+
+        # compute inverse mass matrix
+        mass_matrix_inverse = self.create_output('mass_matrix_inverse', shape=mass_matrix.shape)
+        for i in range(mass_matrix.shape[0]):
+            mass_matrix_inverse[i,i] = 1/mass_matrix[i,i]
 
 
         # compute the mass properties:
@@ -925,11 +934,29 @@ def AframeResidual(Aframe):
                               beams=beams,
                               node_index=node_index)
         
-        U = self.create_input('U', shape=(1,1), val=0)
-        F = self.create_input('F', shape=Fi.shape, val=0) # TODO: check this
-        self.register_output('residual', mass_matrix_inverse*(F-csdl.matvec(K,U)))
+        F_ssr = self.create_output('F_extended', shape = (2*dim,))
+        for i in range(dim):
+            F_ssr[i] = Fi[i]
+            F_ssr[i+dim] = 0
+        A_ssr = self.create_output('A_ssr', shape = (2*dim,2*dim))
+        for i in range(dim):
+            for j in range(dim):
+                A_ssr[i,j] = 0
+                A_ssr[i+dim,j+dim] = 0
+                if i == j:
+                    A_ssr[i+dim,j] = 1
+                else:
+                    A_ssr[i+dim,j] = 0
+        A_ssr[0:dim,dim:2*dim] = -csdl.matmat(K*mass_matrix_inverse)
 
-def AframeResidualJacobian(AframeResidual):
+        delta = self.create_output('delta', shape = (2*dim,))
+        delta[0:dim] = self.declare_variable('velocities', shape=(dim,), val=0)
+        delta[dim:2*dim] = self.declare_variable('displacements', shape=(dim,), val=0)
+
+        residual = self.register_output('residual', F_ssr + csdl.matvec(A_ssr, delta))
+
+
+class AframeResidualJacobian(AframeResidual):
     def define(self):
         beams = self.parameters['beams']
         joints = self.parameters['joints']
@@ -1020,7 +1047,11 @@ def AframeResidualJacobian(AframeResidual):
         # first remove the row/column with a boundary condition, then add a 1:
         K = self.register_output('K', csdl.matmat(csdl.matmat(mask, sum_k), mask) + mask_eye)
         mass_matrix = self.register_output('mass_matrix', csdl.matmat(csdl.matmat(mask, sum_m), mask) + mask_eye)
-        mass_matrix_inverse = mass_matrix # TODO: fix this
+        
+        # compute inverse mass matrix
+        mass_matrix_inverse = self.create_output('mass_matrix_inverse', shape=mass_matrix.shape)
+        for i in range(mass_matrix.shape[0]):
+            mass_matrix_inverse[i,i] = 1/mass_matrix[i,i]
 
 
         # compute the mass properties:
@@ -1033,11 +1064,34 @@ def AframeResidualJacobian(AframeResidual):
                               beams=beams,
                               node_index=node_index)
         
-        self.register_output('U_jacobian', csdl.matmat(mass_matrix_inverse, K))
-        self.register_output('F_jacobian', mass_matrix_inverse)
+        # TODO: fix the below and do it properly
+        zeros = self.declare_variable('zeros', val=np.zeros((dim,dim)), shape=(dim,dim))
+        eye = self.declare_variable('eye', val=np.eye(dim), shape=(dim,dim))
 
+        F_ssr = self.create_output('F_extended', shape = (2*dim,), val=0)
+        for i in range(dim):
+            F_ssr[i] = Fi[i]
+            #F_ssr[i+dim] = zero
+        A_ssr = self.create_output('displacement_jacobian', shape = (2*dim,2*dim))
+        # for i in range(dim):
+        #     for j in range(dim):
+        #         A_ssr[i,j] = zero
+        #         A_ssr[i+dim,j+dim] = zero
+        #         if i == j:
+        #             A_ssr[i+dim,j] = one
+        #         else:
+        #             A_ssr[i+dim,j] = zero
+        A_ssr[0:dim,0:dim] = 1*zeros
+        A_ssr[dim:2*dim,dim:2*dim] = 1*zeros
+        A_ssr[dim:2*dim,0:dim] = eye
+        A_ssr[0:dim,dim:2*dim] = -csdl.matmat(K,mass_matrix_inverse)
 
+        # delta = self.create_output('delta', shape = (2*dim,))
+        # delta[0:dim] = self.declare_variable('velocities', shape=(dim,), val=0)
+        # delta[dim:2*dim] = self.declare_variable('displacements', shape=(dim,), val=0)
 
+        # self.register_output('output_residual_jacobian', A_ssr)
+        # TODO: add input_residual_jacobian
 
 
 
