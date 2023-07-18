@@ -811,6 +811,7 @@ class LinearBeamCSDL(ModuleCSDL):
         joints = self.parameters['joints']
         mesh_units = self.parameters['mesh_units']
 
+        """
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])
             cs = beams[beam_name]['cs']
@@ -827,6 +828,7 @@ class LinearBeamCSDL(ModuleCSDL):
                 radius = self.register_module_input(beam_name+'radius_in',shape=(n-1), computed_upstream=False)
                 self.register_output(beam_name+'_t', 1*thickness)
                 self.register_output(beam_name+'_r', 1*radius)
+        """
 
         # solve the beam group:
         self.add_module(Aframe(beams=beams, bounds=bounds, joints=joints, mesh_units='ft'), name='Aframe')
