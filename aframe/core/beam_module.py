@@ -821,6 +821,7 @@ class LinearBeamCSDL(ModuleCSDL):
                 self.register_output(beam_name+'_tweb',1*xweb)
                 self.register_output(beam_name+'_tcap',1*xcap)
                 
+                
             elif cs == 'tube':
                 thickness = self.register_module_input(beam_name+'thickness_in',shape=(n-1), computed_upstream=False)
                 radius = self.register_module_input(beam_name+'radius_in',shape=(n-1), computed_upstream=False)

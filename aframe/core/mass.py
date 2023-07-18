@@ -103,10 +103,10 @@ class MassCSDL(ModuleCSDL):
                     h[i] = 0.304*(height[i] + height[i + 1])/2
 
             # the box-beam thicknesses:
-            tweb = self.declare_variable(beam_name + '_tweb', shape=(n - 1))
-            tcap = self.declare_variable(beam_name + '_tcap', shape=(n - 1))
-            #tweb = self.register_module_input(beam_name + '_tweb', shape=(n - 1))
-            #tcap = self.register_module_input(beam_name + '_tcap', shape=(n - 1))
+            #tweb = self.declare_variable(beam_name + '_tweb', shape=(n - 1))
+            #tcap = self.declare_variable(beam_name + '_tcap', shape=(n - 1))
+            tweb = self.register_module_input(beam_name + '_tweb', shape=(n - 1), computed_upstream=False)
+            tcap = self.register_module_input(beam_name + '_tcap', shape=(n - 1), computed_upstream=False)
 
             self.print_var(tweb)
             self.print_var(tcap)
