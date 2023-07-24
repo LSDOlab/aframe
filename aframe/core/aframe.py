@@ -385,6 +385,7 @@ class Aframe(ModuleCSDL):
                 self.box(element_name=element_name, w=w[i], h=h[i], tweb=tweb[i], tcap=tcap[i])
 
                 self.register_output(element_name + '_tweb', tweb[i])
+                self.register_output(element_name + '_tcap', tcap[i])
         
         else: raise NotImplementedError('Error: cs type for' + beam_name + 'is not implemented')
 
