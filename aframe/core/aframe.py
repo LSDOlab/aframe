@@ -3,6 +3,7 @@ import csdl
 import python_csdl_backend
 from aframe.core.massprop import MassPropModule as MassProp
 from aframe.core.model import Model
+from aframe.core.buckle import Buckle
 from aframe.core.stress import StressTube, StressBox
 from lsdo_modules.module_csdl.module_csdl import ModuleCSDL
 
@@ -635,6 +636,28 @@ class Aframe(ModuleCSDL):
         # self.register_output('max_stress', max_stress)
 
         # self.print_var(new_stress)
+
+
+
+        # buckling:
+        bkl = self.create_output('bkl', shape=(len(elements)))
+        index = 0
+        for beam_name in beams:
+            n = len(beams[beam_name]['nodes'])
+            Modulus = beams[beam_name]['E']
+            if beams[beam_name]['cs'] == 'box':
+                for i in range(n - 1):
+                    element_name = beam_name + '_element_' + str(i)
+
+                    self.add(Buckle(element_name=element_name,E=Modulus), name=element_name + 'Buckle')
+                    bkl_ratio = self.declare_variable(element_name + 'bkl_ratio')
+                    bkl[index] = 1*bkl_ratio
+
+                    index += 1
+
+
+
+
         
         # output dummy forces and moments for CADDEE:
         zero = self.declare_variable('zero_vec', shape=(3), val=0)
