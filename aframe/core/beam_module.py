@@ -327,6 +327,7 @@ class EBBeamForces(m3l.ExplicitOperation):
         self.parameters.declare('component')
         self.parameters.declare('beams', default={})
         self.parameters.declare('beam_mesh', types=LinearBeamMesh)
+        self.parameters.declare('exclude_middle', default=False)
 
     def assign_attributes(self):
         self.component = self.parameters['component']
@@ -337,10 +338,13 @@ class EBBeamForces(m3l.ExplicitOperation):
         beam_name = list(self.parameters['beams'].keys())[0]   # this is only taking the first mesh added to the solver.
         beam_mesh = list(self.beam_mesh.parameters['meshes'].values())[0]   # this is only taking the first mesh added to the solver.
         nodal_forces = self.arguments['nodal_forces']
+        exclude_middle = self.parameters['exclude_middle']
 
         csdl_model = ModuleCSDL()
 
-        force_map = self.fmap(beam_mesh.value.reshape((-1,3)), oml=self.nodal_forces_mesh.value.reshape((-1,3)))
+        force_map = self.fmap(beam_mesh.value.reshape((-1,3)),
+                              oml=self.nodal_forces_mesh.value.reshape((-1,3)),
+                              exclude_middle=exclude_middle)
 
         flattened_nodal_forces_shape = (np.prod(nodal_forces.shape[:-1]), nodal_forces.shape[-1])
         nodal_forces_csdl = csdl_model.register_module_input(name='nodal_forces', shape=nodal_forces.shape)
@@ -382,36 +386,49 @@ class EBBeamForces(m3l.ExplicitOperation):
         return beam_forces
 
 
-    def fmap(self, mesh, oml):
-        # Fs = W*Fp
+    # def fmap(self, mesh, oml):
+    #     # Fs = W*Fp
+    #
+    #     x, y = mesh.copy(), oml.copy()
+    #     n, m = len(mesh), len(oml)
+    #
+    #     d = np.zeros((m,2))
+    #     for i in range(m):
+    #         dist = np.sum((x - y[i,:])**2, axis=1)
+    #         d[i,:] = np.argsort(dist)[:2]
+    #
+    #     # create the weighting matrix:
+    #     weights = np.zeros((n, m))
+    #     for i in range(m):
+    #         ia, ib = int(d[i,0]), int(d[i,1])
+    #         a, b = x[ia,:], x[ib,:]
+    #         p = y[i,:]
+    #
+    #         length = np.linalg.norm(b - a)
+    #         norm = (b - a)/length
+    #         t = np.dot(p - a, norm)
+    #         # c is the closest point on the line segment (a,b) to point p:
+    #         c =  a + t*norm
+    #
+    #         ac, bc = np.linalg.norm(c - a), np.linalg.norm(c - b)
+    #         l = max(length, bc)
+    #
+    #         weights[ia, i] = (l - ac)/length
+    #         weights[ib, i] = (l - bc)/length
+    #
+    #     return weights
 
+    def fmap(self, mesh, oml, exclude_middle=False):
+        from scipy.spatial.distance import cdist
         x, y = mesh.copy(), oml.copy()
-        n, m = len(mesh), len(oml)
-
-        d = np.zeros((m,2))
-        for i in range(m):
-            dist = np.sum((x - y[i,:])**2, axis=1)
-            d[i,:] = np.argsort(dist)[:2]
-
-        # create the weighting matrix:
-        weights = np.zeros((n, m))
-        for i in range(m):
-            ia, ib = int(d[i,0]), int(d[i,1])
-            a, b = x[ia,:], x[ib,:]
-            p = y[i,:]
-
-            length = np.linalg.norm(b - a)
-            norm = (b - a)/length
-            t = np.dot(p - a, norm)
-            # c is the closest point on the line segment (a,b) to point p:
-            c =  a + t*norm
-
-            ac, bc = np.linalg.norm(c - a), np.linalg.norm(c - b)
-            l = max(length, bc)
-            
-            weights[ia, i] = (l - ac)/length
-            weights[ib, i] = (l - bc)/length
-
+        middle_index = int(x.shape[0] / 2)
+        dist = cdist(y, x)
+        weights = 1.0 / dist
+        if exclude_middle:
+            weights[:, middle_index] = np.zeros(y.shape[0])
+        weights = weights.T
+        weights /= weights.sum(axis=0)
+        np.nan_to_num(weights, copy=False, nan=1.)
         return weights
     
 
