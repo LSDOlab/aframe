@@ -124,8 +124,8 @@ class StressBox(csdl.Model):
         stress_b_comp = self.create_output(name + 'stress_b_comp', shape=(5), val=0)
         
         # hard-coding values for quasi-isotropic laminate
-        T = self.declare_variable('T_composite', val=690.)
-        C = self.declare_variable('C_composite', val=520.)
+        T = self.declare_variable('T_composite', val=690.*1e+6)
+        C = self.declare_variable('C_composite', val=520.*1e+6)
 
         tweb = self.declare_variable(name + '_tweb')
         Q = self.declare_variable(name + '_Q')
