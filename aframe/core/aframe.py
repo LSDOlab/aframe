@@ -604,7 +604,9 @@ class Aframe(ModuleCSDL):
         for beam_name in beams:
             if beams[beam_name]['cs'] == 'box': boxflag = True
 
-        if boxflag: new_stress = self.create_output('new_stress', shape=(len(elements),5), val=0)
+        if boxflag: 
+            new_stress = self.create_output('new_stress', shape=(len(elements),5), val=0)
+            new_stress_comp = self.create_output('new_stress_composite', shape=(len(elements),5), val=0)
 
         stress = self.create_output('vm_stress', shape=(len(elements)), val=0)
 
@@ -627,6 +629,7 @@ class Aframe(ModuleCSDL):
                     
                     stress[index] = self.declare_variable(element_name + '_stress')
                     new_stress[index,:] = csdl.reshape(self.declare_variable(element_name + '_stress_array', shape=(5)), new_shape=(1,5)) # no ks max
+                    new_stress_comp[index,:] = csdl.reshape(self.declare_variable(element_name + '_comp_stress_array', shape=(5)), new_shape=(1,5)) # no ks max
 
                     index += 1
 

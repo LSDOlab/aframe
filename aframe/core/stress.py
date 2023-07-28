@@ -120,6 +120,12 @@ class StressBox(csdl.Model):
         shear_b = self.create_output(name + 'shear_b',shape=(5), val=0)
         stress_a = self.create_output(name + 'stress_a', shape=(5), val=0)
         stress_b = self.create_output(name + 'stress_b', shape=(5), val=0)
+        stress_a_comp = self.create_output(name + 'stress_a_comp', shape=(5), val=0)
+        stress_b_comp = self.create_output(name + 'stress_b_comp', shape=(5), val=0)
+        
+        # hard-coding values for quasi-isotropic laminate
+        T = self.declare_variable('T_composite', val=690.)
+        C = self.declare_variable('C_composite', val=520.)
 
         tweb = self.declare_variable(name + '_tweb')
         Q = self.declare_variable(name + '_Q')
@@ -146,6 +152,9 @@ class StressBox(csdl.Model):
 
             stress_a[point] = (s_axial_a**2 + 3*tau_a**2 + 1E-14)**0.5
             stress_b[point] = (s_axial_b**2 + 3*tau_b**2 + 1E-14)**0.5
+            stress_a_comp[point] = (1/T - 1/C)*s_axial_a + 1/(T*C)*s_axial_a**2 + 3/(T*C)*tau_a**2
+            stress_b_comp[point] = (1/T - 1/C)*s_axial_b + 1/(T*C)*s_axial_b**2 + 3/(T*C)*tau_b**2
+
             
 
         max_stress_a = csdl.max(1E-3*stress_a)/1E-3
@@ -160,4 +169,4 @@ class StressBox(csdl.Model):
         
 
         self.register_output(name + '_stress_array', (stress_a + stress_b)/2) # a more reliable stress constraint
-        
+        self.register_output(name + '_comp_stress_array', (stress_a_comp + stress_b_comp)/2)
