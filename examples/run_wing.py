@@ -16,6 +16,7 @@ mesh[:,1] = np.linspace(-20,20,n)
 
 forces = np.zeros((n,3))
 forces[:,2] = 1000
+forces[:,0] = 100
 
 h = np.ones(n)*1
 w = np.ones(n)*1
@@ -75,6 +76,7 @@ if __name__ == '__main__':
     optimizer = SLSQP(prob, maxiter=1000, ftol=1E-8)
     optimizer.solve()
     optimizer.print_results()
+    
 
 
     #print('displacement: ', sim['wing_displacement'])
@@ -111,4 +113,9 @@ if __name__ == '__main__':
     ax.set_xlim(-5,5)
     ax.set_ylim(-10,10)
     ax.set_zlim(0,5)
+    plt.show()
+
+
+    print(sim['new_stress'])
+    plt.plot(sim['new_stress'])
     plt.show()
