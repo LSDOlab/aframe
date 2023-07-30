@@ -848,4 +848,4 @@ class LinearBeamCSDL(ModuleCSDL):
         """
 
         # solve the beam group:
-        self.add_module(Aframe(beams=beams, bounds=bounds, joints=joints, mesh_units=mesh_units), name='Aframe')
+        self.add_module(Aframe(beams=beams, bounds=bounds, joints=joints, mesh_units='ft'), name='Aframe')
