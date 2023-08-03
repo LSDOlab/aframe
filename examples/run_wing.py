@@ -12,13 +12,14 @@ plt.rcParams.update(plt.rcParamsDefault)
 
 n = 21
 mesh = np.zeros((n,3))
-mesh[:,1] = np.linspace(-10,10,n)
+mesh[:,1] = np.linspace(-20,20,n)
 
 forces = np.zeros((n,3))
 forces[:,2] = 1000
+forces[:,0] = 100
 
-h = np.ones(n)*0.2
-w = np.ones(n)*0.5
+h = np.ones(n)*1
+w = np.ones(n)*1
 
 
 
@@ -36,8 +37,8 @@ class Run(csdl.Model):
         self.create_input('wing_mesh', shape=(len(mesh),3), val=mesh)
         self.create_input('wing_height', shape=(len(mesh)), val=h)
         self.create_input('wing_width', shape=(len(mesh)), val=w)
-        self.create_input('wing_tcap', shape=(len(mesh) - 1), val=0.0001)
-        self.create_input('wing_tweb', shape=(len(mesh) - 1), val=0.0001)
+        self.create_input('wing_tcap', shape=(len(mesh) - 1), val=0.01)
+        self.create_input('wing_tweb', shape=(len(mesh) - 1), val=0.001)
         self.create_input('wing_forces', shape=(len(mesh),3), val=forces)
 
         
@@ -46,8 +47,8 @@ class Run(csdl.Model):
 
 
         self.add_constraint('new_stress', upper=450E6, scaler=1E-8)
-        self.add_design_variable('wing_tcap', lower=0.00001, upper=0.5, scaler=1E4)
-        self.add_design_variable('wing_tweb', lower=0.00001, upper=0.5, scaler=1E4)
+        self.add_design_variable('wing_tcap', lower=0.00001, upper=0.5, scaler=1E1)
+        self.add_design_variable('wing_tweb', lower=0.00001, upper=0.5, scaler=1E2)
         self.add_objective('mass', scaler=1E-2)
 
         mass = self.declare_variable('mass')
@@ -70,11 +71,12 @@ if __name__ == '__main__':
     sim = python_csdl_backend.Simulator(Run(beams=beams,bounds=bounds,joints=joints))
     sim.run()
 
-
+    
     prob = CSDLProblem(problem_name='run_opt', simulator=sim)
-    optimizer = SLSQP(prob, maxiter=1000, ftol=1E-6)
+    optimizer = SLSQP(prob, maxiter=1000, ftol=1E-8)
     optimizer.solve()
     optimizer.print_results()
+    
 
 
     #print('displacement: ', sim['wing_displacement'])
@@ -111,4 +113,9 @@ if __name__ == '__main__':
     ax.set_xlim(-5,5)
     ax.set_ylim(-10,10)
     ax.set_zlim(0,5)
+    plt.show()
+
+
+    print(sim['new_stress'])
+    plt.plot(sim['new_stress'])
     plt.show()

@@ -3,6 +3,7 @@ import csdl
 import python_csdl_backend
 from aframe.core.massprop import MassPropModule as MassProp
 from aframe.core.model import Model
+from aframe.core.buckle import Buckle
 from aframe.core.stress import StressTube, StressBox
 from lsdo_modules.module_csdl.module_csdl import ModuleCSDL
 
@@ -40,7 +41,9 @@ class Aframe(ModuleCSDL):
         Iz = ((w**3)*h - (w_i**3)*h_i)/12
         Iy = (w*(h**3) - w_i*(h_i**3))/12
         J = (w*h*(h**2 + w**2)/12) - (w_i*h_i*(h_i**2 + w_i**2)/12)
-        Q = 2*(h/2)*tweb*(h/4) + (w - 2*tweb)*tcap*((h/2) - (tcap/2))
+        # Q = 2*(h/2)*tweb*(h/4) + (w - 2*tweb)*tcap*((h/2) - (tcap/2))
+
+        Q = (A/2)*(h/4)
 
         self.register_output(element_name + '_A', A)
         self.register_output(element_name + '_Ix', 1*J) # I think J is the same as Ix...
@@ -445,7 +448,7 @@ class Aframe(ModuleCSDL):
         if mesh_units == 'm': mesh = 1*mesh_in
         elif mesh_units == 'ft': mesh = 0.304*mesh_in
         
-        self.print_var(mesh)
+        # self.print_var(mesh)
         
         # iterate over each element:
         for i in range(n - 1):
@@ -500,6 +503,9 @@ class Aframe(ModuleCSDL):
             for i in range(n - 1):
                 element_name = beam_name + '_element_' + str(i)
                 self.box(element_name=element_name, w=w[i], h=h[i], tweb=tweb[i], tcap=tcap[i])
+
+                self.register_output(element_name + '_tweb', tweb[i])
+                self.register_output(element_name + '_tcap', tcap[i])
         
         else: raise NotImplementedError('Error: cs type for' + beam_name + 'is not implemented')
 
@@ -749,6 +755,28 @@ class Aframe(ModuleCSDL):
         # self.register_output('max_stress', max_stress)
 
         # self.print_var(new_stress)
+
+
+
+        # buckling:
+        bkl = self.create_output('bkl', shape=(len(elements)))
+        index = 0
+        for beam_name in beams:
+            n = len(beams[beam_name]['nodes'])
+            Modulus = beams[beam_name]['E']
+            if beams[beam_name]['cs'] == 'box':
+                for i in range(n - 1):
+                    element_name = beam_name + '_element_' + str(i)
+
+                    self.add(Buckle(element_name=element_name,E=Modulus), name=element_name + 'Buckle')
+                    bkl_ratio = self.declare_variable(element_name + 'bkl_ratio')
+                    bkl[index] = 1*bkl_ratio
+
+                    index += 1
+
+
+
+
         
         # output dummy forces and moments for CADDEE:
         zero = self.declare_variable('zero_vec', shape=(3), val=0)

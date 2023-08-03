@@ -53,11 +53,11 @@ class MassPropModule(ModuleCSDL):
         sum_rm = csdl.sum(rm_vec,axes=(0,))
 
         cg = sum_rm/csdl.expand(total_mass, (3))
-        self.register_output('cg_vector',cg)
+        self.register_output('cg_vector', cg)
 
 
         self.register_output('cgx', cg[0])
-        self.register_output('cgy', cg[1])
+        self.register_output('cgy', cg[1]*0) # zeroed to make opt converge better and stuff
         self.register_output('cgz', cg[2])
 
 
@@ -116,7 +116,7 @@ class MassPropModule(ModuleCSDL):
         
 
 
-
+"""
 class MassProp(csdl.Model):
     def initialize(self):
         self.parameters.declare('elements')
@@ -171,7 +171,7 @@ class MassProp(csdl.Model):
 
 
         self.register_output('cgx', cg[0])
-        self.register_output('cgy', cg[1])
+        self.register_output('cgy', cg[1]*0)
         self.register_output('cgz', cg[2])
 
 
@@ -216,7 +216,7 @@ class MassProp(csdl.Model):
 
 
 
-        
+"""
             
 
         
