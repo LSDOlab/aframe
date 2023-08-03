@@ -117,7 +117,7 @@ class MassCSDL(ModuleCSDL):
             A = (((w*h) - (w_i*h_i))**2 + 1E-14)**0.5
 
             # iterate over the elements:
-            em_vec = self.create_output('em_vec',shape=(n - 1),val=0)
+            em_vec = self.create_output(beam_name + 'em_vec',shape=(n - 1),val=0)
             for i in range(n - 1):
 
                 node_a = csdl.reshape(mesh[i, :], (3))

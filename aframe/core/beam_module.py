@@ -80,8 +80,8 @@ class BeamM3LDisplacement(m3l.ImplicitOperation):
         # self.residual_partials['force_jacobian'] = forces
 
         # create residual variable
-        self.size = 6*2*mesh.shape[0]
-        residual = m3l.Variable(name=f'{beam_name}_displacement', shape=(6*2*mesh.shape[0],), operation=self)
+        self.size = 6*2*mesh.shape[1]
+        residual = m3l.Variable(name=f'{beam_name}_displacement', shape=(6*2*mesh.shape[1],), operation=self)
 
         return residual
 
@@ -964,6 +964,7 @@ class LinearBeamResidualCSDL(ModuleCSDL):
         joints = self.parameters['joints']
         mesh_units = self.parameters['mesh_units']
 
+        """
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])
             cs = beams[beam_name]['cs']
@@ -979,7 +980,7 @@ class LinearBeamResidualCSDL(ModuleCSDL):
                 radius = self.register_module_input(beam_name+'radius_in',shape=(n-1), computed_upstream=False)
                 self.register_output(beam_name+'_t', 1*thickness)
                 self.register_output(beam_name+'_r', 1*radius)
-
+        """
         # solve the beam group:
         self.add_module(AframeResidual(beams=beams, bounds=bounds, joints=joints), name='Aframe')
 
@@ -996,6 +997,7 @@ class LinearBeamResidualJacobiansCSDL(ModuleCSDL):
         joints = self.parameters['joints']
         mesh_units = self.parameters['mesh_units']
 
+        """
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])
             cs = beams[beam_name]['cs']
@@ -1011,6 +1013,6 @@ class LinearBeamResidualJacobiansCSDL(ModuleCSDL):
                 radius = self.register_module_input(beam_name+'radius_in',shape=(n-1), computed_upstream=False)
                 self.register_output(beam_name+'_t', 1*thickness)
                 self.register_output(beam_name+'_r', 1*radius)
-
+        """
         # solve the beam group:
         self.add_module(AframeResidualJacobian(beams=beams, bounds=bounds, joints=joints), name='Aframe')
