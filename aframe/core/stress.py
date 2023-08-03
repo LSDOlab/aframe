@@ -131,8 +131,8 @@ class StressBox(csdl.Model):
             y = y_coord[point]
             r = (x**2 + y**2)**0.5
 
-            s_axial_a = (loads_a[0]/A) + (loads_a[4]*y/Iy) + (loads_a[5]*x/Iz)
-            s_axial_b = (loads_b[0]/A) + (loads_b[4]*y/Iy) + (loads_b[5]*x/Iz)
+            s_axial_a = (loads_a[0]/A) + (loads_a[4]*y/Iz) + (loads_a[5]*x/Iy)
+            s_axial_b = (loads_b[0]/A) + (loads_b[4]*y/Iz) + (loads_b[5]*x/Iy)
             s_torsional_a = loads_a[3]*r/J
             s_torsional_b = loads_b[3]*r/J
 

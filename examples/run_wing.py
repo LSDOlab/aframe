@@ -16,7 +16,7 @@ mesh[:,1] = np.linspace(-20,20,n)
 
 forces = np.zeros((n,3))
 forces[:,2] = 1000
-forces[:,0] = 100
+forces[:,0] = 0
 
 h = np.ones(n)*1
 w = np.ones(n)*1
@@ -72,10 +72,10 @@ if __name__ == '__main__':
     sim.run()
 
     
-    prob = CSDLProblem(problem_name='run_opt', simulator=sim)
-    optimizer = SLSQP(prob, maxiter=1000, ftol=1E-8)
-    optimizer.solve()
-    optimizer.print_results()
+    #prob = CSDLProblem(problem_name='run_opt', simulator=sim)
+    #optimizer = SLSQP(prob, maxiter=1000, ftol=1E-8)
+    #optimizer.solve()
+    #optimizer.print_results()
     
 
 
