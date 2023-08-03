@@ -982,7 +982,7 @@ class LinearBeamResidualCSDL(ModuleCSDL):
                 self.register_output(beam_name+'_r', 1*radius)
         """
         # solve the beam group:
-        self.add_module(AframeResidual(beams=beams, bounds=bounds, joints=joints), name='Aframe')
+        self.add_module(AframeResidual(beams=beams, bounds=bounds, joints=joints, mesh_units='ft'), name='Aframe')
 
 class LinearBeamResidualJacobiansCSDL(ModuleCSDL):
     def initialize(self):
