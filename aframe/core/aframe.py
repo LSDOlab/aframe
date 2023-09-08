@@ -755,13 +755,6 @@ class Aframe(ModuleCSDL):
                     index += 1
 
 
-        # compute the maximum stress in the entire system:
-        # max_stress = csdl.max(stress)
-        # self.register_output('max_stress', max_stress)
-
-        # self.print_var(new_stress)
-
-
 
         # buckling:
         bkl = self.create_output('bkl', shape=(len(elements)))
