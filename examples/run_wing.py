@@ -69,17 +69,17 @@ if __name__ == '__main__':
 
 
     sim = python_csdl_backend.Simulator(Run(beams=beams,bounds=bounds,joints=joints))
-    sim.run()
+    #sim.run()
 
     
-    #prob = CSDLProblem(problem_name='run_opt', simulator=sim)
-    #optimizer = SLSQP(prob, maxiter=1000, ftol=1E-8)
-    #optimizer.solve()
-    #optimizer.print_results()
+    prob = CSDLProblem(problem_name='run_opt', simulator=sim)
+    optimizer = SLSQP(prob, maxiter=1000, ftol=1E-8)
+    optimizer.solve()
+    optimizer.print_results()
 
 
-    #print('tcap: ', sim['wing_tcap'])
-    #print('tweb: ', sim['wing_tweb'])
+    print('tcap: ', sim['wing_tcap'])
+    print('tweb: ', sim['wing_tweb'])
 
     cg = sim['cg_vector']
 
