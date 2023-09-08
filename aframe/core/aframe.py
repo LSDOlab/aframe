@@ -656,7 +656,7 @@ class Aframe(ModuleCSDL):
         # recover the local elemental forces/moments:
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])
-            nodal_loads = self.create_output(beam_name + '_nodal_loads', shape=(n), val=0)
+            nodal_loads = self.create_output(beam_name + '_nodal_loads', shape=(n,6), val=0)
 
             for i in range(n - 1):
                 element_name = beam_name + '_element_' + str(i)
@@ -672,9 +672,9 @@ class Aframe(ModuleCSDL):
                 element_loads = csdl.matvec(kp,csdl.matvec(T,d))
                 self.register_output(element_name + 'local_loads', element_loads)
 
-                nodal_loads[i] = element_loads[0:6]
+                nodal_loads[i,:] = csdl.reshape(element_loads[0:6], (1,6))
 
-            nodal_loads[-1] = element_loads[6:-1]
+            nodal_loads[n - 1,:] = csdl.reshape(element_loads[6:12], (1,6))
 
         
 
