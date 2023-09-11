@@ -705,12 +705,7 @@ class Aframe(ModuleCSDL):
                 d[i,:] = csdl.reshape(dna, (1,3))
             d[n - 1,:] = csdl.reshape(dnb, (1,3))
 
-
-
-        # get the rotations:
-        for beam_name in beams:
-            n = len(beams[beam_name]['nodes'])
-
+            # get the rotations:
             # define the axis-wise unit vectors:
             ex = self.create_input('ex', shape=(3), val=[1,0,0])
             ey = self.create_input('ey', shape=(3), val=[0,1,0])
@@ -727,6 +722,9 @@ class Aframe(ModuleCSDL):
                 r[i,0] = csdl.reshape(csdl.arccos(csdl.dot(v, ex)/mag), (1,1))
                 r[i,1] = csdl.reshape(csdl.arccos(csdl.dot(v, ey)/mag), (1,1))
                 r[i,2] = csdl.reshape(csdl.arccos(csdl.dot(v, ez)/mag), (1,1))
+
+
+
 
 
         # perform a nodal stress recovery
