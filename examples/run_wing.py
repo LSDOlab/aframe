@@ -64,18 +64,18 @@ class Run(csdl.Model):
 if __name__ == '__main__':
 
     joints, bounds, beams = {}, {}, {}
-    beams['wing'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'box','nodes': list(range(len(mesh)))}
+    beams['wing'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'box','nodes': list(range(len(mesh))),'nsub': 3}
     bounds['root'] = {'beam': 'wing','node': 10,'fdim': [1,1,1,1,1,1]}
 
 
     sim = python_csdl_backend.Simulator(Run(beams=beams,bounds=bounds,joints=joints))
-    #sim.run()
+    sim.run()
 
     
-    prob = CSDLProblem(problem_name='run_opt', simulator=sim)
-    optimizer = SLSQP(prob, maxiter=1000, ftol=1E-8)
-    optimizer.solve()
-    optimizer.print_results()
+    #prob = CSDLProblem(problem_name='run_opt', simulator=sim)
+    #optimizer = SLSQP(prob, maxiter=1000, ftol=1E-8)
+    #optimizer.solve()
+    #optimizer.print_results()
 
 
     print('tcap: ', sim['wing_tcap'])

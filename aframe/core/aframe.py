@@ -438,7 +438,7 @@ class Aframe(ModuleCSDL):
         return Fi
 
 
-    def add_beam(self, beam_name, nodes, cs, e, g, rho, node_dict, node_index, dim, element_density_list):
+    def add_beam(self, beam_name, nodes, cs, e, g, rho, nsub, node_dict, node_index, dim, element_density_list):
         mesh_units = self.parameters['mesh_units']
         n = len(nodes)
 
@@ -592,6 +592,7 @@ class Aframe(ModuleCSDL):
                           e=beams[beam_name]['E'],
                           g=beams[beam_name]['G'],
                           rho=beams[beam_name]['rho'],
+                          nsub=beams[beam_name]['nsub'],
                           node_dict=node_dict[beam_name],
                           node_index=node_index,
                           dim=dim,
