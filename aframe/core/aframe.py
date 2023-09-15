@@ -1,10 +1,8 @@
 import numpy as np
 import csdl
-import python_csdl_backend
 from aframe.core.massprop import MassPropModule as MassProp
 from aframe.core.model import Model
 from aframe.core.buckle import Buckle
-# from aframe.core.stress import StressTube, StressBox
 from aframe.core.nodal_stress import NodalStressBox
 from lsdo_modules.module_csdl.module_csdl import ModuleCSDL
 
