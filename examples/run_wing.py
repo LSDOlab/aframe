@@ -64,7 +64,7 @@ class Run(csdl.Model):
 if __name__ == '__main__':
 
     joints, bounds, beams = {}, {}, {}
-    beams['wing'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'box','nodes': list(range(len(mesh))),'nsub': 3}
+    beams['wing'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'box','nodes': list(range(len(mesh))),'nsub': 2}
     bounds['root'] = {'beam': 'wing','node': 10,'fdim': [1,1,1,1,1,1]}
 
 
