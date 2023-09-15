@@ -449,7 +449,19 @@ class Aframe(ModuleCSDL):
 
         if mesh_units == 'm': mesh = 1*mesh_in
         elif mesh_units == 'ft': mesh = 0.304*mesh_in
-        
+
+        """
+        # interpolate the mesh:
+        mesh = self.create_output('mesh', shape=(n,3), val=0)
+        for i in range(n - 1):
+            node_a = csdl.reshape(mesh[i, :], (3))
+            node_b = csdl.reshape(mesh[i + 1, :], (3))
+            length = csdl.pnorm(node_b - node_a, pnorm_type=2)
+            slope = (node_b - node_a)/length
+
+            for j in range(nsub):
+                pass
+        """
 
         
         # iterate over each element:
