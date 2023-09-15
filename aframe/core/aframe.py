@@ -9,7 +9,7 @@ from aframe.core.nodal_stress import NodalStressBox
 from lsdo_modules.module_csdl.module_csdl import ModuleCSDL
 
 
-# TODO: define an assembel model method and call that
+
 
 class Aframe(ModuleCSDL):
 
