@@ -697,8 +697,6 @@ class Aframe(ModuleCSDL):
                 rev[i+1,:] = (csdl.reshape(element_loads[0:6], (1,6))**2 + 1E-12)**0.5
 
                 #self.print_var(element_loads)
-                #self.print_var(element_loads[8])
-                #self.print_var(element_loads[2]) # misinterpreted what element loads are...
 
             #self.print_var((fwd + rev)/2)
 
