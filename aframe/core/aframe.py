@@ -672,7 +672,10 @@ class Aframe(ModuleCSDL):
         # recover the forces and moments:
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])
-            nodal_loads = self.create_output(beam_name + '_nodal_loads', shape=(n,6), val=0)
+            #nodal_loads = self.create_output(beam_name + '_nodal_loads', shape=(n,6), val=0)
+
+            fwd = self.create_output(beam_name+'fwd', shape=(n,6),val=0)
+            rev = self.create_output(beam_name+'rev', shape=(n,6),val=0)
 
             for i in range(n - 1):
                 element_name = beam_name + '_element_' + str(i)
@@ -688,14 +691,21 @@ class Aframe(ModuleCSDL):
                 element_loads = csdl.matvec(kp,csdl.matvec(T,d))
                 self.register_output(element_name + 'local_loads', element_loads)
 
-                nodal_loads[i,:] = csdl.reshape(element_loads[0:6], (1,6))
+                #nodal_loads[i,:] = csdl.reshape(element_loads[0:6], (1,6))
 
-                self.print_var(element_loads)
+                fwd[i,:] = (csdl.reshape(element_loads[0:6], (1,6))**2 + 1E-12)**0.5
+                rev[i+1,:] = (csdl.reshape(element_loads[0:6], (1,6))**2 + 1E-12)**0.5
+
+                #self.print_var(element_loads)
                 #self.print_var(element_loads[8])
                 #self.print_var(element_loads[2]) # misinterpreted what element loads are...
 
-            nodal_loads[n - 1,:] = csdl.reshape(element_loads[6:12], (1,6))
+            #self.print_var((fwd + rev)/2)
+
+            #nodal_loads[n - 1,:] = csdl.reshape(element_loads[6:12], (1,6))
             #self.print_var(nodal_loads)
+            nodal_loads = (fwd + rev)/2
+            self.register_output(beam_name+'_nodal_loads',nodal_loads)
 
         
 
