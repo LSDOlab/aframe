@@ -38,246 +38,6 @@ class Aframe(ModuleCSDL):
         self.register_output(name + '_Q', Q)
 
 
-    def local_mass(self, element_name, E, G, node_dict, node_index, dim, i, element_density_list):
-        A = self.declare_variable(element_name + '_A')
-        Ix = self.declare_variable(element_name + '_Ix')
-        Iy = self.declare_variable(element_name + '_Iy')
-        Iz = self.declare_variable(element_name + '_Iz')
-        J = self.declare_variable(element_name + '_J')
-
-        node_a = self.declare_variable(element_name + 'node_a', shape=(3))
-        node_b = self.declare_variable(element_name + 'node_b', shape=(3))
-        L = csdl.pnorm(node_b - node_a, pnorm_type=2) + 1E-12
-
-        a = L/2
-        rho = element_density_list[i]
-        coef = rho*A*a/105
-        rx2 = Ix/A
-        
-        mp = self.create_output(element_name + 'mp', shape=(12,12), val=0)
-
-        mp[0,0] = csdl.reshape(coef*70, (1,1))
-        mp[1,1] = csdl.reshape(coef*78, (1,1))
-        mp[2,2] = csdl.reshape(coef*78, (1,1))
-        mp[3,3] = csdl.reshape(coef*78*rx2, (1,1))
-        mp[2,4] = csdl.reshape(coef*-22*a, (1,1))
-        mp[4,2] = csdl.reshape(coef*-22*a, (1,1))
-        mp[4,4] = csdl.reshape(coef*8*a**2, (1,1))
-        mp[1,5] = csdl.reshape(coef*22*a, (1,1))
-        mp[5,1] = csdl.reshape(coef*22*a, (1,1))
-        mp[5,5] = csdl.reshape(coef*8*a**2, (1,1))
-        mp[0,6] = csdl.reshape(coef*35, (1,1))
-        mp[6,0] = csdl.reshape(coef*35, (1,1))
-        mp[6,6] = csdl.reshape(coef*70, (1,1))
-        mp[1,7] = csdl.reshape(coef*27, (1,1))
-        mp[7,1] = csdl.reshape(coef*27, (1,1))
-        mp[5,7] = csdl.reshape(coef*13*a, (1,1))
-        mp[7,5] = csdl.reshape(coef*13*a, (1,1))
-        mp[7,7] = csdl.reshape(coef*78, (1,1))
-        mp[2,8] = csdl.reshape(coef*27, (1,1))
-        mp[8,2] = csdl.reshape(coef*27, (1,1))
-        mp[4,8] = csdl.reshape(coef*-13*a, (1,1))
-        mp[8,4] = csdl.reshape(coef*-13*a, (1,1))
-        mp[8,8] = csdl.reshape(coef*78, (1,1))
-        mp[3,9] = csdl.reshape(coef*-35*rx2, (1,1))
-        mp[9,3] = csdl.reshape(coef*-35*rx2, (1,1))
-        mp[9,9] = csdl.reshape(coef*70*rx2, (1,1))
-        mp[2,10] = csdl.reshape(coef*13*a, (1,1))
-        mp[10,2] = csdl.reshape(coef*13*a, (1,1))
-        mp[4,10] = csdl.reshape(coef*-6*a**2, (1,1))
-        mp[10,4] = csdl.reshape(coef*-6*a**2, (1,1))
-        mp[8,10] = csdl.reshape(coef*22*a, (1,1))
-        mp[10,8] = csdl.reshape(coef*22*a, (1,1))
-        mp[10,10] = csdl.reshape(coef*8*a**2, (1,1))
-        mp[1,11] = csdl.reshape(coef*-13*a, (1,1))
-        mp[11,1] = csdl.reshape(coef*-13*a, (1,1))
-        mp[5,11] = csdl.reshape(coef*-6*a**2, (1,1))
-        mp[11,5] = csdl.reshape(coef*-6*a**2, (1,1))
-        mp[7,11] = csdl.reshape(coef*-22*a, (1,1))
-        mp[11,7] = csdl.reshape(coef*-22*a, (1,1))
-        mp[11,11] = csdl.reshape(coef*8*a**2, (1,1))
-
-        # transform the local mass matrix to global coordinates:
-        cp = (node_b - node_a)/csdl.expand(L, (3))
-        ll, mm, nn = cp[0], cp[1], cp[2]
-        D = (ll**2 + mm**2)**0.5
-
-        block = self.create_output(element_name + 'mass_block',shape=(3,3),val=0)
-        block[0,0] = csdl.reshape(ll, (1,1))
-        block[0,1] = csdl.reshape(mm, (1,1))
-        block[0,2] = csdl.reshape(nn, (1,1))
-        block[1,0] = csdl.reshape(-mm/D, (1,1))
-        block[1,1] = csdl.reshape(ll/D, (1,1))
-        block[2,0] = csdl.reshape(-ll*nn/D, (1,1))
-        block[2,1] = csdl.reshape(-mm*nn/D, (1,1))
-        block[2,2] = csdl.reshape(D, (1,1))
-
-        # rebranded the transformation matrix T to MT:
-        MT = self.create_output(element_name + 'MT', shape=(12,12), val=0)
-        MT[0:3,0:3] = 1*block
-        MT[3:6,3:6] = 1*block
-        MT[6:9,6:9] = 1*block
-        MT[9:12,9:12] = 1*block
-        tmt = csdl.matmat(csdl.transpose(MT), csdl.matmat(mp, MT))
-
-        # expand the transformed mass matrix to the global dimensions:
-        element_mass_matrix = self.create_output(element_name + 'element_mass_matrix', shape=(dim,dim), val=0)
-
-        # parse tmt:
-        m11 = tmt[0:6,0:6] # upper left
-        m12 = tmt[0:6,6:12] # upper right
-        m21 = tmt[6:12,0:6] # lower left
-        m22 = tmt[6:12,6:12] # lower right
-
-        # assign the four block matrices to their respective positions in mass_matrix:
-        node_a_index = node_index[node_dict[i]]
-        node_b_index = node_index[node_dict[i + 1]]
-
-        row_i = node_a_index*6
-        row_f = node_a_index*6 + 6
-        col_i = node_a_index*6
-        col_f = node_a_index*6 + 6
-        element_mass_matrix[row_i:row_f, col_i:col_f] = m11
-
-        row_i = node_a_index*6
-        row_f = node_a_index*6 + 6
-        col_i = node_b_index*6
-        col_f = node_b_index*6 + 6
-        element_mass_matrix[row_i:row_f, col_i:col_f] = m12
-
-        row_i = node_b_index*6
-        row_f = node_b_index*6 + 6
-        col_i = node_a_index*6
-        col_f = node_a_index*6 + 6
-        element_mass_matrix[row_i:row_f, col_i:col_f] = m21
-
-        row_i = node_b_index*6
-        row_f = node_b_index*6 + 6
-        col_i = node_b_index*6
-        col_f = node_b_index*6 + 6
-        element_mass_matrix[row_i:row_f, col_i:col_f] = m22
-
-
-    def lumped_local_mass(self, element_name, E, G, node_dict, node_index, dim, i, element_density_list):
-        A = self.declare_variable(element_name + '_A')
-        Ix = self.declare_variable(element_name + '_Ix')
-        Iy = self.declare_variable(element_name + '_Iy')
-        Iz = self.declare_variable(element_name + '_Iz')
-        J = self.declare_variable(element_name + '_J')
-
-        node_a = self.declare_variable(element_name + 'node_a', shape=(3))
-        node_b = self.declare_variable(element_name + 'node_b', shape=(3))
-        L = csdl.pnorm(node_b - node_a, pnorm_type=2)
-
-        a = L/2
-        rho = element_density_list[i]
-        coef = rho*A*a/105
-        rx2 = Ix/A
-        
-        mp = self.create_output(element_name + 'mp', shape=(12,12), val=0)
-
-        mp[0,0] = csdl.reshape(coef*70, (1,1))
-        mp[1,1] = csdl.reshape(coef*78, (1,1))
-        mp[2,2] = csdl.reshape(coef*78, (1,1))
-        mp[3,3] = csdl.reshape(coef*78*rx2, (1,1))
-        mp[2,4] = csdl.reshape(coef*-22*a, (1,1))
-        mp[4,2] = csdl.reshape(coef*-22*a, (1,1))
-        mp[4,4] = csdl.reshape(coef*8*a**2, (1,1))
-        mp[1,5] = csdl.reshape(coef*22*a, (1,1))
-        mp[5,1] = csdl.reshape(coef*22*a, (1,1))
-        mp[5,5] = csdl.reshape(coef*8*a**2, (1,1))
-        mp[0,6] = csdl.reshape(coef*35, (1,1))
-        mp[6,0] = csdl.reshape(coef*35, (1,1))
-        mp[6,6] = csdl.reshape(coef*70, (1,1))
-        mp[1,7] = csdl.reshape(coef*27, (1,1))
-        mp[7,1] = csdl.reshape(coef*27, (1,1))
-        mp[5,7] = csdl.reshape(coef*13*a, (1,1))
-        mp[7,5] = csdl.reshape(coef*13*a, (1,1))
-        mp[7,7] = csdl.reshape(coef*78, (1,1))
-        mp[2,8] = csdl.reshape(coef*27, (1,1))
-        mp[8,2] = csdl.reshape(coef*27, (1,1))
-        mp[4,8] = csdl.reshape(coef*-13*a, (1,1))
-        mp[8,4] = csdl.reshape(coef*-13*a, (1,1))
-        mp[8,8] = csdl.reshape(coef*78, (1,1))
-        mp[3,9] = csdl.reshape(coef*-35*rx2, (1,1))
-        mp[9,3] = csdl.reshape(coef*-35*rx2, (1,1))
-        mp[9,9] = csdl.reshape(coef*70*rx2, (1,1))
-        mp[2,10] = csdl.reshape(coef*13*a, (1,1))
-        mp[10,2] = csdl.reshape(coef*13*a, (1,1))
-        mp[4,10] = csdl.reshape(coef*-6*a**2, (1,1))
-        mp[10,4] = csdl.reshape(coef*-6*a**2, (1,1))
-        mp[8,10] = csdl.reshape(coef*22*a, (1,1))
-        mp[10,8] = csdl.reshape(coef*22*a, (1,1))
-        mp[10,10] = csdl.reshape(coef*8*a**2, (1,1))
-        mp[1,11] = csdl.reshape(coef*-13*a, (1,1))
-        mp[11,1] = csdl.reshape(coef*-13*a, (1,1))
-        mp[5,11] = csdl.reshape(coef*-6*a**2, (1,1))
-        mp[11,5] = csdl.reshape(coef*-6*a**2, (1,1))
-        mp[7,11] = csdl.reshape(coef*-22*a, (1,1))
-        mp[11,7] = csdl.reshape(coef*-22*a, (1,1))
-        mp[11,11] = csdl.reshape(coef*8*a**2, (1,1))
-
-        # transform the local mass matrix to global coordinates:
-        cp = (node_b - node_a)/csdl.expand(L, (3))
-        ll, mm, nn = cp[0], cp[1], cp[2]
-        D = (ll**2 + mm**2)**0.5
-
-        block = self.create_output(element_name + 'mass_block',shape=(3,3),val=0)
-        block[0,0] = csdl.reshape(ll, (1,1))
-        block[0,1] = csdl.reshape(mm, (1,1))
-        block[0,2] = csdl.reshape(nn, (1,1))
-        block[1,0] = csdl.reshape(-mm/D, (1,1))
-        block[1,1] = csdl.reshape(ll/D, (1,1))
-        block[2,0] = csdl.reshape(-ll*nn/D, (1,1))
-        block[2,1] = csdl.reshape(-mm*nn/D, (1,1))
-        block[2,2] = csdl.reshape(D, (1,1))
-
-        # rebranded the transformation matrix T to MT:
-        MT = self.create_output(element_name + 'MT', shape=(12,12), val=0)
-        MT[0:3,0:3] = 1*block
-        MT[3:6,3:6] = 1*block
-        MT[6:9,6:9] = 1*block
-        MT[9:12,9:12] = 1*block
-        tmt = csdl.matmat(csdl.transpose(MT), csdl.matmat(mp, MT))
-
-        # expand the transformed mass matrix to the global dimensions:
-        element_mass_matrix = self.create_output(element_name + 'element_mass_matrix', shape=(dim,dim), val=0)
-
-        # parse tmt:
-        m11 = tmt[0:6,0:6] # upper left
-        m12 = tmt[0:6,6:12] # upper right
-        m21 = tmt[6:12,0:6] # lower left
-        m22 = tmt[6:12,6:12] # lower right
-
-        # assign the four block matrices to their respective positions in mass_matrix:
-        node_a_index = node_index[node_dict[i]]
-        node_b_index = node_index[node_dict[i + 1]]
-
-        row_i = node_a_index*6
-        row_f = node_a_index*6 + 6
-        col_i = node_a_index*6
-        col_f = node_a_index*6 + 6
-        element_mass_matrix[row_i:row_f, col_i:col_f] = m11
-
-        row_i = node_a_index*6
-        row_f = node_a_index*6 + 6
-        col_i = node_b_index*6
-        col_f = node_b_index*6 + 6
-        element_mass_matrix[row_i:row_f, col_i:col_f] = m12
-
-        row_i = node_b_index*6
-        row_f = node_b_index*6 + 6
-        col_i = node_a_index*6
-        col_f = node_a_index*6 + 6
-        element_mass_matrix[row_i:row_f, col_i:col_f] = m21
-
-        row_i = node_b_index*6
-        row_f = node_b_index*6 + 6
-        col_i = node_b_index*6
-        col_f = node_b_index*6 + 6
-        element_mass_matrix[row_i:row_f, col_i:col_f] = m22
-
-
     def local_stiffness(self, element_name, E, G, node_dict, node_index, dim, i):
         A = self.declare_variable(element_name + '_A')
         Iy = self.declare_variable(element_name + '_Iy')
@@ -443,7 +203,6 @@ class Aframe(ModuleCSDL):
             node_b = csdl.reshape(cmesh[i + 1, :], (3))
             length = csdl.pnorm(node_b - node_a, pnorm_type=2)
             de = ((node_b - node_a)/csdl.expand(length, (3,)))*csdl.expand(length/nsub, (3,))
-
             for j in range(nsub):
                 ind = i*nsub + j
                 mesh[ind,:] = csdl.reshape(node_a + j*de, (1,3))
@@ -454,53 +213,32 @@ class Aframe(ModuleCSDL):
         # iterate over each element:
         for i in range(n - 1):
             element_name = beam_name + '_element_' + str(i)
-            node_a = csdl.reshape(mesh[i, :], (3))
-            node_b = csdl.reshape(mesh[i + 1, :], (3))
-            self.register_output(element_name + 'node_a', node_a)
-            self.register_output(element_name + 'node_b', node_b)
+            self.register_output(element_name + 'node_a', csdl.reshape(mesh[i, :], (3)))
+            self.register_output(element_name + 'node_b', csdl.reshape(mesh[i + 1, :], (3)))
 
 
-        if cs == 'tube':
-            t = self.register_module_input(beam_name + '_t', shape=(n), val=0.001)
-            r_in = self.register_module_input(beam_name + '_r', shape=(n), val=0.1)
 
-            if mesh_units == 'm': r = r_in
-            elif mesh_units == 'ft': r = 0.304*r_in
-
-            for i in range(n - 1):
-                element_name = beam_name + '_element_' + str(i)
-                self.tube(element_name=element_name, t=(t[i+1] + t[i])/2, r=(r[i+1] + r[i])/2)
-
-
-        elif cs == 'box':
+        if cs == 'box':
             width = self.register_module_input(beam_name + '_width', shape=(n), promotes=True)
             height = self.register_module_input(beam_name + '_height', shape=(n), promotes=True)
             tweb = self.register_module_input(beam_name + '_tweb', shape=(n))
             tcap = self.register_module_input(beam_name + '_tcap', shape=(n))
 
             # parse elemental outputs
-            w = self.create_output(beam_name + '_w', shape=(n - 1), val=0)
-            h = self.create_output(beam_name + '_h', shape=(n - 1), val=0)
+            w, h = self.create_output(beam_name + '_w', shape=(n - 1), val=0), self.create_output(beam_name + '_h', shape=(n - 1), val=0)
 
             for i in range(n - 1):
                 element_name = beam_name + '_element_' + str(i)
 
-                if mesh_units == 'm':
-                    w[i] = (width[i] + width[i + 1])/2
-                    h[i] = (height[i] + height[i + 1])/2
-                elif mesh_units == 'ft':
-                    w[i] = 0.304*(width[i] + width[i + 1])/2
-                    h[i] = 0.304*(height[i] + height[i + 1])/2
+                if mesh_units == 'm': converted_width, converted_height = 1*width, 1*height
+                elif mesh_units == 'ft': converted_width, converted_height = 0.304*width, 0.304*height
 
-                self.register_output(element_name + '_h', 1*h[i])
-                self.register_output(element_name + '_w', 1*w[i])
+                w[i], h[i] = (converted_width[i] + converted_width[i + 1])/2, (converted_height[i] + converted_height[i + 1])/2
+                self.register_output(element_name + '_h', h[i])
+                self.register_output(element_name + '_w', w[i])
 
                 # compute the box-beam cs properties
-                self.box(name=element_name, 
-                         w=(width[i] + width[i+1])/2, 
-                         h=(height[i] + height[i+1])/2, 
-                         tweb=(tweb[i] + tweb[i+1])/2, 
-                         tcap=(tcap[i] + tcap[i+1])/2)
+                self.box(name=element_name, w=w[i], h=h[i], tweb=(tweb[i]+tweb[i+1])/2, tcap=(tcap[i]+tcap[i+1])/2)
 
                 self.register_output(element_name + '_tweb', (tweb[i] + tweb[i+1])/2)
                 self.register_output(element_name + '_tcap', (tcap[i] + tcap[i+1])/2)
@@ -510,43 +248,26 @@ class Aframe(ModuleCSDL):
             for i in range(n):
                 name = beam_name + str(i)
                 self.box(name=name, w=width[i], h=height[i], tweb=tweb[i], tcap=tcap[i])
-
                 self.register_output(name + '_h', height[i])
                 self.register_output(name + '_w', width[i])
                 self.register_output(name + '_tweb', tweb[i])
         
 
 
+        # calculate the stiffness matrix for each element:
+        for i in range(n - 1): self.local_stiffness(element_name=beam_name + '_element_' + str(i), E=e, G=g, node_dict=node_dict, node_index=node_index, dim=dim, i=i)
 
-        # calculate the stiffness matrix and the mass matrix for each element:
-        for i in range(n - 1):
-            element_name = beam_name + '_element_' + str(i)
 
-            self.local_stiffness(element_name=element_name, 
-                                 E=e, 
-                                 G=g, 
-                                 node_dict=node_dict, 
-                                 node_index=node_index, 
-                                 dim=dim,
-                                 i=i)
-            
-            self.local_mass(element_name=element_name, 
-                                 E=e, 
-                                 G=g, 
-                                 node_dict=node_dict, 
-                                 node_index=node_index, 
-                                 dim=dim,
-                                 i=i,
-                                 element_density_list=element_density_list)
+
+
+
+
+
+
 
 
     def define(self):
-        beams = self.parameters['beams']
-        joints = self.parameters['joints']
-        bounds = self.parameters['bounds']
-        mesh_units = self.parameters['mesh_units']
-
-
+        beams, joints, bounds = self.parameters['beams'], self.parameters['joints'], self.parameters['bounds']
         if not beams: raise Exception('Error: empty beam dictionary')
         if not bounds: raise Exception('Error: no boundary conditions specified')
         
@@ -561,13 +282,10 @@ class Aframe(ModuleCSDL):
 
         # assign nodal indices in the global system:
         for joint_name in joints:
-            joint_beam_list = joints[joint_name]['beams']
-            joint_node_list = joints[joint_name]['nodes']
+            joint_beam_list, joint_node_list = joints[joint_name]['beams'], joints[joint_name]['nodes']
             joint_node_a = node_dict[joint_beam_list[0]][joint_node_list[0]]
             for i, beam_name in enumerate(joint_beam_list):
                 if i != 0: node_dict[beam_name][joint_node_list[i]] = joint_node_a
-
-
 
         node_set = set(node_dict[beam_name][i] for beam_name in beams for i in range(len(beams[beam_name]['nodes'])))
         num_unique_nodes = len(node_set)
@@ -577,8 +295,7 @@ class Aframe(ModuleCSDL):
 
 
         # create a list of element names:
-        elements, element_density_list = [], []
-        num_elements = 0
+        elements, element_density_list, num_elements = [], [], 0
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])
             num_elements += n - 1
@@ -608,13 +325,11 @@ class Aframe(ModuleCSDL):
             helper[i,:,:] = csdl.reshape(self.declare_variable(element_name + 'k', shape=(dim,dim)), (1,dim,dim))
             mass_helper[i,:,:] = csdl.reshape(self.declare_variable(element_name + 'element_mass_matrix', shape=(dim,dim)), (1,dim,dim))
 
-        sum_k = csdl.sum(helper, axes=(0, ))
-        sum_m = csdl.sum(mass_helper, axes=(0, ))
+        sum_k, sum_m = csdl.sum(helper, axes=(0, )), csdl.sum(mass_helper, axes=(0, ))
 
         b_index_list = []
         for b_name in bounds:
-            fpos = bounds[b_name]['node']
-            fdim = bounds[b_name]['fdim']
+            fpos, fdim = bounds[b_name]['node'], bounds[b_name]['fdim']
             b_node_index = node_index[node_dict[bounds[b_name]['beam']][fpos]]
             # add the constrained dof index to the b_index_list:
             for i, fdim in enumerate(fdim):
@@ -622,8 +337,7 @@ class Aframe(ModuleCSDL):
 
 
 
-        mask = self.create_output('mask', shape=(dim,dim), val=np.eye(dim))
-        mask_eye = self.create_output('mask_eye', shape=(dim,dim), val=0)
+        mask, mask_eye = self.create_output('mask', shape=(dim,dim), val=np.eye(dim)), self.create_output('mask_eye', shape=(dim,dim), val=0)
         zero, one = self.create_input('zero', shape=(1,1), val=0), self.create_input('one', shape=(1,1), val=1)
         [(mask.__setitem__((i,i),1*zero), mask_eye.__setitem__((i,i),1*one)) for i in range(dim) if i in b_index_list]
 
@@ -637,13 +351,8 @@ class Aframe(ModuleCSDL):
         # compute the mass properties:
         self.add(MassProp(elements=elements, element_density_list=element_density_list), name='MassProp')
 
-
-        Fi = self.global_loads(b_index_list=b_index_list,
-                              num_unique_nodes=num_unique_nodes,
-                              node_dict=node_dict,
-                              beams=beams,
-                              node_index=node_index)
-        
+        # create the global loads vector:
+        Fi = self.global_loads(b_index_list=b_index_list, num_unique_nodes=num_unique_nodes, node_dict=node_dict, beams=beams, node_index=node_index)
 
         # solve the linear system
         solve_res = self.create_implicit_operation(Model(dim=dim))
@@ -659,9 +368,7 @@ class Aframe(ModuleCSDL):
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])
             #nodal_loads = self.create_output(beam_name + '_nodal_loads', shape=(n,6), val=0)
-
-            fwd = self.create_output(beam_name+'fwd', shape=(n,6),val=0)
-            rev = self.create_output(beam_name+'rev', shape=(n,6),val=0)
+            fwd, rev = self.create_output(beam_name+'fwd', shape=(n,6),val=0), self.create_output(beam_name+'rev', shape=(n,6),val=0)
 
             for i in range(n - 1):
                 element_name = beam_name + '_element_' + str(i)
@@ -671,8 +378,7 @@ class Aframe(ModuleCSDL):
                 # concatenate the nodal displacements:
                 d = self.create_output(element_name + 'd', shape=(12), val=0)
                 d[0:6], d[6:12] = disp_a, disp_b
-                kp = self.declare_variable(element_name + 'kp',shape=(12,12))
-                T = self.declare_variable(element_name + 'T',shape=(12,12))
+                kp, T = self.declare_variable(element_name + 'kp',shape=(12,12)), self.declare_variable(element_name + 'T',shape=(12,12))
                 # element local loads output (required for the stress recovery):
                 element_loads = csdl.matvec(kp,csdl.matvec(T,d))
                 self.register_output(element_name + 'local_loads', element_loads)
@@ -682,14 +388,9 @@ class Aframe(ModuleCSDL):
                 fwd[i,:] = (csdl.reshape(element_loads[0:6], (1,6))**2 + 1E-12)**0.5
                 rev[i+1,:] = (csdl.reshape(element_loads[0:6], (1,6))**2 + 1E-12)**0.5
 
-                #self.print_var(element_loads)
-
-            #self.print_var((fwd + rev)/2)
 
             #nodal_loads[n - 1,:] = csdl.reshape(element_loads[6:12], (1,6))
-            #self.print_var(nodal_loads)
-            nodal_loads = (fwd + rev)/2
-            self.register_output(beam_name+'_nodal_loads',nodal_loads)
+            self.register_output(beam_name+'_nodal_loads', (fwd + rev)/2)
 
         
 
@@ -698,29 +399,20 @@ class Aframe(ModuleCSDL):
         # parse the displacements to get the new nodal coordinates:
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])
+            d = self.create_output(beam_name + '_displacement', shape=(n,3), val=0)
             for i in range(n - 1):
                 element_name = beam_name + '_element_' + str(i)
                 node_a_position = self.declare_variable(element_name + 'node_a', shape=(3))
                 node_b_position = self.declare_variable(element_name + 'node_b', shape=(3))
                 a, b =  node_index[node_dict[beam_name][i]], node_index[node_dict[beam_name][i + 1]]
                 # get the nodal displacements for the current element:
-                dn1, dn2 = U[a*6:a*6 + 3], U[b*6:b*6 + 3]
-                self.register_output(element_name + 'node_a_def', node_a_position + dn1)
-                self.register_output(element_name + 'node_b_def', node_b_position + dn2)
-
-
-        # the displacement outputs for each beam:
-        for beam_name in beams:
-            n = len(beams[beam_name]['nodes'])
-            d = self.create_output(beam_name + '_displacement', shape=(n,3), val=0)
-            for i in range(n - 1):
-                element_name = beam_name + '_element_' + str(i)
-                a, b =  node_index[node_dict[beam_name][i]], node_index[node_dict[beam_name][i + 1]]
                 dna, dnb = U[a*6:a*6 + 3], U[b*6:b*6 + 3]
+                self.register_output(element_name + 'node_a_def', node_a_position + dna)
+                self.register_output(element_name + 'node_b_def', node_b_position + dnb)
+
                 d[i,:] = csdl.reshape(dna, (1,3))
             d[n - 1,:] = csdl.reshape(dnb, (1,3))
 
-            #self.print_var(d)
             """
             # get the rotations:
             # define the axis-wise unit vectors:
@@ -748,12 +440,9 @@ class Aframe(ModuleCSDL):
         for beam_name in beams:
             #boxflag = False
             #if beams[beam_name]['cs'] == 'box': boxflag = True
-
             n = len(beams[beam_name]['nodes'])
             nodal_loads = self.declare_variable(beam_name + '_nodal_loads', shape=(n,6))
-
             stress = self.create_output(beam_name + '_stress', shape=(n,5), val=0)
-
             for i in range(n):
                 name = beam_name + str(i)
                 n_load = self.register_output(name + 'n_load', csdl.reshape(nodal_loads[i,:], (6)))
@@ -761,7 +450,6 @@ class Aframe(ModuleCSDL):
                 node_stress = self.declare_variable(name + 'stress', shape=(5))
                 stress[i,:] = csdl.reshape(node_stress, (1,5))
 
-            #self.print_var(nodal_loads)
 
 
         # buckling:
@@ -777,7 +465,6 @@ class Aframe(ModuleCSDL):
                     self.add(Buckle(element_name=element_name,E=Modulus), name=element_name + 'Buckle')
                     bkl_ratio = self.declare_variable(element_name + 'bkl_ratio')
                     bkl[index] = 1*bkl_ratio
-
                     index += 1
 
 
