@@ -18,20 +18,6 @@ class Aframe(ModuleCSDL):
         self.parameters.declare('mesh_units', default='m')
 
 
-    def tube(self, element_name, t, r):
-        r1, r2 = r - t, r
-        A = np.pi * (r2**2 - r1**2)
-        Iy = np.pi * (r2**4 - r1**4) / 4.0
-        Iz = np.pi * (r2**4 - r1**4) / 4.0
-        J = np.pi * (r2**4 - r1**4) / 2.0
-
-        self.register_output(element_name + '_A', A)
-        self.register_output(element_name + '_Ix', 1*J)
-        self.register_output(element_name + '_Iy', Iy)
-        self.register_output(element_name + '_Iz', Iz)
-        self.register_output(element_name + '_J', J)
-
-
     def box(self, name, w, h, tweb, tcap):
         w_i = w - 2*tweb
         h_i = h - 2*tcap
