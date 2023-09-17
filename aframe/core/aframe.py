@@ -436,7 +436,7 @@ class Aframe(ModuleCSDL):
         return Fi
 
 
-    def add_beam(self, beam_name, nodes, cs, e, g, rho, nsub, node_dict, node_index, dim, element_density_list):
+    def add_beam(self, beam_name, nodes, cs, e, g, rho, node_dict, node_index, dim, element_density_list):
         mesh_units = self.parameters['mesh_units']
         n = len(nodes)
 
@@ -524,6 +524,10 @@ class Aframe(ModuleCSDL):
             for i in range(n):
                 name = beam_name + str(i)
                 self.box(name=name, w=width[i], h=height[i], tweb=tweb[i], tcap=tcap[i])
+
+                self.register_output(name + '_h', height[i])
+                self.register_output(name + '_w', width[i])
+                self.register_output(name + '_tweb', tweb[i])
         
 
 
@@ -605,7 +609,6 @@ class Aframe(ModuleCSDL):
                           e=beams[beam_name]['E'],
                           g=beams[beam_name]['G'],
                           rho=beams[beam_name]['rho'],
-                          nsub=beams[beam_name]['nsub'],
                           node_dict=node_dict[beam_name],
                           node_index=node_index,
                           dim=dim,
@@ -687,6 +690,10 @@ class Aframe(ModuleCSDL):
 
                 nodal_loads[i,:] = csdl.reshape(element_loads[0:6], (1,6))
 
+                self.print_var(element_loads)
+                #self.print_var(element_loads[8])
+                #self.print_var(element_loads[2]) # misinterpreted what element loads are...
+
             nodal_loads[n - 1,:] = csdl.reshape(element_loads[6:12], (1,6))
             #self.print_var(nodal_loads)
 
@@ -719,6 +726,8 @@ class Aframe(ModuleCSDL):
                 d[i,:] = csdl.reshape(dna, (1,3))
             d[n - 1,:] = csdl.reshape(dnb, (1,3))
 
+            #self.print_var(d)
+            """
             # get the rotations:
             # define the axis-wise unit vectors:
             ex = self.create_input('ex', shape=(3), val=[1,0,0])
@@ -736,7 +745,7 @@ class Aframe(ModuleCSDL):
                 r[i,0] = csdl.reshape(csdl.arccos(csdl.dot(v, ex)/mag), (1,1))
                 r[i,1] = csdl.reshape(csdl.arccos(csdl.dot(v, ey)/mag), (1,1))
                 r[i,2] = csdl.reshape(csdl.arccos(csdl.dot(v, ez)/mag), (1,1))
-
+            """
 
 
 
@@ -758,7 +767,7 @@ class Aframe(ModuleCSDL):
                 node_stress = self.declare_variable(name + 'stress', shape=(5))
                 stress[i,:] = csdl.reshape(node_stress, (1,5))
 
-
+            #self.print_var(nodal_loads)
 
 
         # buckling:

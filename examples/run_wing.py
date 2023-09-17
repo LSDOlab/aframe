@@ -18,8 +18,8 @@ forces = np.zeros((n,3))
 forces[:,2] = 1000
 forces[:,0] = 0
 
-h = np.ones(n)*1
-w = np.ones(n)*1
+h = np.ones(n)*0.375
+w = np.ones(n)*1.5
 
 
 
@@ -64,7 +64,7 @@ class Run(csdl.Model):
 if __name__ == '__main__':
 
     joints, bounds, beams = {}, {}, {}
-    beams['wing'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'box','nodes': list(range(len(mesh))),'nsub': 2}
+    beams['wing'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'box','nodes': list(range(len(mesh)))}
     bounds['root'] = {'beam': 'wing','node': 10,'fdim': [1,1,1,1,1,1]}
 
 
