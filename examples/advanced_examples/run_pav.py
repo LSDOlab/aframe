@@ -44,7 +44,6 @@ forces = np.zeros((len(nodes),3))
 forces[:,2] = fz
 # endregion
 
-
 class Run(csdl.Model):
     def initialize(self):
         self.parameters.declare('beams',default={})
@@ -78,7 +77,7 @@ class Run(csdl.Model):
 if __name__ == '__main__':
 
     joints, bounds, beams = {}, {}, {}
-    beams['wing'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'box','nodes': list(range(len(nodes)))}
+    beams['wing'] = {'E': 7.31E10,'G': 26E9,'rho': 2768,'cs': 'box','nodes': list(range(len(nodes)))}
     bounds['root'] = {'beam': 'wing','node': 10,'fdim': [1,1,1,1,1,1]}
 
 
@@ -91,3 +90,8 @@ if __name__ == '__main__':
 
     print('stress (psi): ', np.max(stress, axis=1)/6894.75729)
     print('displacement (in): ', disp*39.3700787)
+
+
+
+    plt.plot(stress)
+    plt.show()

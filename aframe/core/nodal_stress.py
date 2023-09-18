@@ -58,7 +58,7 @@ class NodalStressBox(csdl.Model):
         tweb = self.declare_variable(name + '_tweb')
         Q = self.declare_variable(name + '_Q')
 
-        #self.print_var(load)
+        self.print_var(w)
 
         for point in range(5):
             x = x_coord[point]

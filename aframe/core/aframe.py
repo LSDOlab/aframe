@@ -4,6 +4,7 @@ from aframe.core.massprop import MassPropModule as MassProp
 from aframe.core.model import Model
 from aframe.core.buckle import Buckle
 from aframe.core.nodal_stress import NodalStressBox
+from aframe.core.stress import StressBox
 from lsdo_modules.module_csdl.module_csdl import ModuleCSDL
 
 
@@ -365,9 +366,10 @@ class Aframe(ModuleCSDL):
 
 
         # recover the forces and moments:
+        """
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])
-            #nodal_loads = self.create_output(beam_name + '_nodal_loads', shape=(n,6), val=0)
+            test_nodal_loads = self.create_output(beam_name + '_test_nodal_loads', shape=(n-1,6), val=0)
             fwd, rev = self.create_output(beam_name+'fwd', shape=(n,6),val=0), self.create_output(beam_name+'rev', shape=(n,6),val=0)
 
             for i in range(n - 1):
@@ -383,15 +385,32 @@ class Aframe(ModuleCSDL):
                 element_loads = csdl.matvec(kp,csdl.matvec(T,d))
                 self.register_output(element_name + 'local_loads', element_loads)
 
-                #nodal_loads[i,:] = csdl.reshape(element_loads[0:6], (1,6))
+                test_nodal_loads[i,:] = csdl.reshape(element_loads[0:6], (1,6))
 
-                fwd[i,:] = (csdl.reshape(element_loads[0:6], (1,6))**2 + 1E-12)**0.5
-                rev[i+1,:] = (csdl.reshape(element_loads[0:6], (1,6))**2 + 1E-12)**0.5
+                fwd[i,:] = (csdl.reshape(element_loads[0:6], (1,6))**2)**0.5
+                rev[i+1,:] = (csdl.reshape(element_loads[0:6], (1,6))**2)**0.5
 
 
-            #nodal_loads[n - 1,:] = csdl.reshape(element_loads[6:12], (1,6))
-            self.register_output(beam_name+'_nodal_loads', (fwd + rev)/2)
+            test_nodal_loads[n - 1,:] = csdl.reshape(element_loads[6:12], (1,6))
+            nodal_loads = self.register_output(beam_name+'_nodal_loads', (fwd + rev)/2)
 
+            #self.print_var(nodal_loads[:,2])
+        """
+        # recover the local elemental forces/moments:
+        for beam_name in beams:
+            n = len(beams[beam_name]['nodes'])
+            for i in range(n - 1):
+                element_name = beam_name + '_element_' + str(i)
+                node_a_id, node_b_id = node_index[node_dict[beam_name][i]], node_index[node_dict[beam_name][i + 1]]
+                # get the nodal displacements for the current element:
+                disp_a, disp_b = 1*U[node_a_id*6:node_a_id*6 + 6], 1*U[node_b_id*6:node_b_id*6 + 6]
+                # concatenate the nodal displacements:
+                d = self.create_output(element_name + 'd', shape=(12), val=0)
+                d[0:6], d[6:12] = disp_a, disp_b
+                kp = self.declare_variable(element_name + 'kp',shape=(12,12))
+                T = self.declare_variable(element_name + 'T',shape=(12,12))
+                # element local loads output (required for the stress recovery):
+                local_loads = self.register_output(element_name + 'local_loads', csdl.matvec(kp,csdl.matvec(T,d)))
         
 
 
@@ -437,18 +456,38 @@ class Aframe(ModuleCSDL):
 
 
         # perform a nodal stress recovery
+        """
         for beam_name in beams:
             #boxflag = False
             #if beams[beam_name]['cs'] == 'box': boxflag = True
             n = len(beams[beam_name]['nodes'])
-            nodal_loads = self.declare_variable(beam_name + '_nodal_loads', shape=(n,6))
-            stress = self.create_output(beam_name + '_stress', shape=(n,5), val=0)
-            for i in range(n):
-                name = beam_name + str(i)
-                n_load = self.register_output(name + 'n_load', csdl.reshape(nodal_loads[i,:], (6)))
+            test_nodal_loads = self.declare_variable(beam_name + '_test_nodal_loads', shape=(n-1,6))
+            stress = self.create_output(beam_name + '_stress', shape=(n-1,5), val=0)
+            for i in range(n - 1):
+                # name = beam_name + str(i)
+                name = beam_name + '_element_' + str(i)
+                n_load = self.register_output(name + 'n_load', csdl.reshape(test_nodal_loads[i,:], (6)))
                 self.add(NodalStressBox(name=name), name=name + 'NodalStressBox')
                 node_stress = self.declare_variable(name + 'stress', shape=(5))
                 stress[i,:] = csdl.reshape(node_stress, (1,5))
+        """
+        #boxflag = False
+        #for beam_name in beams:
+        #    if beams[beam_name]['cs'] == 'box': boxflag = True
+        #if boxflag: new_stress = self.create_output('new_stress', shape=(len(elements),5), val=0)
+        #stress = self.create_output('vm_stress', shape=(len(elements)), val=0)
+
+        #index = 0
+        for beam_name in beams:
+            n = len(beams[beam_name]['nodes'])
+            stress = self.create_output(beam_name + '_stress', shape=(n-1,5), val=0)
+            for i in range(n - 1):
+                element_name = beam_name + '_element_' + str(i)
+                self.add(StressBox(name=element_name), name=element_name + 'StressBox')
+                stress[i,:] = csdl.reshape(self.declare_variable(element_name + '_stress_array', shape=(5)), new_shape=(1,5)) # no ks max
+
+                #index += 1
+
 
 
 
