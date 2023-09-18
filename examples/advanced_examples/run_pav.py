@@ -1,11 +1,15 @@
 import numpy as np
-
-
-in2m = 0.0254
+import csdl
+import python_csdl_backend
+from aframe.core.aframe import Aframe
+from modopt.scipy_library import SLSQP
+from modopt.csdl_library import CSDLProblem
+import matplotlib.pyplot as plt
+plt.rcParams.update(plt.rcParamsDefault)
 
 
 # region Data
-beam_nodal_locations = np.array([[ 2.94811022e+00,  4.26720000e+00,  6.04990180e-01],
+nodes = np.array([[ 2.94811022e+00,  4.26720000e+00,  6.04990180e-01],
        [ 2.97757859e+00,  3.84045955e+00,  6.04825502e-01],
        [ 3.00704575e+00,  3.41373953e+00,  6.04644661e-01],
        [ 3.04885750e+00,  2.98700842e+00,  6.04464035e-01],
@@ -27,11 +31,63 @@ beam_nodal_locations = np.array([[ 2.94811022e+00,  4.26720000e+00,  6.04990180e
        [ 2.97757502e+00, -3.84045126e+00,  6.04824402e-01],
        [ 2.94810822e+00, -4.26717128e+00,  6.04995104e-01]])
 
-beam_widths = np.array()
-beam_heights = np.array()
-nodal_loads = np.array()
-cap_thickness = 0.05 * in2m * np.ones()
-web_thickness = 0.05 * in2m * np.ones()
+width = np.array([15.02832841,16.68571462,18.3431398,20.69488606,23.25181241,25.80873883,28.36566531,30.92259183,33.78853197,38.20994261,38.22183283,
+                        38.2101895,33.7887308,30.92279163,28.36584859,25.80890559,23.25196265,20.69501978,18.34325832,16.68582243,15.0283895])*0.0254
+height = np.array([4.829655269,5.36233072,5.894975046,6.6507877,7.472511573,8.294235446,9.11595932,9.937683193,10.78952744,12.27959289,
+                        12.29249872,12.27348164,10.7828073,9.9327594,9.111444436,8.290129472,7.468814508,6.647499545,5.892050209,5.359670941,4.827291672])*0.0254
+fz = np.array([178.5249412,225.7910602,255.3444864,254.0378545,264.3659094,274.6239472,281.8637954,292.5067646,318.2693761,325.1311971,0,
+                        324.954771,318.1305384,292.5699649,281.8552967,274.6799369,264.4083816,254.1059857,255.3734613,225.8430446,178.5818996])*4.44822162
+tcap = 0.05 * 0.0254 * np.ones(len(nodes))
+tweb = 0.05 * 0.0254 * np.ones(len(nodes))
+
+forces = np.zeros((len(nodes),3))
+forces[:,2] = fz
 # endregion
 
 
+class Run(csdl.Model):
+    def initialize(self):
+        self.parameters.declare('beams',default={})
+        self.parameters.declare('bounds',default={})
+        self.parameters.declare('joints',default={})
+    def define(self):
+        beams = self.parameters['beams']
+        bounds = self.parameters['bounds']
+        joints = self.parameters['joints']
+
+        self.create_input('wing_mesh', shape=(len(nodes),3), val=nodes)
+        self.create_input('wing_height', shape=(len(nodes)), val=height)
+        self.create_input('wing_width', shape=(len(nodes)), val=width)
+        self.create_input('wing_tcap', shape=(len(nodes)), val=tcap)
+        self.create_input('wing_tweb', shape=(len(nodes)), val=tweb)
+        self.create_input('wing_forces', shape=(len(nodes),3), val=forces)
+        
+        # solve the PAV beam model:
+        self.add(Aframe(beams=beams, bounds=bounds, joints=joints), name='Aframe')
+
+        #self.add_constraint('wing_stress', upper=450E6, scaler=1E-8)
+        #self.add_design_variable('wing_tcap', lower=0.001, upper=0.2, scaler=1E2)
+        #self.add_design_variable('wing_tweb', lower=0.001, upper=0.2, scaler=1E3)
+        #self.add_objective('mass', scaler=1E-2)
+        
+        
+
+
+
+
+if __name__ == '__main__':
+
+    joints, bounds, beams = {}, {}, {}
+    beams['wing'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'box','nodes': list(range(len(nodes)))}
+    bounds['root'] = {'beam': 'wing','node': 10,'fdim': [1,1,1,1,1,1]}
+
+
+    sim = python_csdl_backend.Simulator(Run(beams=beams,bounds=bounds,joints=joints))
+    sim.run()
+
+
+    stress = sim['wing_stress']
+    disp = sim['wing_displacement']
+
+    print('stress (psi): ', np.max(stress, axis=1)/6894.75729)
+    print('displacement (in): ', disp*39.3700787)
