@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 plt.rcParams.update(plt.rcParamsDefault)
 
 
-n = 30
+n = 20
 mesh = np.zeros((n,3))
 mesh[:,1] = np.linspace(0,10,n)
 
@@ -30,8 +30,8 @@ class Run(csdl.Model):
         self.create_input('wing_mesh', shape=(n,3), val=mesh)
         self.create_input('wing_height', shape=(n), val=0.1)
         self.create_input('wing_width', shape=(n), val=0.1)
-        self.create_input('wing_tcap', shape=(n - 1), val=0.003)
-        self.create_input('wing_tweb', shape=(n - 1), val=0.003)
+        self.create_input('wing_tcap', shape=(n), val=0.003)
+        self.create_input('wing_tweb', shape=(n), val=0.003)
         self.create_input('wing_forces', shape=(n,3), val=forces)
         
         # solve the beam group:
@@ -62,10 +62,9 @@ if __name__ == '__main__':
     # optimizer.print_results()
 
     print(sim['wing_displacement'])
-    print(sim['new_stress'])
 
 
-    stress = sim['vm_stress']
+    stress = sim['wing_stress']
     print(stress)
 
 

@@ -63,8 +63,8 @@ class Run(csdl.Model):
 
         self.create_input('wing_height', shape=(len(axis_nodes)), val=h)
         self.create_input('wing_width', shape=(len(axis_nodes)), val=w)
-        self.create_input('wing_tcap', shape=(len(axis_nodes) - 1), val=0.001)
-        self.create_input('wing_tweb', shape=(len(axis_nodes) - 1), val=0.001)
+        self.create_input('wing_tcap', shape=(len(axis_nodes)), val=0.001)
+        self.create_input('wing_tweb', shape=(len(axis_nodes)), val=0.001)
         self.create_input('wing_forces', shape=(len(axis_nodes),3), val=forces)
         # self.create_input('wing_moments', shape=(len(axis_nodes),3), val=moments)
 
@@ -73,7 +73,7 @@ class Run(csdl.Model):
         self.add(Aframe(beams=beams, bounds=bounds, joints=joints), name='Aframe')
 
 
-        self.add_constraint('new_stress', upper=450E6, scaler=1E-8)
+        self.add_constraint('wing_stress', upper=450E6, scaler=1E-8)
         self.add_design_variable('wing_tcap', lower=0.001, upper=0.2, scaler=1E2)
         self.add_design_variable('wing_tweb', lower=0.001, upper=0.2, scaler=1E3)
         self.add_objective('mass', scaler=1E-2)
@@ -99,16 +99,14 @@ if __name__ == '__main__':
     sim.run()
 
 
-    prob = CSDLProblem(problem_name='run_opt', simulator=sim)
-    optimizer = SLSQP(prob, maxiter=1000, ftol=1E-9)
-    optimizer.solve()
-    optimizer.print_results()
+    #prob = CSDLProblem(problem_name='run_opt', simulator=sim)
+    #optimizer = SLSQP(prob, maxiter=1000, ftol=1E-9)
+    #optimizer.solve()
+    #optimizer.print_results()
 
 
     #print('displacement: ', sim['wing_displacement'])
-    print('new stress: ', sim['new_stress'])
-
-
+    print('stress: ', sim['wing_stress'])
     print('tcap: ', sim['wing_tcap'])
     print('tweb: ', sim['wing_tweb'])
 
