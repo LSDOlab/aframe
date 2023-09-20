@@ -471,19 +471,21 @@ class Aframe(ModuleCSDL):
                 node_stress = self.declare_variable(name + 'stress', shape=(5))
                 stress[i,:] = csdl.reshape(node_stress, (1,5))
         """
-        #boxflag = False
-        #for beam_name in beams:
-        #    if beams[beam_name]['cs'] == 'box': boxflag = True
-        #if boxflag: new_stress = self.create_output('new_stress', shape=(len(elements),5), val=0)
-        #stress = self.create_output('vm_stress', shape=(len(elements)), val=0)
 
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])
-            stress = self.create_output(beam_name + '_stress', shape=(n-1,5), val=0)
+            element_stress = self.create_output(beam_name + '_element_stress', shape=(n-1,5), val=0)
+            fwd = self.create_output(beam_name + '_fwd', shape=(n,5), val=0)
+            rev = self.create_output(beam_name + '_rev', shape=(n,5), val=0)
             for i in range(n - 1):
                 element_name = beam_name + '_element_' + str(i)
                 self.add(StressBox(name=element_name), name=element_name + 'StressBox')
-                stress[i,:] = csdl.reshape(self.declare_variable(element_name + '_stress_array', shape=(5)), new_shape=(1,5)) # no ks max
+                element_stress[i,:] = csdl.reshape(self.declare_variable(element_name + '_stress_array', shape=(5)), new_shape=(1,5))
+                fwd[i,:] = csdl.reshape(self.declare_variable(element_name + '_stress_array', shape=(5)), new_shape=(1,5))
+                rev[i+1,:] = csdl.reshape(self.declare_variable(element_name + '_stress_array', shape=(5)), new_shape=(1,5))
+
+            stress = (fwd + rev)/2
+            self.register_output(beam_name + '_stress', stress)
 
 
 
