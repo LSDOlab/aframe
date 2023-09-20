@@ -5,8 +5,14 @@ from aframe.core.aframe import Aframe
 from modopt.scipy_library import SLSQP
 from modopt.csdl_library import CSDLProblem
 import matplotlib.pyplot as plt
+import pandas as pd
 plt.rcParams.update(plt.rcParamsDefault)
 
+
+m2ft = 3.288084
+m2in = 39.3701
+N2lbf = 0.224809
+Npm22psi = 0.000145038
 
 # region Data
 nodes = np.array([[ 2.94811022e+00,  4.26720000e+00,  6.04990180e-01],
@@ -46,9 +52,11 @@ forces[:,2] = fz
 
 class Run(csdl.Model):
     def initialize(self):
-        self.parameters.declare('beams',default={})
-        self.parameters.declare('bounds',default={})
-        self.parameters.declare('joints',default={})
+        self.parameters.declare('beams', default={})
+        self.parameters.declare('bounds', default={})
+        self.parameters.declare('joints', default={})
+        self.parameters.declare('optimization_flag', default=False)
+
     def define(self):
         beams = self.parameters['beams']
         bounds = self.parameters['bounds']
@@ -64,10 +72,11 @@ class Run(csdl.Model):
         # solve the PAV beam model:
         self.add(Aframe(beams=beams, bounds=bounds, joints=joints), name='Aframe')
 
-        #self.add_constraint('wing_stress', upper=450E6, scaler=1E-8)
-        #self.add_design_variable('wing_tcap', lower=0.001, upper=0.2, scaler=1E2)
-        #self.add_design_variable('wing_tweb', lower=0.001, upper=0.2, scaler=1E3)
-        #self.add_objective('mass', scaler=1E-2)
+        if self.parameters['optimization_flag']:
+            self.add_constraint('wing_stress', upper=2.16e8, scaler=1E-8)
+            self.add_design_variable('wing_tcap', lower=0.001, upper=0.2, scaler=1E2)
+            self.add_design_variable('wing_tweb', lower=0.001, upper=0.2, scaler=1E3)
+            self.add_objective('mass', scaler=1E-2)
         
         
 
@@ -81,17 +90,41 @@ if __name__ == '__main__':
     bounds['root'] = {'beam': 'wing','node': 10,'fdim': [1,1,1,1,1,1]}
 
 
-    sim = python_csdl_backend.Simulator(Run(beams=beams,bounds=bounds,joints=joints))
+    sim = python_csdl_backend.Simulator(
+        Run(beams=beams,
+            bounds=bounds,
+            joints=joints,
+            optimization_flag=False), 
+        analytics=True
+        )
     sim.run()
 
+    spanwise_location_ft = sim['wing_mesh'][:, 1]*m2ft
+    width_in = sim['wing_width']*m2in
+    height_in = sim['wing_height']*m2in
+    tcap_in = sim['wing_tcap']*m2in
+    tweb_in = sim['wing_tweb']*m2in
+    nodal_forces_lbf = sim['wing_forces']*N2lbf
+    
+    stress_psi = np.max(sim['wing_stress'], axis=1)*Npm22psi
+    disp_in = sim['wing_displacement'][:, 2]*m2in
 
-    stress = sim['wing_stress']
-    disp = sim['wing_displacement']
+    beamDf = pd.DataFrame(
+        data={
+            'Spanwise y-location (ft)': spanwise_location_ft,
+            'Width (in)': width_in,
+            'Height (in)': height_in,
+            'Web thickness (in)': tweb_in,
+            'Cap thickness (in)': tcap_in,
+            'Nodal forces (lbf)': nodal_forces_lbf[:, 2],
+            'Displacement (in)': disp_in,
+            # 'Stress (psi)': stress_psi
+        },
+    )
+    print(beamDf)
 
-    print('stress (psi): ', np.max(stress, axis=1)/6894.75729)
-    print('displacement (in): ', disp*39.3700787)
+    print('Max stress (psi): ', np.max(stress_psi))
+    print('displacement (in): ', np.max(disp_in))
 
-
-
-    plt.plot(stress)
+    plt.plot(stress_psi)
     plt.show()
