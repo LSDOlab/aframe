@@ -124,6 +124,8 @@ class StressBox(csdl.Model):
         tweb = self.declare_variable(name + '_tweb')
         Q = self.declare_variable(name + '_Q')
 
+        axial_stress = self.create_output(name + '_axial_stress', shape=(5), val=0)
+
         # self.print_var(tweb)
 
         for point in range(5):
@@ -133,13 +135,16 @@ class StressBox(csdl.Model):
 
             s_axial_a = (loads_a[0]/A) + (loads_a[4]*y/Iy) + (loads_a[5]*x/Iz)
             s_axial_b = (loads_b[0]/A) + (loads_b[4]*y/Iy) + (loads_b[5]*x/Iz)
+
+            axial_stress[point] = (s_axial_a + s_axial_b)/2
+
             s_torsional_a = loads_a[3]*r/J
             s_torsional_b = loads_b[3]*r/J
 
             if point == 4: # the max shear at the neutral axis:
                 shear_a[point] = loads_a[2]*Q/(Iy*2*tweb)
                 shear_b[point] = loads_b[2]*Q/(Iy*2*tweb)
-                # self.print_var(transverse_shear_stress_a)
+                self.register_output(name + '_shear_stress', (shear_a[point] + shear_b[point])/2)
 
             tau_a = s_torsional_a + shear_a[point]
             tau_b = s_torsional_b + shear_b[point]

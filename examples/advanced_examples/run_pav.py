@@ -109,6 +109,10 @@ if __name__ == '__main__':
     stress_psi = np.max(sim['wing_stress'], axis=1)*Npm22psi
     disp_in = sim['wing_displacement'][:, 2]*m2in
 
+    element_loads = sim['wing_element_loads'] # (n-1,6) [fx,fy,fz,mx,my,mz]
+    element_axial_stress = np.abs(sim['wing_element_axial_stress']) # (n-1,5)
+    element_shear_stress = np.abs(sim['wing_element_shear_stress']) # (n-1), evaluated at the center of the web
+
     beamDf = pd.DataFrame(
         data={
             'Spanwise y-location (ft)': spanwise_location_ft,

@@ -348,6 +348,7 @@ class Aframe(ModuleCSDL):
         # recover the elemental forces/moments:
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])
+            element_loads = self.create_output(beam_name + '_element_loads', shape=(n-1,6), val=0)
             for i in range(n - 1):
                 element_name = beam_name + '_element_' + str(i)
                 node_a_id, node_b_id = node_index[node_dict[beam_name][i]], node_index[node_dict[beam_name][i + 1]]
@@ -359,7 +360,9 @@ class Aframe(ModuleCSDL):
                 kp = self.declare_variable(element_name + 'kp',shape=(12,12))
                 T = self.declare_variable(element_name + 'T',shape=(12,12))
                 # element local loads output (required for the stress recovery):
-                self.register_output(element_name + 'local_loads', csdl.matvec(kp,csdl.matvec(T,d)))
+                ans = csdl.matvec(kp,csdl.matvec(T,d))
+                self.register_output(element_name + 'local_loads', ans)
+                element_loads[i,:] = csdl.reshape(ans[0:6], (1,6))
         
 
 
@@ -424,6 +427,8 @@ class Aframe(ModuleCSDL):
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])
             element_stress = self.create_output(beam_name + '_element_stress', shape=(n-1,5), val=0)
+            element_axial_stress = self.create_output(beam_name + '_element_axial_stress', shape=(n-1,5), val=0)
+            element_shear_stress = self.create_output(beam_name + '_element_shear_stress', shape=(n-1), val=0)
             fwd = self.create_output(beam_name + '_fwd', shape=(n,5), val=0)
             rev = self.create_output(beam_name + '_rev', shape=(n,5), val=0)
             for i in range(n - 1):
@@ -432,6 +437,8 @@ class Aframe(ModuleCSDL):
                 element_stress[i,:] = csdl.reshape(self.declare_variable(element_name + '_stress_array', shape=(5)), new_shape=(1,5))
                 fwd[i,:] = csdl.reshape(self.declare_variable(element_name + '_stress_array', shape=(5)), new_shape=(1,5))
                 rev[i+1,:] = csdl.reshape(self.declare_variable(element_name + '_stress_array', shape=(5)), new_shape=(1,5))
+                element_axial_stress[i,:] = csdl.reshape(self.declare_variable(element_name + '_axial_stress', shape=(5)), new_shape=(1,5))
+                element_shear_stress[i] = self.declare_variable(element_name + '_shear_stress', shape=(1))
 
             stress = (fwd + rev)/2
             self.register_output(beam_name + '_stress', stress)
