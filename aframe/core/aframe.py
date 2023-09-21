@@ -339,7 +339,7 @@ class Aframe(ModuleCSDL):
         # solve the linear system
         solve_res = self.create_implicit_operation(Model(dim=dim))
         solve_res.declare_state(state='U', residual='R')
-        solve_res.nonlinear_solver = csdl.NewtonSolver(solve_subsystems=False,maxiter=100,iprint=False,atol=1E-7,)
+        solve_res.nonlinear_solver = csdl.NewtonSolver(solve_subsystems=False,maxiter=100,iprint=False,atol=1E-8,)
         solve_res.linear_solver = csdl.ScipyKrylov()
         U = solve_res(K, Fi)
 
@@ -452,12 +452,15 @@ class Aframe(ModuleCSDL):
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])
             Modulus = beams[beam_name]['E']
+
+            s_cap = self.create_output(beam_name + '_sp_cap', shape=(n-1), val=0)
             if beams[beam_name]['cs'] == 'box':
                 for i in range(n - 1):
                     element_name = beam_name + '_element_' + str(i)
 
                     self.add(Buckle(element_name=element_name,E=Modulus), name=element_name + 'Buckle')
                     bkl_ratio = self.declare_variable(element_name + 'bkl_ratio')
+                    s_cap[i] = self.declare_variable(element_name + '_sp_cap')
                     bkl[index] = 1*bkl_ratio
                     index += 1
 

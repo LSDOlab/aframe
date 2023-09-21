@@ -112,6 +112,7 @@ if __name__ == '__main__':
     element_loads = sim['wing_element_loads'] # (n-1,6) [fx,fy,fz,mx,my,mz]
     element_axial_stress = np.abs(sim['wing_element_axial_stress']) # (n-1,5)
     element_shear_stress = np.abs(sim['wing_element_shear_stress']) # (n-1), evaluated at the center of the web
+    element_sp_cap = sim['wing_sp_cap'] # (n-1) critical stress for the spar cap
 
     beamDf = pd.DataFrame(
         data={
@@ -130,5 +131,8 @@ if __name__ == '__main__':
     print('Max stress (psi): ', np.max(stress_psi))
     print('displacement (in): ', np.max(disp_in))
 
-    plt.plot(stress_psi)
-    plt.show()
+    #plt.plot(stress_psi)
+    #plt.show()
+
+    #plt.plot(element_loads[:,2])
+    #plt.show()

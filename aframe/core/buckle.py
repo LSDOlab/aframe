@@ -23,7 +23,7 @@ class Buckle(csdl.Model):
         sp_cap = k*E*((tcap/w)**2)/(1 - v**2)
         # sp_web = k*E*((tweb/h)**2)/(1 - v**2)
 
-        self.register_output(element_name + 'sp_cap', sp_cap)
+        # self.register_output(element_name + 'sp_cap', sp_cap)
         # self.register_output('sp_web', sp_web)
 
 
@@ -32,3 +32,5 @@ class Buckle(csdl.Model):
         cap_stress = (stress_array[0] + stress_array[1])/2
 
         self.register_output(element_name + 'bkl_ratio', cap_stress/sp_cap)
+
+        self.register_output(element_name + '_sp_cap', sp_cap)
