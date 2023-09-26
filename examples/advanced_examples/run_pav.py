@@ -110,9 +110,13 @@ if __name__ == '__main__':
     disp_in = sim['wing_displacement'][:, 2]*m2in
 
     element_loads = sim['wing_element_loads'] # (n-1,6) [fx,fy,fz,mx,my,mz]
-    element_axial_stress = np.abs(sim['wing_element_axial_stress']) # (n-1,5)
-    element_shear_stress = np.abs(sim['wing_element_shear_stress']) # (n-1), evaluated at the center of the web
+    element_axial_stress = np.pad(np.max(np.abs(sim['wing_element_axial_stress']), axis=1), (0, 1), 'constant') # (n-1,5)
+    element_shear_stress = np.pad(np.abs(sim['wing_element_shear_stress']), (0, 1), 'constant') # (n-1), evaluated at the center of the web
+    element_torsional_stress = np.pad(np.max(np.abs(sim['wing_element_torsional_stress']), axis=1), (0, 1), 'constant')
     element_sp_cap = sim['wing_sp_cap'] # (n-1) critical stress for the spar cap
+    element_Iy_out = sim['wing_iyo'] # (n-1)
+    element_Iz_out = sim['wing_izo'] # (n-1)
+    element_J_out = sim['wing_jo'] # (n-1)
 
     beamDf = pd.DataFrame(
         data={
@@ -123,6 +127,13 @@ if __name__ == '__main__':
             'Cap thickness (in)': tcap_in,
             'Nodal forces (lbf)': nodal_forces_lbf[:, 2],
             'Displacement (in)': disp_in,
+            'Axial stress': element_axial_stress,
+            'Shear stress': element_axial_stress,
+            'Torsional stress': element_torsional_stress,
+            'Fz': np.pad(element_loads[:,2], (0, 1), 'constant'), # shear i think
+            'Mx': np.pad(element_loads[:,3], (0, 1), 'constant'),
+            'My': np.pad(element_loads[:,4], (0, 1), 'constant'),
+            'Mz': np.pad(element_loads[:,5], (0, 1), 'constant'),
             # 'Stress (psi)': stress_psi
         },
     )

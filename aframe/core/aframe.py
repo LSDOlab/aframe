@@ -210,6 +210,8 @@ class Aframe(ModuleCSDL):
             # parse elemental outputs
             w, h = self.create_output(beam_name + '_w', shape=(n - 1), val=0), self.create_output(beam_name + '_h', shape=(n - 1), val=0)
 
+            iyo, izo, jo = self.create_output(beam_name + '_iyo', shape=(n - 1), val=0), self.create_output(beam_name + '_izo', shape=(n - 1), val=0), self.create_output(beam_name + '_jo', shape=(n - 1), val=0)
+
             for i in range(n - 1):
                 element_name = beam_name + '_element_' + str(i)
                 if mesh_units == 'm': converted_width, converted_height = 1*width, 1*height
@@ -224,6 +226,11 @@ class Aframe(ModuleCSDL):
 
                 self.register_output(element_name + '_tweb', (tweb[i] + tweb[i+1])/2)
                 self.register_output(element_name + '_tcap', (tcap[i] + tcap[i+1])/2)
+
+
+                iyo[i] = self.declare_variable(element_name + '_Iy')
+                izo[i] = self.declare_variable(element_name + '_Iz')
+                jo[i] = self.declare_variable(element_name + '_J')
 
 
             # parse nodal outputs
@@ -429,6 +436,7 @@ class Aframe(ModuleCSDL):
             element_stress = self.create_output(beam_name + '_element_stress', shape=(n-1,5), val=0)
             element_axial_stress = self.create_output(beam_name + '_element_axial_stress', shape=(n-1,5), val=0)
             element_shear_stress = self.create_output(beam_name + '_element_shear_stress', shape=(n-1), val=0)
+            element_torsional_stress = self.create_output(beam_name + '_element_torsional_stress', shape=(n-1,5), val=0)
             fwd = self.create_output(beam_name + '_fwd', shape=(n,5), val=0)
             rev = self.create_output(beam_name + '_rev', shape=(n,5), val=0)
             for i in range(n - 1):
@@ -439,6 +447,7 @@ class Aframe(ModuleCSDL):
                 rev[i+1,:] = csdl.reshape(self.declare_variable(element_name + '_stress_array', shape=(5)), new_shape=(1,5))
                 element_axial_stress[i,:] = csdl.reshape(self.declare_variable(element_name + '_axial_stress', shape=(5)), new_shape=(1,5))
                 element_shear_stress[i] = self.declare_variable(element_name + '_shear_stress', shape=(1))
+                element_torsional_stress[i,:] = csdl.reshape(self.declare_variable(element_name + '_torsional_stress', shape=(5)), new_shape=(1,5))
 
             stress = (fwd + rev)/2
             self.register_output(beam_name + '_stress', stress)
