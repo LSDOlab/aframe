@@ -131,9 +131,10 @@ if __name__ == '__main__':
             'Shear stress': element_axial_stress,
             'Torsional stress': element_torsional_stress,
             'Fz': np.pad(element_loads[:,2], (0, 1), 'constant'), # shear i think
-            'Mx': np.pad(element_loads[:,3], (0, 1), 'constant'),
-            'My': np.pad(element_loads[:,4], (0, 1), 'constant'),
-            'Mz': np.pad(element_loads[:,5], (0, 1), 'constant'),
+            'My': np.pad(element_loads[:,4], (0, 1), 'constant'), # bend moment i think
+            'Iy': np.pad(element_Iy_out, (0, 1), 'constant'),
+            'Iz': np.pad(element_Iz_out, (0, 1), 'constant'),
+            'J': np.pad(element_J_out, (0, 1), 'constant'),
             # 'Stress (psi)': stress_psi
         },
     )
@@ -145,5 +146,5 @@ if __name__ == '__main__':
     #plt.plot(stress_psi)
     #plt.show()
 
-    #plt.plot(element_loads[:,2])
-    #plt.show()
+    plt.plot(element_loads[:,4])
+    plt.show()
