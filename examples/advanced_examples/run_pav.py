@@ -13,6 +13,8 @@ m2ft = 3.288084
 m2in = 39.3701
 N2lbf = 0.224809
 Npm22psi = 0.000145038
+Nm2lbft = 0.73756214728
+m42in4 = 2402509.607720009
 
 # region Data
 nodes = np.array([[ 2.94811022e+00,  4.26720000e+00,  6.04990180e-01],
@@ -110,15 +112,15 @@ if __name__ == '__main__':
     disp_in = sim['wing_displacement'][:, 2]*m2in
 
     element_loads = sim['wing_element_loads'] # (n-1,6) [fx,fy,fz,mx,my,mz]
-    element_axial_stress = np.pad(np.max(np.abs(sim['wing_element_axial_stress']), axis=1), (0, 1), 'constant') # (n-1,5)
-    element_shear_stress = np.pad(np.abs(sim['wing_element_shear_stress']), (0, 1), 'constant') # (n-1), evaluated at the center of the web
-    element_torsional_stress = np.pad(np.max(np.abs(sim['wing_element_torsional_stress']), axis=1), (0, 1), 'constant')
+    element_axial_stress = np.max(np.abs(sim['wing_element_axial_stress']), axis=1) # (n-1,5)
+    element_shear_stress = np.abs(sim['wing_element_shear_stress']) # (n-1), evaluated at the center of the web
+    element_torsional_stress = np.max(np.abs(sim['wing_element_torsional_stress']), axis=1)
     element_sp_cap = sim['wing_sp_cap'] # (n-1) critical stress for the spar cap
     element_Iy_out = sim['wing_iyo'] # (n-1)
     element_Iz_out = sim['wing_izo'] # (n-1)
     element_J_out = sim['wing_jo'] # (n-1)
 
-    beamDf = pd.DataFrame(
+    beamNodalDf = pd.DataFrame(
         data={
             'Spanwise y-location (ft)': spanwise_location_ft,
             'Width (in)': width_in,
@@ -127,24 +129,34 @@ if __name__ == '__main__':
             'Cap thickness (in)': tcap_in,
             'Nodal forces (lbf)': nodal_forces_lbf[:, 2],
             'Displacement (in)': disp_in,
-            'Axial stress': element_axial_stress,
-            'Shear stress': element_axial_stress,
-            'Torsional stress': element_torsional_stress,
-            'Fz': np.pad(element_loads[:,2], (0, 1), 'constant'), # shear i think
-            'My': np.pad(element_loads[:,4], (0, 1), 'constant'), # bend moment i think
-            'Iy': np.pad(element_Iy_out, (0, 1), 'constant'),
-            'Iz': np.pad(element_Iz_out, (0, 1), 'constant'),
-            'J': np.pad(element_J_out, (0, 1), 'constant'),
-            # 'Stress (psi)': stress_psi
+            'Stress (psi)': stress_psi
         },
     )
-    print(beamDf)
 
+    beamElementDf = pd.DataFrame(
+        data={
+            'Spanwise y-location (ft)': np.average([spanwise_location_ft[:-1], spanwise_location_ft[1:]], axis=0),
+            'Axial stress (psi)': element_axial_stress*Npm22psi,
+            'Shear stress (psi)': element_shear_stress*Npm22psi,
+            'Torsional stress (psi)': element_torsional_stress*Npm22psi,
+            'Fz (lbf)': element_loads[:, 2]*N2lbf,
+            'My (lbf-ft)': element_loads[:, 4]*Nm2lbft,
+            'Iy (in^4)': element_Iy_out * m42in4,
+            'Iz (in^4)': element_Iz_out * m42in4,
+            'J (in^4)': element_J_out * m42in4,
+        },
+    )
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
+        print(beamNodalDf)
+        print(beamElementDf)
+
+    beamNodalDf.to_excel('pav_3g_results_nodal.xlsx')
+    beamElementDf.to_excel('pav_3g_results_element.xlsx')
     print('Max stress (psi): ', np.max(stress_psi))
     print('displacement (in): ', np.max(disp_in))
 
-    #plt.plot(stress_psi)
-    #plt.show()
+    plt.plot(stress_psi)
+    plt.show()
 
     plt.plot(element_loads[:,4])
     plt.show()
