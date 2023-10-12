@@ -26,7 +26,8 @@ class Aframe(ModuleCSDL):
         A = (((w*h) - (w_i*h_i))**2 + 1E-14)**0.5 # for robustness
         Iz = ((w**3)*h - (w_i**3)*h_i)/12
         Iy = (w*(h**3) - w_i*(h_i**3))/12
-        J = (w*h*(h**2 + w**2)/12) - (w_i*h_i*(h_i**2 + w_i**2)/12)
+        # J = (w*h*(h**2 + w**2)/12) - (w_i*h_i*(h_i**2 + w_i**2)/12)
+        J = ( 2*tweb*tcap*(w-tweb)**2*(h-tcap)**2 ) / ( w*tweb + h*tcap - tweb**2 -tcap**2 )
         # Q = 2*(h/2)*tweb*(h/4) + (w - 2*tweb)*tcap*((h/2) - (tcap/2))
 
         Q = (A/2)*(h/4)
