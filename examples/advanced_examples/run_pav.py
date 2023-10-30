@@ -6,6 +6,8 @@ from modopt.scipy_library import SLSQP
 from modopt.csdl_library import CSDLProblem
 import matplotlib.pyplot as plt
 import pandas as pd
+import pickle
+import scipy
 plt.rcParams.update(plt.rcParamsDefault)
 
 
@@ -86,6 +88,19 @@ class Run(csdl.Model):
 
 
 if __name__ == '__main__':
+
+    fileObj = open('PAVsymbbeam_data.p', 'rb')
+    PAVsymbbeam_data = pickle.load(fileObj)
+    fileObj.close()
+
+    PAVsymbbeam_data['LoadNodes'].to_csv('PavLoadNodesFromRade.csv')
+    PAVsymbbeam_data['AxisNodes'].to_csv('PavAxisNodesFromRade.csv')
+    PAVsymbbeam_data['WidthHeight'].to_csv('PavWidthHeightFromRade.csv')
+
+    scipy.io.savemat('PavRibsPointsFromRade.mat',
+                     {'Airfoil': PAVsymbbeam_data['AirfoilRibsPoints'],
+                      'Corner': PAVsymbbeam_data['CornerRibsPoints']}
+                     )
 
     joints, bounds, beams = {}, {}, {}
     beams['wing'] = {'E': 7.31E10,'G': 26E9,'rho': 2768,'cs': 'box','nodes': list(range(len(nodes)))}
