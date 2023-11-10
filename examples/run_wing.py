@@ -15,7 +15,7 @@ mesh = np.zeros((n,3))
 mesh[:,1] = np.linspace(-20,20,n)
 
 forces = np.zeros((n,3))
-forces[:,2] = 0
+forces[:,2] = 1000
 forces[:,0] = 0
 
 h = np.ones(n)*0.375
@@ -81,6 +81,8 @@ if __name__ == '__main__':
     print('tcap: ', sim['wing_tcap'])
     print('tweb: ', sim['wing_tweb'])
 
+    print('bkl: ', sim['wing_bkl'])
+
     cg = sim['cg_vector']
 
 
@@ -102,7 +104,7 @@ if __name__ == '__main__':
             ax.scatter(nb[0], nb[1], nb[2],color='yellow',edgecolors='black',linewidth=1,zorder=10,label='_nolegend_',s=30)
 
 
-    #ax.scatter(cg[0],cg[1],cg[2],color='blue',s=50,edgecolors='black')
+    ax.scatter(cg[0],cg[1],cg[2],color='blue',s=50,edgecolors='black')
 
 
     ax.set_xlim(-5,5)

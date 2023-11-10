@@ -130,10 +130,13 @@ if __name__ == '__main__':
     element_axial_stress = np.max(np.abs(sim['wing_element_axial_stress']), axis=1) # (n-1,5)
     element_shear_stress = np.abs(sim['wing_element_shear_stress']) # (n-1), evaluated at the center of the web
     element_torsional_stress = np.max(np.abs(sim['wing_element_torsional_stress']), axis=1)
-    element_sp_cap = sim['wing_sp_cap'] # (n-1) critical stress for the spar cap
+    # element_sp_cap = sim['wing_sp_cap'] # (n-1) critical stress for the spar cap
     element_Iy_out = sim['wing_iyo'] # (n-1)
     element_Iz_out = sim['wing_izo'] # (n-1)
     element_J_out = sim['wing_jo'] # (n-1)
+
+    bkl = sim['wing_bkl']
+    print(bkl)
 
     beamNodalDf = pd.DataFrame(
         data={

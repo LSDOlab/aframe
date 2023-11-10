@@ -1,9 +1,6 @@
 import numpy as np
 import csdl
-from aframe.core.massprop import MassPropModule as MassProp
 from aframe.core.model import Model
-from aframe.core.buckle import Buckle
-from aframe.core.nodal_stress import NodalStressBox
 from aframe.core.stress import StressBox
 from lsdo_modules.module_csdl.module_csdl import ModuleCSDL
 
@@ -45,8 +42,7 @@ class Aframe(ModuleCSDL):
         dim = num_unique_nodes*6
         node_index = {list(node_set)[i]: i for i in range(num_unique_nodes)}
 
-        print(node_dict)
-        print(node_index)
+
 
         # create a list of element names:
         elements, element_density_list, num_elements = [], [], 0
@@ -102,8 +98,8 @@ class Aframe(ModuleCSDL):
                     A = self.register_output(element_name + '_A', (((w*h) - (w_i*h_i))**2 + 1E-14)**0.5)
                     iyo[i] = Iy = self.register_output(element_name + '_Iy', (w*(h**3) - w_i*(h_i**3))/12)
                     izo[i] = Iz = self.register_output(element_name + '_Iz', ((w**3)*h - (w_i**3)*h_i)/12)
-                    # J = (2*tweb*tcap*(w-tweb)**2*(h-tcap)**2)/(w*tweb+h*tcap-tweb**2-tcap**2)
-                    jo[i] = J = self.register_output(element_name + '_J', (w*h*(h**2 + w**2)/12) - (w_i*h_i*(h_i**2 + w_i**2)/12))
+                    # jo[i] = J = self.register_output(element_name + '_J', (w*h*(h**2 + w**2)/12) - (w_i*h_i*(h_i**2 + w_i**2)/12))
+                    jo[i] = J = self.register_output(element_name + '_J', (2*tweb*tcap*(w-tweb)**2*(h-tcap)**2)/(w*tweb+h*tcap-tweb**2-tcap**2)) # Darshan's formula
                     # Q = 2*(h/2)*tweb*(h/4) + (w - 2*tweb)*tcap*((h/2) - (tcap/2))
                     Q = self.register_output(element_name + '_Q', (A/2)*(h/4))
                     self.register_output(element_name + '_Ix', 1*J) # I think J is the same as Ix...
@@ -362,7 +358,7 @@ class Aframe(ModuleCSDL):
         solve_res = self.create_implicit_operation(Model(dim=dim))
         solve_res.declare_state(state='U', residual='R')
         solve_res.nonlinear_solver = csdl.NewtonSolver(solve_subsystems=False,maxiter=10,iprint=False,atol=1E-8,)
-        solve_res.linear_solver = csdl.ScipyKrylov()
+        solve_res.linear_solver = csdl.DirectSolver()
         U = solve_res(K, Fi)
 
 
@@ -448,6 +444,28 @@ class Aframe(ModuleCSDL):
 
 
 
+
+        # buckling:
+        for beam_name in beams:
+            n = len(beams[beam_name]['nodes'])
+            E = beams[beam_name]['E']
+            v = 0.33 # Poisson's ratio
+            k = 4.0
+
+            bkl = self.create_output(beam_name + '_bkl', shape=(n - 1), val=0)
+            for i in range(n - 1):
+                element_name = beam_name + '_element_' + str(i)
+
+                wb = self.declare_variable(element_name + '_w')
+                hb = self.declare_variable(element_name + '_h')
+                tcapb = self.declare_variable(element_name + '_tcap')
+
+                critical_stress = k*E*((tcapb/wb)**2)/(1 - v**2)
+
+                actual_stress_array = self.declare_variable(element_name + '_stress_array', shape=(5))
+                actual_stress = (actual_stress_array[0] + actual_stress_array[1])/2
+
+                bkl[i] = actual_stress/critical_stress # greater than 1 = bad
 
 
 
