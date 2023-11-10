@@ -95,10 +95,11 @@ class Aframe(ModuleCSDL):
                     tweb = self.register_output(element_name + '_tweb', (tweb_in[i]+tweb_in[i+1])/2)
                     tcap = self.register_output(element_name + '_tcap', (tcap_in[i]+tcap_in[i+1])/2)
 
+
+
                     # compute the box-beam cs properties
                     w_i, h_i = w - 2*tweb, h - 2*tcap
-                    # A = (((w*h) - (w_i*h_i))**2 + 1E-14)**0.5 # for robustness
-                    A = self.register_output(element_name + '_A', (w*h) - (w_i*h_i))
+                    A = self.register_output(element_name + '_A', (((w*h) - (w_i*h_i))**2 + 1E-14)**0.5)
                     iyo[i] = Iy = self.register_output(element_name + '_Iy', (w*(h**3) - w_i*(h_i**3))/12)
                     izo[i] = Iz = self.register_output(element_name + '_Iz', ((w**3)*h - (w_i**3)*h_i)/12)
                     # J = (2*tweb*tcap*(w-tweb)**2*(h-tcap)**2)/(w*tweb+h*tcap-tweb**2-tcap**2)
