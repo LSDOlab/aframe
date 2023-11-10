@@ -192,7 +192,7 @@ class Aframe(ModuleCSDL):
         default_val[:,1] = np.linspace(0,n,n)
         # mesh = self.declare_variable(name + '_mesh', shape=(n,3), val=default_val)
         mesh_in = self.register_module_input(beam_name + '_mesh', shape=(n,3), promotes=True, val=default_val)
-
+        # self.print_var(mesh_in)
         if mesh_units == 'm': mesh = 1*mesh_in
         elif mesh_units == 'ft': mesh = 0.304*mesh_in
 
@@ -207,6 +207,7 @@ class Aframe(ModuleCSDL):
             height = self.register_module_input(beam_name + '_height', shape=(n), promotes=True)
             tweb = self.register_module_input(beam_name + '_tweb', shape=(n))
             tcap = self.register_module_input(beam_name + '_tcap', shape=(n))
+
 
             # parse elemental outputs
             w, h = self.create_output(beam_name + '_w', shape=(n - 1), val=0), self.create_output(beam_name + '_h', shape=(n - 1), val=0)
@@ -334,7 +335,7 @@ class Aframe(ModuleCSDL):
         # modify the global stiffness matrix and the global mass matrix with boundary conditions:
         # first remove the row/column with a boundary condition, then add a 1:
         K = self.register_output('K', csdl.matmat(csdl.matmat(mask, sum_k), mask) + mask_eye)
-        mass_matrix = self.register_output('mass_matrix', csdl.matmat(csdl.matmat(mask, sum_m), mask) + mask_eye)
+        # mass_matrix = self.register_output('mass_matrix', csdl.matmat(csdl.matmat(mask, sum_m), mask) + mask_eye)
 
 
 
@@ -347,7 +348,7 @@ class Aframe(ModuleCSDL):
         # solve the linear system
         solve_res = self.create_implicit_operation(Model(dim=dim))
         solve_res.declare_state(state='U', residual='R')
-        solve_res.nonlinear_solver = csdl.NewtonSolver(solve_subsystems=False,maxiter=100,iprint=False,atol=1E-8,)
+        solve_res.nonlinear_solver = csdl.NewtonSolver(solve_subsystems=False,maxiter=10,iprint=False,atol=1E-8,)
         solve_res.linear_solver = csdl.ScipyKrylov()
         U = solve_res(K, Fi)
 

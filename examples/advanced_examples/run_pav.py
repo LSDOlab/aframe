@@ -7,7 +7,7 @@ from modopt.csdl_library import CSDLProblem
 import matplotlib.pyplot as plt
 import pandas as pd
 import pickle
-import scipy
+import scipy.io
 plt.rcParams.update(plt.rcParamsDefault)
 
 
@@ -89,7 +89,7 @@ class Run(csdl.Model):
 
 if __name__ == '__main__':
 
-    fileObj = open('PAVsymbbeam_data.p', 'rb')
+    fileObj = open('examples/advanced_examples/PAVsymbbeam_data.p', 'rb')
     PAVsymbbeam_data = pickle.load(fileObj)
     fileObj.close()
 
@@ -170,8 +170,8 @@ if __name__ == '__main__':
     print('Max stress (psi): ', np.max(stress_psi))
     print('displacement (in): ', np.max(disp_in))
 
-    plt.plot(stress_psi)
-    plt.show()
+    #plt.plot(stress_psi)
+    #plt.show()
 
-    plt.plot(element_loads[:,4])
-    plt.show()
+    #plt.plot(element_loads[:,4])
+    #plt.show()
