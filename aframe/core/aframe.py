@@ -275,6 +275,8 @@ class Aframe(ModuleCSDL):
         # compute the center of gravity for the entire structure:
         total_mass = self.register_module_output('mass', csdl.sum(m_vec))
         self.register_output('struct_mass', 1*total_mass)
+
+        # self.print_var(total_mass)
         
         cg = csdl.sum(rm_vec, axes=(0,))/csdl.expand(total_mass, (3))
         self.register_output('cg_vector', cg)
@@ -318,6 +320,7 @@ class Aframe(ModuleCSDL):
         self.register_output('izz', Izz)
         self.register_output('ixz', Ixz)
 
+        # self.print_var(m_vec)
 
 
 
@@ -461,7 +464,7 @@ class Aframe(ModuleCSDL):
                 tcapb = self.declare_variable(element_name + '_tcap')
                 #a = self.declare_variable(element_name + 'L')
 
-                critical_stress = k*E*(tcapb/wb)**2/(1 - v**2)
+                critical_stress = k*E*(tcapb/wb)**2/(1 - v**2) # Roark's simply-supported panel buckling
                 #self.print_var(critical_stress)
 
                 actual_stress_array = self.declare_variable(element_name + '_stress_array', shape=(5))
