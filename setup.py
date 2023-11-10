@@ -31,8 +31,7 @@ setup(
         'sphinxcontrib-bibtex',
         'setuptools',
         'wheel',
-        'twine',
-        'm3l @ git+https://github.com/LSDOlab/m3l.git'
+        'twine'
     ],
     classifiers=[
         'Programming Language :: Python',
