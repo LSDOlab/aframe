@@ -145,7 +145,7 @@ if __name__ == '__main__':
     element_J_out = sim['wing_jo'] # (n-1)
 
     bkl = sim['wing_bkl']
-    print(bkl)
+    print('buckle ratio: ', bkl)
 
     beamNodalDf = pd.DataFrame(
         data={
