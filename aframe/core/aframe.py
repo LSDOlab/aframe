@@ -450,7 +450,7 @@ class Aframe(ModuleCSDL):
             n = len(beams[beam_name]['nodes'])
             E = beams[beam_name]['E']
             v = 0.33 # Poisson's ratio
-            k = 4.0
+            k = 3.0
 
             bkl = self.create_output(beam_name + '_bkl', shape=(n - 1), val=0)
             for i in range(n - 1):
@@ -459,8 +459,10 @@ class Aframe(ModuleCSDL):
                 wb = self.declare_variable(element_name + '_w')
                 hb = self.declare_variable(element_name + '_h')
                 tcapb = self.declare_variable(element_name + '_tcap')
+                #a = self.declare_variable(element_name + 'L')
 
-                critical_stress = k*E*((tcapb/wb)**2)/(1 - v**2)
+                critical_stress = k*E*(tcapb/wb)**2/(1 - v**2)
+                #self.print_var(critical_stress)
 
                 actual_stress_array = self.declare_variable(element_name + '_stress_array', shape=(5))
                 actual_stress = (actual_stress_array[0] + actual_stress_array[1])/2
