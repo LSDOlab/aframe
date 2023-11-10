@@ -5307,348 +5307,6 @@ v14_wing_iyo
 	connected to:
 	promoted to:
 
-v10818_wing_element_13_stress_array
-	name:                    wing_element_13_stress_array
-	unpromoted name:         Aframe.wing_element_13StressBox.wing_element_13_stress_array
-	promoted name:           wing_element_13_stress_array
-	shape:                   (5,)
-	avg val:                 1.0
-	graph info:              1 in op / 4 out op(s)
-	connected to:
-	promoted to:
-	                         Aframe.wing_element_13_stress_array
-
-v10563_wing_element_13stress_a
-	name:                    wing_element_13stress_a
-	unpromoted name:         Aframe.wing_element_13StressBox.wing_element_13stress_a
-	promoted name:           wing_element_13stress_a
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 2 out op(s)
-	connected to:
-	promoted to:
-
-v10564_wing_element_13stress_b
-	name:                    wing_element_13stress_b
-	unpromoted name:         Aframe.wing_element_13StressBox.wing_element_13stress_b
-	promoted name:           wing_element_13stress_b
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 2 out op(s)
-	connected to:
-	promoted to:
-
-v10816_wing_element_13_stress
-	name:                    wing_element_13_stress
-	unpromoted name:         Aframe.wing_element_13StressBox.wing_element_13_stress
-	promoted name:           wing_element_13_stress
-	shape:                   (1,)
-	avg val:                 1.0
-	graph info:              1 in op / 0 out op(s)
-	connected to:
-	promoted to:
-
-v10794_wing_element_13_shear_stress
-	name:                    wing_element_13_shear_stress
-	unpromoted name:         Aframe.wing_element_13StressBox.wing_element_13_shear_stress
-	promoted name:           wing_element_13_shear_stress
-	shape:                   (1,)
-	avg val:                 1.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-	                         Aframe.wing_element_13_shear_stress
-
-v10562_wing_element_13shear_b
-	name:                    wing_element_13shear_b
-	unpromoted name:         Aframe.wing_element_13StressBox.wing_element_13shear_b
-	promoted name:           wing_element_13shear_b
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-
-v10561_wing_element_13shear_a
-	name:                    wing_element_13shear_a
-	unpromoted name:         Aframe.wing_element_13StressBox.wing_element_13shear_a
-	promoted name:           wing_element_13shear_a
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-
-v10568_wing_element_13_torsional_stress
-	name:                    wing_element_13_torsional_stress
-	unpromoted name:         Aframe.wing_element_13StressBox.wing_element_13_torsional_stress
-	promoted name:           wing_element_13_torsional_stress
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-	                         Aframe.wing_element_13_torsional_stress
-
-v10546_wing_element_13y_coord
-	name:                    wing_element_13y_coord
-	unpromoted name:         Aframe.wing_element_13StressBox.wing_element_13y_coord
-	promoted name:           wing_element_13y_coord
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-
-v10545_wing_element_13x_coord
-	name:                    wing_element_13x_coord
-	unpromoted name:         Aframe.wing_element_13StressBox.wing_element_13x_coord
-	promoted name:           wing_element_13x_coord
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-
-v10567_wing_element_13_axial_stress
-	name:                    wing_element_13_axial_stress
-	unpromoted name:         Aframe.wing_element_13StressBox.wing_element_13_axial_stress
-	promoted name:           wing_element_13_axial_stress
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-	                         Aframe.wing_element_13_axial_stress
-
-v11667_wing_element_16_stress_array
-	name:                    wing_element_16_stress_array
-	unpromoted name:         Aframe.wing_element_16StressBox.wing_element_16_stress_array
-	promoted name:           wing_element_16_stress_array
-	shape:                   (5,)
-	avg val:                 1.0
-	graph info:              1 in op / 4 out op(s)
-	connected to:
-	promoted to:
-	                         Aframe.wing_element_16_stress_array
-
-v11412_wing_element_16stress_a
-	name:                    wing_element_16stress_a
-	unpromoted name:         Aframe.wing_element_16StressBox.wing_element_16stress_a
-	promoted name:           wing_element_16stress_a
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 2 out op(s)
-	connected to:
-	promoted to:
-
-v11413_wing_element_16stress_b
-	name:                    wing_element_16stress_b
-	unpromoted name:         Aframe.wing_element_16StressBox.wing_element_16stress_b
-	promoted name:           wing_element_16stress_b
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 2 out op(s)
-	connected to:
-	promoted to:
-
-v11665_wing_element_16_stress
-	name:                    wing_element_16_stress
-	unpromoted name:         Aframe.wing_element_16StressBox.wing_element_16_stress
-	promoted name:           wing_element_16_stress
-	shape:                   (1,)
-	avg val:                 1.0
-	graph info:              1 in op / 0 out op(s)
-	connected to:
-	promoted to:
-
-v11643_wing_element_16_shear_stress
-	name:                    wing_element_16_shear_stress
-	unpromoted name:         Aframe.wing_element_16StressBox.wing_element_16_shear_stress
-	promoted name:           wing_element_16_shear_stress
-	shape:                   (1,)
-	avg val:                 1.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-	                         Aframe.wing_element_16_shear_stress
-
-v11411_wing_element_16shear_b
-	name:                    wing_element_16shear_b
-	unpromoted name:         Aframe.wing_element_16StressBox.wing_element_16shear_b
-	promoted name:           wing_element_16shear_b
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-
-v11410_wing_element_16shear_a
-	name:                    wing_element_16shear_a
-	unpromoted name:         Aframe.wing_element_16StressBox.wing_element_16shear_a
-	promoted name:           wing_element_16shear_a
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-
-v11417_wing_element_16_torsional_stress
-	name:                    wing_element_16_torsional_stress
-	unpromoted name:         Aframe.wing_element_16StressBox.wing_element_16_torsional_stress
-	promoted name:           wing_element_16_torsional_stress
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-	                         Aframe.wing_element_16_torsional_stress
-
-v11395_wing_element_16y_coord
-	name:                    wing_element_16y_coord
-	unpromoted name:         Aframe.wing_element_16StressBox.wing_element_16y_coord
-	promoted name:           wing_element_16y_coord
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-
-v11394_wing_element_16x_coord
-	name:                    wing_element_16x_coord
-	unpromoted name:         Aframe.wing_element_16StressBox.wing_element_16x_coord
-	promoted name:           wing_element_16x_coord
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-
-v11416_wing_element_16_axial_stress
-	name:                    wing_element_16_axial_stress
-	unpromoted name:         Aframe.wing_element_16StressBox.wing_element_16_axial_stress
-	promoted name:           wing_element_16_axial_stress
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-	                         Aframe.wing_element_16_axial_stress
-
-v8837_wing_element_6_stress_array
-	name:                    wing_element_6_stress_array
-	unpromoted name:         Aframe.wing_element_6StressBox.wing_element_6_stress_array
-	promoted name:           wing_element_6_stress_array
-	shape:                   (5,)
-	avg val:                 1.0
-	graph info:              1 in op / 4 out op(s)
-	connected to:
-	promoted to:
-	                         Aframe.wing_element_6_stress_array
-
-v8582_wing_element_6stress_a
-	name:                    wing_element_6stress_a
-	unpromoted name:         Aframe.wing_element_6StressBox.wing_element_6stress_a
-	promoted name:           wing_element_6stress_a
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 2 out op(s)
-	connected to:
-	promoted to:
-
-v8583_wing_element_6stress_b
-	name:                    wing_element_6stress_b
-	unpromoted name:         Aframe.wing_element_6StressBox.wing_element_6stress_b
-	promoted name:           wing_element_6stress_b
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 2 out op(s)
-	connected to:
-	promoted to:
-
-v8835_wing_element_6_stress
-	name:                    wing_element_6_stress
-	unpromoted name:         Aframe.wing_element_6StressBox.wing_element_6_stress
-	promoted name:           wing_element_6_stress
-	shape:                   (1,)
-	avg val:                 1.0
-	graph info:              1 in op / 0 out op(s)
-	connected to:
-	promoted to:
-
-v8813_wing_element_6_shear_stress
-	name:                    wing_element_6_shear_stress
-	unpromoted name:         Aframe.wing_element_6StressBox.wing_element_6_shear_stress
-	promoted name:           wing_element_6_shear_stress
-	shape:                   (1,)
-	avg val:                 1.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-	                         Aframe.wing_element_6_shear_stress
-
-v8581_wing_element_6shear_b
-	name:                    wing_element_6shear_b
-	unpromoted name:         Aframe.wing_element_6StressBox.wing_element_6shear_b
-	promoted name:           wing_element_6shear_b
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-
-v8580_wing_element_6shear_a
-	name:                    wing_element_6shear_a
-	unpromoted name:         Aframe.wing_element_6StressBox.wing_element_6shear_a
-	promoted name:           wing_element_6shear_a
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-
-v8587_wing_element_6_torsional_stress
-	name:                    wing_element_6_torsional_stress
-	unpromoted name:         Aframe.wing_element_6StressBox.wing_element_6_torsional_stress
-	promoted name:           wing_element_6_torsional_stress
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-	                         Aframe.wing_element_6_torsional_stress
-
-v8565_wing_element_6y_coord
-	name:                    wing_element_6y_coord
-	unpromoted name:         Aframe.wing_element_6StressBox.wing_element_6y_coord
-	promoted name:           wing_element_6y_coord
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-
-v8564_wing_element_6x_coord
-	name:                    wing_element_6x_coord
-	unpromoted name:         Aframe.wing_element_6StressBox.wing_element_6x_coord
-	promoted name:           wing_element_6x_coord
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-
-v8586_wing_element_6_axial_stress
-	name:                    wing_element_6_axial_stress
-	unpromoted name:         Aframe.wing_element_6StressBox.wing_element_6_axial_stress
-	promoted name:           wing_element_6_axial_stress
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-	                         Aframe.wing_element_6_axial_stress
-
 v10535_wing_element_12_stress_array
 	name:                    wing_element_12_stress_array
 	unpromoted name:         Aframe.wing_element_12StressBox.wing_element_12_stress_array
@@ -6789,120 +6447,6 @@ v12265_wing_element_19_axial_stress
 	promoted to:
 	                         Aframe.wing_element_19_axial_stress
 
-v9120_wing_element_7_stress_array
-	name:                    wing_element_7_stress_array
-	unpromoted name:         Aframe.wing_element_7StressBox.wing_element_7_stress_array
-	promoted name:           wing_element_7_stress_array
-	shape:                   (5,)
-	avg val:                 1.0
-	graph info:              1 in op / 4 out op(s)
-	connected to:
-	promoted to:
-	                         Aframe.wing_element_7_stress_array
-
-v8865_wing_element_7stress_a
-	name:                    wing_element_7stress_a
-	unpromoted name:         Aframe.wing_element_7StressBox.wing_element_7stress_a
-	promoted name:           wing_element_7stress_a
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 2 out op(s)
-	connected to:
-	promoted to:
-
-v8866_wing_element_7stress_b
-	name:                    wing_element_7stress_b
-	unpromoted name:         Aframe.wing_element_7StressBox.wing_element_7stress_b
-	promoted name:           wing_element_7stress_b
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 2 out op(s)
-	connected to:
-	promoted to:
-
-v9118_wing_element_7_stress
-	name:                    wing_element_7_stress
-	unpromoted name:         Aframe.wing_element_7StressBox.wing_element_7_stress
-	promoted name:           wing_element_7_stress
-	shape:                   (1,)
-	avg val:                 1.0
-	graph info:              1 in op / 0 out op(s)
-	connected to:
-	promoted to:
-
-v9096_wing_element_7_shear_stress
-	name:                    wing_element_7_shear_stress
-	unpromoted name:         Aframe.wing_element_7StressBox.wing_element_7_shear_stress
-	promoted name:           wing_element_7_shear_stress
-	shape:                   (1,)
-	avg val:                 1.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-	                         Aframe.wing_element_7_shear_stress
-
-v8864_wing_element_7shear_b
-	name:                    wing_element_7shear_b
-	unpromoted name:         Aframe.wing_element_7StressBox.wing_element_7shear_b
-	promoted name:           wing_element_7shear_b
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-
-v8863_wing_element_7shear_a
-	name:                    wing_element_7shear_a
-	unpromoted name:         Aframe.wing_element_7StressBox.wing_element_7shear_a
-	promoted name:           wing_element_7shear_a
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-
-v8870_wing_element_7_torsional_stress
-	name:                    wing_element_7_torsional_stress
-	unpromoted name:         Aframe.wing_element_7StressBox.wing_element_7_torsional_stress
-	promoted name:           wing_element_7_torsional_stress
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-	                         Aframe.wing_element_7_torsional_stress
-
-v8848_wing_element_7y_coord
-	name:                    wing_element_7y_coord
-	unpromoted name:         Aframe.wing_element_7StressBox.wing_element_7y_coord
-	promoted name:           wing_element_7y_coord
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-
-v8847_wing_element_7x_coord
-	name:                    wing_element_7x_coord
-	unpromoted name:         Aframe.wing_element_7StressBox.wing_element_7x_coord
-	promoted name:           wing_element_7x_coord
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-
-v8869_wing_element_7_axial_stress
-	name:                    wing_element_7_axial_stress
-	unpromoted name:         Aframe.wing_element_7StressBox.wing_element_7_axial_stress
-	promoted name:           wing_element_7_axial_stress
-	shape:                   (5,)
-	avg val:                 0.0
-	graph info:              1 in op / 1 out op(s)
-	connected to:
-	promoted to:
-	                         Aframe.wing_element_7_axial_stress
-
 v11384_wing_element_15_stress_array
 	name:                    wing_element_15_stress_array
 	unpromoted name:         Aframe.wing_element_15StressBox.wing_element_15_stress_array
@@ -7473,6 +7017,120 @@ v10850_wing_element_14_axial_stress
 	promoted to:
 	                         Aframe.wing_element_14_axial_stress
 
+v9120_wing_element_7_stress_array
+	name:                    wing_element_7_stress_array
+	unpromoted name:         Aframe.wing_element_7StressBox.wing_element_7_stress_array
+	promoted name:           wing_element_7_stress_array
+	shape:                   (5,)
+	avg val:                 1.0
+	graph info:              1 in op / 4 out op(s)
+	connected to:
+	promoted to:
+	                         Aframe.wing_element_7_stress_array
+
+v8865_wing_element_7stress_a
+	name:                    wing_element_7stress_a
+	unpromoted name:         Aframe.wing_element_7StressBox.wing_element_7stress_a
+	promoted name:           wing_element_7stress_a
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 2 out op(s)
+	connected to:
+	promoted to:
+
+v8866_wing_element_7stress_b
+	name:                    wing_element_7stress_b
+	unpromoted name:         Aframe.wing_element_7StressBox.wing_element_7stress_b
+	promoted name:           wing_element_7stress_b
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 2 out op(s)
+	connected to:
+	promoted to:
+
+v9118_wing_element_7_stress
+	name:                    wing_element_7_stress
+	unpromoted name:         Aframe.wing_element_7StressBox.wing_element_7_stress
+	promoted name:           wing_element_7_stress
+	shape:                   (1,)
+	avg val:                 1.0
+	graph info:              1 in op / 0 out op(s)
+	connected to:
+	promoted to:
+
+v9096_wing_element_7_shear_stress
+	name:                    wing_element_7_shear_stress
+	unpromoted name:         Aframe.wing_element_7StressBox.wing_element_7_shear_stress
+	promoted name:           wing_element_7_shear_stress
+	shape:                   (1,)
+	avg val:                 1.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+	                         Aframe.wing_element_7_shear_stress
+
+v8864_wing_element_7shear_b
+	name:                    wing_element_7shear_b
+	unpromoted name:         Aframe.wing_element_7StressBox.wing_element_7shear_b
+	promoted name:           wing_element_7shear_b
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+
+v8863_wing_element_7shear_a
+	name:                    wing_element_7shear_a
+	unpromoted name:         Aframe.wing_element_7StressBox.wing_element_7shear_a
+	promoted name:           wing_element_7shear_a
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+
+v8870_wing_element_7_torsional_stress
+	name:                    wing_element_7_torsional_stress
+	unpromoted name:         Aframe.wing_element_7StressBox.wing_element_7_torsional_stress
+	promoted name:           wing_element_7_torsional_stress
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+	                         Aframe.wing_element_7_torsional_stress
+
+v8848_wing_element_7y_coord
+	name:                    wing_element_7y_coord
+	unpromoted name:         Aframe.wing_element_7StressBox.wing_element_7y_coord
+	promoted name:           wing_element_7y_coord
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+
+v8847_wing_element_7x_coord
+	name:                    wing_element_7x_coord
+	unpromoted name:         Aframe.wing_element_7StressBox.wing_element_7x_coord
+	promoted name:           wing_element_7x_coord
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+
+v8869_wing_element_7_axial_stress
+	name:                    wing_element_7_axial_stress
+	unpromoted name:         Aframe.wing_element_7StressBox.wing_element_7_axial_stress
+	promoted name:           wing_element_7_axial_stress
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+	                         Aframe.wing_element_7_axial_stress
+
 v11950_wing_element_17_stress_array
 	name:                    wing_element_17_stress_array
 	unpromoted name:         Aframe.wing_element_17StressBox.wing_element_17_stress_array
@@ -7586,3 +7244,345 @@ v11699_wing_element_17_axial_stress
 	connected to:
 	promoted to:
 	                         Aframe.wing_element_17_axial_stress
+
+v10818_wing_element_13_stress_array
+	name:                    wing_element_13_stress_array
+	unpromoted name:         Aframe.wing_element_13StressBox.wing_element_13_stress_array
+	promoted name:           wing_element_13_stress_array
+	shape:                   (5,)
+	avg val:                 1.0
+	graph info:              1 in op / 4 out op(s)
+	connected to:
+	promoted to:
+	                         Aframe.wing_element_13_stress_array
+
+v10563_wing_element_13stress_a
+	name:                    wing_element_13stress_a
+	unpromoted name:         Aframe.wing_element_13StressBox.wing_element_13stress_a
+	promoted name:           wing_element_13stress_a
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 2 out op(s)
+	connected to:
+	promoted to:
+
+v10564_wing_element_13stress_b
+	name:                    wing_element_13stress_b
+	unpromoted name:         Aframe.wing_element_13StressBox.wing_element_13stress_b
+	promoted name:           wing_element_13stress_b
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 2 out op(s)
+	connected to:
+	promoted to:
+
+v10816_wing_element_13_stress
+	name:                    wing_element_13_stress
+	unpromoted name:         Aframe.wing_element_13StressBox.wing_element_13_stress
+	promoted name:           wing_element_13_stress
+	shape:                   (1,)
+	avg val:                 1.0
+	graph info:              1 in op / 0 out op(s)
+	connected to:
+	promoted to:
+
+v10794_wing_element_13_shear_stress
+	name:                    wing_element_13_shear_stress
+	unpromoted name:         Aframe.wing_element_13StressBox.wing_element_13_shear_stress
+	promoted name:           wing_element_13_shear_stress
+	shape:                   (1,)
+	avg val:                 1.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+	                         Aframe.wing_element_13_shear_stress
+
+v10562_wing_element_13shear_b
+	name:                    wing_element_13shear_b
+	unpromoted name:         Aframe.wing_element_13StressBox.wing_element_13shear_b
+	promoted name:           wing_element_13shear_b
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+
+v10561_wing_element_13shear_a
+	name:                    wing_element_13shear_a
+	unpromoted name:         Aframe.wing_element_13StressBox.wing_element_13shear_a
+	promoted name:           wing_element_13shear_a
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+
+v10568_wing_element_13_torsional_stress
+	name:                    wing_element_13_torsional_stress
+	unpromoted name:         Aframe.wing_element_13StressBox.wing_element_13_torsional_stress
+	promoted name:           wing_element_13_torsional_stress
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+	                         Aframe.wing_element_13_torsional_stress
+
+v10546_wing_element_13y_coord
+	name:                    wing_element_13y_coord
+	unpromoted name:         Aframe.wing_element_13StressBox.wing_element_13y_coord
+	promoted name:           wing_element_13y_coord
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+
+v10545_wing_element_13x_coord
+	name:                    wing_element_13x_coord
+	unpromoted name:         Aframe.wing_element_13StressBox.wing_element_13x_coord
+	promoted name:           wing_element_13x_coord
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+
+v10567_wing_element_13_axial_stress
+	name:                    wing_element_13_axial_stress
+	unpromoted name:         Aframe.wing_element_13StressBox.wing_element_13_axial_stress
+	promoted name:           wing_element_13_axial_stress
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+	                         Aframe.wing_element_13_axial_stress
+
+v11667_wing_element_16_stress_array
+	name:                    wing_element_16_stress_array
+	unpromoted name:         Aframe.wing_element_16StressBox.wing_element_16_stress_array
+	promoted name:           wing_element_16_stress_array
+	shape:                   (5,)
+	avg val:                 1.0
+	graph info:              1 in op / 4 out op(s)
+	connected to:
+	promoted to:
+	                         Aframe.wing_element_16_stress_array
+
+v11412_wing_element_16stress_a
+	name:                    wing_element_16stress_a
+	unpromoted name:         Aframe.wing_element_16StressBox.wing_element_16stress_a
+	promoted name:           wing_element_16stress_a
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 2 out op(s)
+	connected to:
+	promoted to:
+
+v11413_wing_element_16stress_b
+	name:                    wing_element_16stress_b
+	unpromoted name:         Aframe.wing_element_16StressBox.wing_element_16stress_b
+	promoted name:           wing_element_16stress_b
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 2 out op(s)
+	connected to:
+	promoted to:
+
+v11665_wing_element_16_stress
+	name:                    wing_element_16_stress
+	unpromoted name:         Aframe.wing_element_16StressBox.wing_element_16_stress
+	promoted name:           wing_element_16_stress
+	shape:                   (1,)
+	avg val:                 1.0
+	graph info:              1 in op / 0 out op(s)
+	connected to:
+	promoted to:
+
+v11643_wing_element_16_shear_stress
+	name:                    wing_element_16_shear_stress
+	unpromoted name:         Aframe.wing_element_16StressBox.wing_element_16_shear_stress
+	promoted name:           wing_element_16_shear_stress
+	shape:                   (1,)
+	avg val:                 1.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+	                         Aframe.wing_element_16_shear_stress
+
+v11411_wing_element_16shear_b
+	name:                    wing_element_16shear_b
+	unpromoted name:         Aframe.wing_element_16StressBox.wing_element_16shear_b
+	promoted name:           wing_element_16shear_b
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+
+v11410_wing_element_16shear_a
+	name:                    wing_element_16shear_a
+	unpromoted name:         Aframe.wing_element_16StressBox.wing_element_16shear_a
+	promoted name:           wing_element_16shear_a
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+
+v11417_wing_element_16_torsional_stress
+	name:                    wing_element_16_torsional_stress
+	unpromoted name:         Aframe.wing_element_16StressBox.wing_element_16_torsional_stress
+	promoted name:           wing_element_16_torsional_stress
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+	                         Aframe.wing_element_16_torsional_stress
+
+v11395_wing_element_16y_coord
+	name:                    wing_element_16y_coord
+	unpromoted name:         Aframe.wing_element_16StressBox.wing_element_16y_coord
+	promoted name:           wing_element_16y_coord
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+
+v11394_wing_element_16x_coord
+	name:                    wing_element_16x_coord
+	unpromoted name:         Aframe.wing_element_16StressBox.wing_element_16x_coord
+	promoted name:           wing_element_16x_coord
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+
+v11416_wing_element_16_axial_stress
+	name:                    wing_element_16_axial_stress
+	unpromoted name:         Aframe.wing_element_16StressBox.wing_element_16_axial_stress
+	promoted name:           wing_element_16_axial_stress
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+	                         Aframe.wing_element_16_axial_stress
+
+v8837_wing_element_6_stress_array
+	name:                    wing_element_6_stress_array
+	unpromoted name:         Aframe.wing_element_6StressBox.wing_element_6_stress_array
+	promoted name:           wing_element_6_stress_array
+	shape:                   (5,)
+	avg val:                 1.0
+	graph info:              1 in op / 4 out op(s)
+	connected to:
+	promoted to:
+	                         Aframe.wing_element_6_stress_array
+
+v8582_wing_element_6stress_a
+	name:                    wing_element_6stress_a
+	unpromoted name:         Aframe.wing_element_6StressBox.wing_element_6stress_a
+	promoted name:           wing_element_6stress_a
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 2 out op(s)
+	connected to:
+	promoted to:
+
+v8583_wing_element_6stress_b
+	name:                    wing_element_6stress_b
+	unpromoted name:         Aframe.wing_element_6StressBox.wing_element_6stress_b
+	promoted name:           wing_element_6stress_b
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 2 out op(s)
+	connected to:
+	promoted to:
+
+v8835_wing_element_6_stress
+	name:                    wing_element_6_stress
+	unpromoted name:         Aframe.wing_element_6StressBox.wing_element_6_stress
+	promoted name:           wing_element_6_stress
+	shape:                   (1,)
+	avg val:                 1.0
+	graph info:              1 in op / 0 out op(s)
+	connected to:
+	promoted to:
+
+v8813_wing_element_6_shear_stress
+	name:                    wing_element_6_shear_stress
+	unpromoted name:         Aframe.wing_element_6StressBox.wing_element_6_shear_stress
+	promoted name:           wing_element_6_shear_stress
+	shape:                   (1,)
+	avg val:                 1.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+	                         Aframe.wing_element_6_shear_stress
+
+v8581_wing_element_6shear_b
+	name:                    wing_element_6shear_b
+	unpromoted name:         Aframe.wing_element_6StressBox.wing_element_6shear_b
+	promoted name:           wing_element_6shear_b
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+
+v8580_wing_element_6shear_a
+	name:                    wing_element_6shear_a
+	unpromoted name:         Aframe.wing_element_6StressBox.wing_element_6shear_a
+	promoted name:           wing_element_6shear_a
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+
+v8587_wing_element_6_torsional_stress
+	name:                    wing_element_6_torsional_stress
+	unpromoted name:         Aframe.wing_element_6StressBox.wing_element_6_torsional_stress
+	promoted name:           wing_element_6_torsional_stress
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+	                         Aframe.wing_element_6_torsional_stress
+
+v8565_wing_element_6y_coord
+	name:                    wing_element_6y_coord
+	unpromoted name:         Aframe.wing_element_6StressBox.wing_element_6y_coord
+	promoted name:           wing_element_6y_coord
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+
+v8564_wing_element_6x_coord
+	name:                    wing_element_6x_coord
+	unpromoted name:         Aframe.wing_element_6StressBox.wing_element_6x_coord
+	promoted name:           wing_element_6x_coord
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+
+v8586_wing_element_6_axial_stress
+	name:                    wing_element_6_axial_stress
+	unpromoted name:         Aframe.wing_element_6StressBox.wing_element_6_axial_stress
+	promoted name:           wing_element_6_axial_stress
+	shape:                   (5,)
+	avg val:                 0.0
+	graph info:              1 in op / 1 out op(s)
+	connected to:
+	promoted to:
+	                         Aframe.wing_element_6_axial_stress
