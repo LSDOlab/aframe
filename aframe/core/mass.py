@@ -1,7 +1,5 @@
 import numpy as np
 import csdl
-from lsdo_modules.module_csdl.module_csdl import ModuleCSDL
-from lsdo_modules.module.module import Module
 import m3l
 
 # this file contains an entirely separate mass computation model for aframe
@@ -10,23 +8,18 @@ import m3l
 
 
 
-class Mass(m3l.ExplicitOperation):
+class BeamMassModel(m3l.ExplicitOperation):
     def initialize(self, kwargs):
-        self.parameters.declare('component', default=None)
+        self.parameters.declare('name', types=str)
         self.parameters.declare('mesh', default=None)
-        self.parameters.declare('struct_solver', True)
-        self.parameters.declare('compute_mass_properties', default=True, types=bool)
 
         self.parameters.declare('beams', default={})
         self.parameters.declare('mesh_units', default='ft')
         self.num_nodes = None
 
     def assign_attributes(self):
-        self.component = self.parameters['component']
         self.mesh = self.parameters['mesh']
-        self.struct_solver = self.parameters['struct_solver']
-        self.compute_mass_properties = self.parameters['compute_mass_properties']
-
+        self.name = self.parameters['name']
         self.beams = self.parameters['beams']
         self.mesh_units = self.parameters['mesh_units']
 
@@ -35,38 +28,29 @@ class Mass(m3l.ExplicitOperation):
         mesh_units = self.parameters['mesh_units']
 
         csdl_model = MassCSDL(
-            module=self,
             beams=beams,
             mesh_units=mesh_units,)
         
         return csdl_model
 
-    def evaluate(self):
-
-        self.name = 'mass_model'
+    def evaluate(self, width, height, t_cap, t_web, beam_nodes):
         self.arguments = {}
-        
-        mass = m3l.Variable('mass', shape=(1,), operation=self)
+        beams = self.parameters['beams']
+
+        for j, beam_name in enumerate(beams):
+            self.arguments[f'{beam_name}_mesh'] = beam_nodes
+            self.arguments[f'{beam_name}_width'] = width
+            self.arguments[f'{beam_name}_height'] = height
+            self.arguments[f'{beam_name}_tweb'] = t_cap
+            self.arguments[f'{beam_name}_tcap'] = t_web
+
+        mass = m3l.Variable(name='mass', shape=(1,), operation=self)
 
         return mass
 
 
 
-
-
-
-
-class MassMesh(Module):
-    def initialize(self, kwargs):
-        self.parameters.declare('meshes', types=dict)
-        self.parameters.declare('mesh_units', default='ft')
-
-
-
-
-
-
-class MassCSDL(ModuleCSDL):
+class MassCSDL(csdl.Model):
     def initialize(self):
         self.parameters.declare('beams', default={})
         self.parameters.declare('mesh_units', default='ft')
@@ -79,18 +63,17 @@ class MassCSDL(ModuleCSDL):
 
         m_vec = self.create_output('m_vec',shape=(len(beams)),val=0) # stores the mass for each beam
 
-
         for j, beam_name in enumerate(beams):
             n = len(beams[beam_name]['nodes'])
             rho = beams[beam_name]['rho']
 
             # get the mesh:
-            mesh_in = self.register_module_input(beam_name + '_mesh', shape=(n,3), promotes=True)
+            mesh_in = self.declare_variable(beam_name + '_mesh', shape=(n,3))
             if mesh_units == 'm': mesh = 1*mesh_in
             elif mesh_units == 'ft': mesh = 0.304*mesh_in
             # get the width and height meshes:
-            width = self.register_module_input(beam_name + '_width', shape=(n), promotes=True)
-            height = self.register_module_input(beam_name + '_height', shape=(n), promotes=True)
+            width = self.declare_variable(beam_name + '_width', shape=(n))
+            height = self.declare_variable(beam_name + '_height', shape=(n))
             w = self.create_output(beam_name + '_w', shape=(n - 1), val=0)
             h = self.create_output(beam_name + '_h', shape=(n - 1), val=0)
             # take averages of nodal meshes to get elemental meshes and convert units:
@@ -105,8 +88,8 @@ class MassCSDL(ModuleCSDL):
             # the box-beam thicknesses:
             #tweb = self.declare_variable(beam_name + '_tweb', shape=(n - 1))
             #tcap = self.declare_variable(beam_name + '_tcap', shape=(n - 1))
-            tweb = self.register_module_input(beam_name + '_tweb', shape=(n - 1), computed_upstream=False)
-            tcap = self.register_module_input(beam_name + '_tcap', shape=(n - 1), computed_upstream=False)
+            tweb = self.declare_variable(beam_name + '_tweb', shape=(n - 1))
+            tcap = self.declare_variable(beam_name + '_tcap', shape=(n - 1))
 
             self.print_var(tweb)
             self.print_var(tcap)
@@ -133,6 +116,6 @@ class MassCSDL(ModuleCSDL):
 
 
         total_mass = csdl.sum(m_vec) # sums the beam masses
-        self.register_module_output('mass', total_mass)
+        self.register_output('mass', total_mass)
 
         self.print_var(total_mass)

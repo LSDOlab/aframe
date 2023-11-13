@@ -5,12 +5,12 @@ from aframe.core.model import Model
 from aframe.core.buckle import Buckle
 from aframe.core.nodal_stress import NodalStressBox
 from aframe.core.stress import StressBox
-from lsdo_modules.module_csdl.module_csdl import ModuleCSDL
 
 
 
 
-class Aframe(ModuleCSDL):
+
+class Aframe(csdl.Model):
 
     def initialize(self):
         self.parameters.declare('beams', default={})
@@ -191,7 +191,7 @@ class Aframe(ModuleCSDL):
         default_val = np.zeros((n, 3))
         default_val[:,1] = np.linspace(0,n,n)
         # mesh = self.declare_variable(name + '_mesh', shape=(n,3), val=default_val)
-        mesh_in = self.register_module_input(beam_name + '_mesh', shape=(n,3), promotes=True, val=default_val)
+        mesh_in = self.declare_variable(beam_name + '_mesh', shape=(n,3), val=default_val)
         # self.print_var(mesh_in)
         if mesh_units == 'm': mesh = 1*mesh_in
         elif mesh_units == 'ft': mesh = 0.304*mesh_in
@@ -203,10 +203,10 @@ class Aframe(ModuleCSDL):
 
 
         if cs == 'box':
-            width = self.register_module_input(beam_name + '_width', shape=(n), promotes=True)
-            height = self.register_module_input(beam_name + '_height', shape=(n), promotes=True)
-            tweb = self.register_module_input(beam_name + '_tweb', shape=(n))
-            tcap = self.register_module_input(beam_name + '_tcap', shape=(n))
+            width = self.declare_variable(beam_name + '_width', shape=(n))
+            height = self.declare_variable(beam_name + '_height', shape=(n))
+            tweb = self.declare_variable(beam_name + '_tweb', shape=(n))
+            tcap = self.declare_variable(beam_name + '_tcap', shape=(n))
 
 
             # parse elemental outputs

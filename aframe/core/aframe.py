@@ -2,12 +2,12 @@ import numpy as np
 import csdl
 from aframe.core.model import Model
 from aframe.core.stress import StressBox
-from lsdo_modules.module_csdl.module_csdl import ModuleCSDL
 
 
 
 
-class Aframe(ModuleCSDL):
+
+class Aframe(csdl.Model):
 
     def initialize(self):
         self.parameters.declare('beams', default={})
@@ -62,17 +62,17 @@ class Aframe(ModuleCSDL):
             default_val = np.zeros((n, 3))
             default_val[:,1] = np.linspace(0,n,n)
             # mesh = self.declare_variable(name + '_mesh', shape=(n,3), val=default_val)
-            mesh_in = self.register_module_input(beam_name + '_mesh', shape=(n,3), promotes=True, val=default_val)
+            mesh_in = self.declare_variable(beam_name + '_mesh', shape=(n,3), val=default_val)
             # self.print_var(mesh_in)
             if mesh_units == 'm': mesh = 1*mesh_in
             elif mesh_units == 'ft': mesh = 0.304*mesh_in
 
 
             if cs == 'box':
-                width = self.register_module_input(beam_name + '_width', shape=(n), promotes=True)
-                height = self.register_module_input(beam_name + '_height', shape=(n), promotes=True)
-                tweb_in = self.register_module_input(beam_name + '_tweb', shape=(n))
-                tcap_in = self.register_module_input(beam_name + '_tcap', shape=(n))
+                width = self.declare_variable(beam_name + '_width', shape=(n))
+                height = self.declare_variable(beam_name + '_height', shape=(n))
+                tweb_in = self.declare_variable(beam_name + '_tweb', shape=(n))
+                tcap_in = self.declare_variable(beam_name + '_tcap', shape=(n))
 
                 # create elemental outputs
                 w_vec, h_vec = self.create_output(beam_name + '_w', shape=(n - 1), val=0), self.create_output(beam_name + '_h', shape=(n - 1), val=0)
@@ -273,7 +273,7 @@ class Aframe(ModuleCSDL):
             m_vec[i] = m
         
         # compute the center of gravity for the entire structure:
-        total_mass = self.register_module_output('mass', csdl.sum(m_vec))
+        total_mass = self.register_output('mass', csdl.sum(m_vec))
         self.register_output('struct_mass', 1*total_mass)
 
         # self.print_var(total_mass)
@@ -308,7 +308,7 @@ class Aframe(ModuleCSDL):
         # sum the m*r vector to get the moi:
         Ixx, Iyy, Izz, Ixz = csdl.sum(eixx), csdl.sum(eiyy), csdl.sum(eizz), csdl.sum(eixz)
 
-        inertia_tensor = self.register_module_output('inertia_tensor', shape=(3, 3), val=0)
+        inertia_tensor = self.create_output('inertia_tensor', shape=(3, 3), val=0)
         inertia_tensor[0, 0] = csdl.reshape(Ixx, (1, 1))
         inertia_tensor[0, 2] = csdl.reshape(Ixz, (1, 1))
         inertia_tensor[1, 1] = csdl.reshape(Iyy, (1, 1))

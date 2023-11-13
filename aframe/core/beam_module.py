@@ -1,23 +1,24 @@
-from lsdo_modules.module_csdl.module_csdl import ModuleCSDL
-from lsdo_modules.module.module import Module
 from aframe.core.aframe import Aframe
 import numpy as np
 import csdl
 import m3l
 import array_mapper as am
 from typing import Tuple, Dict
-import m3l
+from dataclasses import dataclass
 
-    
 
+@dataclass
+class EBBeamOutputs:
+    """Data class for Euler--Bernoulli beam outputs"""
+    displacements : m3l.Variable
+    rotations : m3l.Variable
+    mass : m3l.Variable
+    cg_vector : m3l.Variable
+    inertia_tensor : m3l.Variable
 
 class EBBeam(m3l.ExplicitOperation):
     def initialize(self, kwargs):
-        self.parameters.declare('component', default=None)
-        self.parameters.declare('mesh', default=None)
-        self.parameters.declare('struct_solver', True)
-        self.parameters.declare('compute_mass_properties', default=True, types=bool)
-
+        self.parameters.declare('name', types=str)
         self.parameters.declare('beams', default={})
         self.parameters.declare('bounds', default={})
         self.parameters.declare('joints', default={})
@@ -25,11 +26,7 @@ class EBBeam(m3l.ExplicitOperation):
         self.num_nodes = None
 
     def assign_attributes(self):
-        self.component = self.parameters['component']
-        self.mesh = self.parameters['mesh']
-        self.struct_solver = self.parameters['struct_solver']
-        self.compute_mass_properties = self.parameters['compute_mass_properties']
-
+        self.name = self.parameters['name']
         self.beams = self.parameters['beams']
         self.bounds = self.parameters['bounds']
         self.joints = self.parameters['joints']
@@ -50,11 +47,10 @@ class EBBeam(m3l.ExplicitOperation):
         mesh_units = self.parameters['mesh_units']
 
         csdl_model = LinearBeamCSDL(
-            module=self,
             beams=beams,  
             bounds=bounds,
             joints=joints,
-            mesh_units=mesh_units,)
+            mesh_units=mesh_units)
         
         return csdl_model
 
@@ -69,7 +65,7 @@ class EBBeam(m3l.ExplicitOperation):
     #     displacement_nodes = arguments['displacement_nodes']
     #     derivatives['nodal_displacement', 'displacement'] = displacement_map(geo_mesh, displacement_nodes)
 
-    def evaluate(self, forces:m3l.Variable=None, moments:m3l.Variable=None) -> Tuple[m3l.Variable, m3l.Variable]:
+    def evaluate(self, beam_mesh : m3l.Variable, t_web : m3l.Variable=None, t_cap : m3l.Variable=None, forces:m3l.Variable=None, moments:m3l.Variable=None) -> Tuple[m3l.Variable, m3l.Variable]:
         '''
         Evaluates the beam model.
         
@@ -89,14 +85,18 @@ class EBBeam(m3l.ExplicitOperation):
 
         '''
 
+        mesh = beam_mesh.beam_nodes
+        beam_height = beam_mesh.height
+        beam_width = beam_mesh.width
+
         # Gets information for naming/shapes
         beam_name = list(self.parameters['beams'].keys())[0]   # this is only taking the first mesh added to the solver.
-        mesh = list(self.parameters['mesh'].parameters['meshes'].values())[0]   # this is only taking the first mesh added to the solver.
-
-        # Define operation arguments
-        self.name = f'{self.component.name}_eb_beam_model'
 
         self.arguments = {}
+        self.arguments[f'{beam_name}_width'] = beam_width
+        self.arguments[f'{beam_name}_height'] = beam_height
+        # self.arguments[f'{beam_name}_tcap'] = t_cap
+        # self.arguments[f'{beam_name}_tweb'] = t_web
         if forces is not None:
             self.arguments[f'{beam_name}_forces'] = forces
         if moments is not None:
@@ -108,47 +108,56 @@ class EBBeam(m3l.ExplicitOperation):
         mass = m3l.Variable(name='mass', shape=(1,), operation=self)
         cg = m3l.Variable(name='cg_vector', shape=(3,), operation=self)
         inertia_tensor = m3l.Variable(name='inertia_tensor', shape=(3,3), operation=self)
-        return displacements, rotations, mass, cg, inertia_tensor
+        
+        outputs = EBBeamOutputs(
+            displacements=displacements,
+            rotations=rotations,
+            mass=mass,
+            cg_vector=cg,
+            inertia_tensor=inertia_tensor,
+        )
+        
+        return outputs
 
 
     
 
 class EBBeamForces(m3l.ExplicitOperation):
     def initialize(self, kwargs):
-        self.parameters.declare('component')
+        self.parameters.declare('name', types=str)
         self.parameters.declare('beams', default={})
-        self.parameters.declare('beam_mesh', types=LinearBeamMesh)
+        # self.parameters.declare('beam_mesh', types=LinearBeamMesh)
         self.parameters.declare('exclude_middle', default=False)
 
     def assign_attributes(self):
-        self.component = self.parameters['component']
         self.beams = self.parameters['beams']
-        self.beam_mesh = self.parameters['beam_mesh']
+        # self.beam_mesh = self.parameters['beam_mesh']
+        self.name = self.parameters['name']
 
     def compute(self) -> csdl.Model:
         beam_name = list(self.parameters['beams'].keys())[0]   # this is only taking the first mesh added to the solver.
-        beam_mesh = list(self.beam_mesh.parameters['meshes'].values())[0]   # this is only taking the first mesh added to the solver.
+        # beam_mesh = list(self.beam_mesh.parameters['meshes'].values())[0]   # this is only taking the first mesh added to the solver.
         nodal_forces = self.arguments['nodal_forces']
         exclude_middle = self.parameters['exclude_middle']
 
-        csdl_model = ModuleCSDL()
+        csdl_model = csdl.Model()
 
-        force_map = self.fmap(beam_mesh.value.reshape((-1,3)),
+        force_map = self.fmap(self.beam_mesh.value.reshape((-1,3)),
                               oml=self.nodal_forces_mesh.value.reshape((-1,3)),
                               exclude_middle=exclude_middle)
 
         flattened_nodal_forces_shape = (np.prod(nodal_forces.shape[:-1]), nodal_forces.shape[-1])
-        nodal_forces_csdl = csdl_model.register_module_input(name='nodal_forces', shape=nodal_forces.shape)
+        nodal_forces_csdl = csdl_model.declare_variable(name='nodal_forces', shape=nodal_forces.shape)
         flattened_nodal_forces = csdl.reshape(nodal_forces_csdl, new_shape=flattened_nodal_forces_shape)
         force_map_csdl = csdl_model.create_input(f'nodal_to_{beam_name}_forces_map', val=force_map)
         flatenned_beam_mesh_forces = csdl.matmat(force_map_csdl, flattened_nodal_forces)
-        output_shape = tuple(beam_mesh.shape[:-1]) + (nodal_forces.shape[-1],)
+        output_shape = tuple(self.beam_mesh.shape[:-1]) + (nodal_forces.shape[-1],)
         beam_mesh_forces = csdl.reshape(flatenned_beam_mesh_forces, new_shape=output_shape)
-        csdl_model.register_module_output(f'{beam_name}_forces', beam_mesh_forces)
+        csdl_model.register_output(f'{beam_name}_forces', beam_mesh_forces)
 
         return csdl_model
 
-    def evaluate(self, nodal_forces:m3l.Variable, nodal_forces_mesh:am.MappedArray) -> m3l.Variable:
+    def evaluate(self, beam_mesh : m3l.Variable, nodal_forces:m3l.Variable, nodal_forces_mesh:am.MappedArray) -> m3l.Variable:
         '''
         Maps nodal forces from arbitrary locations to the mesh nodes.
         
@@ -164,12 +173,10 @@ class EBBeamForces(m3l.ExplicitOperation):
         mesh_forces : m3l.Variable
             The forces on the mesh.
         '''
-        self.name = f'{self.component.name}_eb_beam_force_mapping'
-
         self.nodal_forces_mesh = nodal_forces_mesh
-
+        self.beam_mesh = beam_mesh
         beam_name = list(self.parameters['beams'].keys())[0]   # this is only taking the first mesh added to the solver.
-        beam_mesh = list(self.beam_mesh.parameters['meshes'].values())[0]   # this is only taking the first mesh added to the solver.
+        # beam_mesh = list(self.beam_mesh.parameters['meshes'].values())[0]   # this is only taking the first mesh added to the solver.
 
         self.arguments = {'nodal_forces' : nodal_forces}
         output_shape = tuple(beam_mesh.shape[:-1]) + (nodal_forces.shape[-1],)
@@ -232,14 +239,14 @@ class EBBeamMoments(m3l.ExplicitOperation):
         beam_name = list(self.parameters['beams'].keys())[0]   # this is only taking the first mesh added to the solver.
         mesh = list(self.parameters['mesh'].parameters['meshes'].values())[0]   # this is only taking the first mesh added to the solver.
 
-        csdl_model = ModuleCSDL()
+        csdl_model = csdl.Model()
 
         force_map = self.fmap(mesh.value.reshape((-1,3)), oml=nodal_moments_mesh.value.reshape((-1,3)))
 
-        nodal_moments = csdl_model.register_module_input(name='nodal_moments', shape=nodal_moments.shape)
+        nodal_moments = csdl_model.declare_variable(name='nodal_moments', shape=nodal_moments.shape)
         moment_map_csdl = csdl_model.create_input(f'nodal_to_{beam_name}_moments_map', val=force_map)
         beam_moments = csdl.matmat(moment_map_csdl, nodal_moments)
-        csdl_model.register_module_output(f'{beam_name}_moments', beam_moments)
+        csdl_model.register_output(f'{beam_name}_moments', beam_moments)
 
         return csdl_model
 
@@ -315,20 +322,20 @@ class EBBeamNodalDisplacements(m3l.ExplicitOperation):
         self.beams = self.parameters['beams']
         self.beam_mesh = self.parameters['beam_mesh']
 
-    def compute(self) -> ModuleCSDL:
+    def compute(self) -> csdl.Model:
         beam_name = list(self.parameters['beams'].keys())[0]   # this is only taking the first mesh added to the solver.
         mesh = list(self.beam_mesh.parameters['meshes'].values())[0]   # this is only taking the first mesh added to the solver.
         nodal_displacements_mesh = self.nodal_displacements_mesh
         beam_displacements = self.arguments[f'{beam_name}_displacement']
 
-        csdl_model = ModuleCSDL()
+        csdl_model = csdl.Model()
 
         displacement_map = self.umap(mesh.value.reshape((-1,3)), oml=nodal_displacements_mesh.value.reshape((-1,3)))
 
-        beam_displacements_csdl = csdl_model.register_module_input(name=f'{beam_name}_displacement', shape=beam_displacements.shape)
+        beam_displacements_csdl = csdl_model.declare_variable(name=f'{beam_name}_displacement', shape=beam_displacements.shape)
         displacement_map_csdl = csdl_model.create_input(f'{beam_name}_displacements_to_nodal_displacements', val=displacement_map)
         nodal_displacements = csdl.matmat(displacement_map_csdl, beam_displacements_csdl)
-        csdl_model.register_module_output(f'{beam_name}_nodal_displacement', nodal_displacements)
+        csdl_model.register_output(f'{beam_name}_nodal_displacement', nodal_displacements)
 
         return csdl_model
 
@@ -417,14 +424,15 @@ class BeamM3LStress(m3l.ExplicitOperation):
 
 
 
-class LinearBeamMesh(Module):
+class LinearBeamMesh(m3l.ExplicitOperation):
     def initialize(self, kwargs):
+        self.parameters.declare('name', types=str, default='linear_beam_mesh')
         self.parameters.declare('meshes', types=dict)
         self.parameters.declare('mesh_units', default='m')
 
 
 
-class LinearBeamCSDL(ModuleCSDL):
+class LinearBeamCSDL(csdl.Model):
     def initialize(self):
         self.parameters.declare('beams')
         self.parameters.declare('bounds')
@@ -437,24 +445,5 @@ class LinearBeamCSDL(ModuleCSDL):
         joints = self.parameters['joints']
         mesh_units = self.parameters['mesh_units']
 
-        """
-        for beam_name in beams:
-            n = len(beams[beam_name]['nodes'])
-            cs = beams[beam_name]['cs']
-
-            if cs == 'box':
-                xweb = self.register_module_input(beam_name+'t_web_in',shape=(n-1), computed_upstream=False)
-                xcap = self.register_module_input(beam_name+'t_cap_in',shape=(n-1), computed_upstream=False)
-                self.register_output(beam_name+'_tweb',1*xweb)
-                self.register_output(beam_name+'_tcap',1*xcap)
-                
-                
-            elif cs == 'tube':
-                thickness = self.register_module_input(beam_name+'thickness_in',shape=(n-1), computed_upstream=False)
-                radius = self.register_module_input(beam_name+'radius_in',shape=(n-1), computed_upstream=False)
-                self.register_output(beam_name+'_t', 1*thickness)
-                self.register_output(beam_name+'_r', 1*radius)
-        """
-
         # solve the beam group:
-        self.add_module(Aframe(beams=beams, bounds=bounds, joints=joints, mesh_units='ft'), name='Aframe')
+        self.add(Aframe(beams=beams, bounds=bounds, joints=joints, mesh_units=mesh_units), name='Aframe')
