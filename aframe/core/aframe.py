@@ -460,7 +460,7 @@ class Aframe(ModuleCSDL):
                 element_name = beam_name + '_element_' + str(i)
 
                 wb = self.declare_variable(element_name + '_w')
-                hb = self.declare_variable(element_name + '_h')
+                #hb = self.declare_variable(element_name + '_h')
                 tcapb = self.declare_variable(element_name + '_tcap')
                 #a = self.declare_variable(element_name + 'L')
 
