@@ -60,7 +60,7 @@ mass_rev = np.array([1.59267758, 1.59293928, 1.76015184, 1.96724632, 2.21743341,
 mass = (mass_fwd + mass_rev)/2
 gravity_loads = mass*9.81
 
-forces[:,2] += gravity_loads
+forces[:,2] -= gravity_loads
 # endregion
 
 class Run(csdl.Model):
@@ -143,9 +143,7 @@ if __name__ == '__main__':
     element_Iy_out = sim['wing_iyo'] # (n-1)
     element_Iz_out = sim['wing_izo'] # (n-1)
     element_J_out = sim['wing_jo'] # (n-1)
-
     bkl = sim['wing_bkl']
-    print('buckle ratio: ', bkl)
 
     beamNodalDf = pd.DataFrame(
         data={
@@ -171,6 +169,7 @@ if __name__ == '__main__':
             'Iy (in^4)': element_Iy_out * m42in4,
             'Iz (in^4)': element_Iz_out * m42in4,
             'J (in^4)': element_J_out * m42in4,
+            'Buckle ratio': bkl,
         },
     )
     with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also

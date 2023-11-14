@@ -95,8 +95,9 @@ class EBBeam(m3l.ExplicitOperation):
         self.arguments = {}
         self.arguments[f'{beam_name}_width'] = beam_width
         self.arguments[f'{beam_name}_height'] = beam_height
-        # self.arguments[f'{beam_name}_tcap'] = t_cap
-        # self.arguments[f'{beam_name}_tweb'] = t_web
+        self.arguments[f'{beam_name}_tcap'] = t_cap
+        self.arguments[f'{beam_name}_tweb'] = t_web
+        self.arguments[f'{beam_name}_mesh'] = mesh
         if forces is not None:
             self.arguments[f'{beam_name}_forces'] = forces
         if moments is not None:

@@ -88,11 +88,17 @@ class MassCSDL(csdl.Model):
             # the box-beam thicknesses:
             #tweb = self.declare_variable(beam_name + '_tweb', shape=(n - 1))
             #tcap = self.declare_variable(beam_name + '_tcap', shape=(n - 1))
-            tweb = self.declare_variable(beam_name + '_tweb', shape=(n - 1))
-            tcap = self.declare_variable(beam_name + '_tcap', shape=(n - 1))
+            tweb_in = self.declare_variable(beam_name + '_tweb', shape=(n))
+            tcap_in = self.declare_variable(beam_name + '_tcap', shape=(n))
 
-            self.print_var(tweb)
-            self.print_var(tcap)
+            tweb = self.create_output('marius_tweb', shape=(n-1), val=0)
+            tcap = self.create_output('marius_tcap', shape=(n-1), val=0)
+            for i in range(n - 1):
+                tweb[i] = (tweb_in[i]+tweb_in[i+1])/2
+                tcap[i] = (tcap_in[i]+tcap_in[i+1])/2
+
+            #self.print_var(tweb)
+            #self.print_var(tcap)
 
             # get cs area:
             w_i = w - 2*tweb
