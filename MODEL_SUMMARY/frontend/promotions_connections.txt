@@ -1,0 +1,838 @@
+(id:0)                source     in     wing_mesh
+ <---(id:6)           promotion  dec    Aframe.wing_mesh
+
+(id:1)                source     in     wing_height
+ <---(id:9)           promotion  dec    Aframe.wing_height
+
+(id:2)                source     in     wing_width
+ <---(id:8)           promotion  dec    Aframe.wing_width
+
+(id:3)                source     in     wing_tcap
+ <---(id:11)          promotion  dec    Aframe.wing_tcap
+
+(id:4)                source     in     wing_tweb
+ <---(id:10)          promotion  dec    Aframe.wing_tweb
+
+(id:5)                source     in     wing_forces
+ <---(id:5787)        promotion  dec    Aframe.wing_forces
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:6845)             source     dec    Aframe.wing_element_19_w
+ <---(id:12241)       promotion  dec    Aframe.wing_element_19StressBox.wing_element_19_w
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:6833)             source     dec    Aframe.wing_element_18_w
+ <---(id:11958)       promotion  dec    Aframe.wing_element_18StressBox.wing_element_18_w
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:6821)             source     dec    Aframe.wing_element_17_w
+ <---(id:11675)       promotion  dec    Aframe.wing_element_17StressBox.wing_element_17_w
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:6809)             source     dec    Aframe.wing_element_16_w
+ <---(id:11392)       promotion  dec    Aframe.wing_element_16StressBox.wing_element_16_w
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:6797)             source     dec    Aframe.wing_element_15_w
+ <---(id:11109)       promotion  dec    Aframe.wing_element_15StressBox.wing_element_15_w
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:6785)             source     dec    Aframe.wing_element_14_w
+ <---(id:10826)       promotion  dec    Aframe.wing_element_14StressBox.wing_element_14_w
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:6773)             source     dec    Aframe.wing_element_13_w
+ <---(id:10543)       promotion  dec    Aframe.wing_element_13StressBox.wing_element_13_w
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:6761)             source     dec    Aframe.wing_element_12_w
+ <---(id:10260)       promotion  dec    Aframe.wing_element_12StressBox.wing_element_12_w
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:6749)             source     dec    Aframe.wing_element_11_w
+ <---(id:9977)        promotion  dec    Aframe.wing_element_11StressBox.wing_element_11_w
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:6737)             source     dec    Aframe.wing_element_10_w
+ <---(id:9694)        promotion  dec    Aframe.wing_element_10StressBox.wing_element_10_w
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:6725)             source     dec    Aframe.wing_element_9_w
+ <---(id:9411)        promotion  dec    Aframe.wing_element_9StressBox.wing_element_9_w
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:6713)             source     dec    Aframe.wing_element_8_w
+ <---(id:9128)        promotion  dec    Aframe.wing_element_8StressBox.wing_element_8_w
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:6701)             source     dec    Aframe.wing_element_7_w
+ <---(id:8845)        promotion  dec    Aframe.wing_element_7StressBox.wing_element_7_w
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:6689)             source     dec    Aframe.wing_element_6_w
+ <---(id:8562)        promotion  dec    Aframe.wing_element_6StressBox.wing_element_6_w
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:6677)             source     dec    Aframe.wing_element_5_w
+ <---(id:8279)        promotion  dec    Aframe.wing_element_5StressBox.wing_element_5_w
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:6665)             source     dec    Aframe.wing_element_4_w
+ <---(id:7996)        promotion  dec    Aframe.wing_element_4StressBox.wing_element_4_w
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:6653)             source     dec    Aframe.wing_element_3_w
+ <---(id:7713)        promotion  dec    Aframe.wing_element_3StressBox.wing_element_3_w
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:6641)             source     dec    Aframe.wing_element_2_w
+ <---(id:7430)        promotion  dec    Aframe.wing_element_2StressBox.wing_element_2_w
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:6629)             source     dec    Aframe.wing_element_1_w
+ <---(id:7147)        promotion  dec    Aframe.wing_element_1StressBox.wing_element_1_w
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:6617)             source     dec    Aframe.wing_element_0_w
+ <---(id:6864)        promotion  dec    Aframe.wing_element_0StressBox.wing_element_0_w
+
+(id:6239)             source     out    Aframe.wing_element_19local_loads
+ <---(id:12243)       promotion  dec    Aframe.wing_element_19StressBox.wing_element_19local_loads
+
+(id:6229)             source     out    Aframe.wing_element_18local_loads
+ <---(id:11960)       promotion  dec    Aframe.wing_element_18StressBox.wing_element_18local_loads
+
+(id:6219)             source     out    Aframe.wing_element_17local_loads
+ <---(id:11677)       promotion  dec    Aframe.wing_element_17StressBox.wing_element_17local_loads
+
+(id:6209)             source     out    Aframe.wing_element_16local_loads
+ <---(id:11394)       promotion  dec    Aframe.wing_element_16StressBox.wing_element_16local_loads
+
+(id:6199)             source     out    Aframe.wing_element_15local_loads
+ <---(id:11111)       promotion  dec    Aframe.wing_element_15StressBox.wing_element_15local_loads
+
+(id:6189)             source     out    Aframe.wing_element_14local_loads
+ <---(id:10828)       promotion  dec    Aframe.wing_element_14StressBox.wing_element_14local_loads
+
+(id:6179)             source     out    Aframe.wing_element_13local_loads
+ <---(id:10545)       promotion  dec    Aframe.wing_element_13StressBox.wing_element_13local_loads
+
+(id:6169)             source     out    Aframe.wing_element_12local_loads
+ <---(id:10262)       promotion  dec    Aframe.wing_element_12StressBox.wing_element_12local_loads
+
+(id:6159)             source     out    Aframe.wing_element_11local_loads
+ <---(id:9979)        promotion  dec    Aframe.wing_element_11StressBox.wing_element_11local_loads
+
+(id:6149)             source     out    Aframe.wing_element_10local_loads
+ <---(id:9696)        promotion  dec    Aframe.wing_element_10StressBox.wing_element_10local_loads
+
+(id:6139)             source     out    Aframe.wing_element_9local_loads
+ <---(id:9413)        promotion  dec    Aframe.wing_element_9StressBox.wing_element_9local_loads
+
+(id:6129)             source     out    Aframe.wing_element_8local_loads
+ <---(id:9130)        promotion  dec    Aframe.wing_element_8StressBox.wing_element_8local_loads
+
+(id:6119)             source     out    Aframe.wing_element_7local_loads
+ <---(id:8847)        promotion  dec    Aframe.wing_element_7StressBox.wing_element_7local_loads
+
+(id:6109)             source     out    Aframe.wing_element_6local_loads
+ <---(id:8564)        promotion  dec    Aframe.wing_element_6StressBox.wing_element_6local_loads
+
+(id:6099)             source     out    Aframe.wing_element_5local_loads
+ <---(id:8281)        promotion  dec    Aframe.wing_element_5StressBox.wing_element_5local_loads
+
+(id:6089)             source     out    Aframe.wing_element_4local_loads
+ <---(id:7998)        promotion  dec    Aframe.wing_element_4StressBox.wing_element_4local_loads
+
+(id:6079)             source     out    Aframe.wing_element_3local_loads
+ <---(id:7715)        promotion  dec    Aframe.wing_element_3StressBox.wing_element_3local_loads
+
+(id:6069)             source     out    Aframe.wing_element_2local_loads
+ <---(id:7432)        promotion  dec    Aframe.wing_element_2StressBox.wing_element_2local_loads
+
+(id:6059)             source     out    Aframe.wing_element_1local_loads
+ <---(id:7149)        promotion  dec    Aframe.wing_element_1StressBox.wing_element_1local_loads
+
+(id:6049)             source     out    Aframe.wing_element_0local_loads
+ <---(id:6866)        promotion  dec    Aframe.wing_element_0StressBox.wing_element_0local_loads
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:5372)             source     dec    Aframe.wing_element_19_A
+ <---(id:12237)       promotion  dec    Aframe.wing_element_19StressBox.wing_element_19_A
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:5361)             source     dec    Aframe.wing_element_18_A
+ <---(id:11954)       promotion  dec    Aframe.wing_element_18StressBox.wing_element_18_A
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:5350)             source     dec    Aframe.wing_element_17_A
+ <---(id:11671)       promotion  dec    Aframe.wing_element_17StressBox.wing_element_17_A
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:5339)             source     dec    Aframe.wing_element_16_A
+ <---(id:11388)       promotion  dec    Aframe.wing_element_16StressBox.wing_element_16_A
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:5328)             source     dec    Aframe.wing_element_15_A
+ <---(id:11105)       promotion  dec    Aframe.wing_element_15StressBox.wing_element_15_A
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:5317)             source     dec    Aframe.wing_element_14_A
+ <---(id:10822)       promotion  dec    Aframe.wing_element_14StressBox.wing_element_14_A
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:5306)             source     dec    Aframe.wing_element_13_A
+ <---(id:10539)       promotion  dec    Aframe.wing_element_13StressBox.wing_element_13_A
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:5295)             source     dec    Aframe.wing_element_12_A
+ <---(id:10256)       promotion  dec    Aframe.wing_element_12StressBox.wing_element_12_A
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:5284)             source     dec    Aframe.wing_element_11_A
+ <---(id:9973)        promotion  dec    Aframe.wing_element_11StressBox.wing_element_11_A
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:5273)             source     dec    Aframe.wing_element_10_A
+ <---(id:9690)        promotion  dec    Aframe.wing_element_10StressBox.wing_element_10_A
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:5262)             source     dec    Aframe.wing_element_9_A
+ <---(id:9407)        promotion  dec    Aframe.wing_element_9StressBox.wing_element_9_A
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:5251)             source     dec    Aframe.wing_element_8_A
+ <---(id:9124)        promotion  dec    Aframe.wing_element_8StressBox.wing_element_8_A
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:5240)             source     dec    Aframe.wing_element_7_A
+ <---(id:8841)        promotion  dec    Aframe.wing_element_7StressBox.wing_element_7_A
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:5229)             source     dec    Aframe.wing_element_6_A
+ <---(id:8558)        promotion  dec    Aframe.wing_element_6StressBox.wing_element_6_A
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:5218)             source     dec    Aframe.wing_element_5_A
+ <---(id:8275)        promotion  dec    Aframe.wing_element_5StressBox.wing_element_5_A
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:5207)             source     dec    Aframe.wing_element_4_A
+ <---(id:7992)        promotion  dec    Aframe.wing_element_4StressBox.wing_element_4_A
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:5196)             source     dec    Aframe.wing_element_3_A
+ <---(id:7709)        promotion  dec    Aframe.wing_element_3StressBox.wing_element_3_A
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:5185)             source     dec    Aframe.wing_element_2_A
+ <---(id:7426)        promotion  dec    Aframe.wing_element_2StressBox.wing_element_2_A
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:5174)             source     dec    Aframe.wing_element_1_A
+ <---(id:7143)        promotion  dec    Aframe.wing_element_1StressBox.wing_element_1_A
+
+WARNING: Declared variable not promoted/connected to input/output
+(id:5163)             source     dec    Aframe.wing_element_0_A
+ <---(id:6860)        promotion  dec    Aframe.wing_element_0StressBox.wing_element_0_A
+
+(id:4885)             source     out    Aframe.wing_element_19_Iz
+ <---(id:12240)       promotion  dec    Aframe.wing_element_19StressBox.wing_element_19_Iz
+
+(id:4879)             source     out    Aframe.wing_element_19_Iy
+ <---(id:12239)       promotion  dec    Aframe.wing_element_19StressBox.wing_element_19_Iy
+
+(id:4901)             source     out    Aframe.wing_element_19_J
+ <---(id:12238)       promotion  dec    Aframe.wing_element_19StressBox.wing_element_19_J
+
+(id:4904)             source     out    Aframe.wing_element_19_Q
+ <---(id:12267)       promotion  dec    Aframe.wing_element_19StressBox.wing_element_19_Q
+
+(id:4856)             source     out    Aframe.wing_element_19_h
+ <---(id:12242)       promotion  dec    Aframe.wing_element_19StressBox.wing_element_19_h
+
+(id:4860)             source     out    Aframe.wing_element_19_tweb
+ <---(id:12266)       promotion  dec    Aframe.wing_element_19StressBox.wing_element_19_tweb
+
+(id:27)               source     out    Aframe.wing_element_0_h
+ <---(id:6865)        promotion  dec    Aframe.wing_element_0StressBox.wing_element_0_h
+
+(id:284)              source     out    Aframe.wing_element_1_h
+ <---(id:7148)        promotion  dec    Aframe.wing_element_1StressBox.wing_element_1_h
+
+(id:538)              source     out    Aframe.wing_element_2_h
+ <---(id:7431)        promotion  dec    Aframe.wing_element_2StressBox.wing_element_2_h
+
+(id:792)              source     out    Aframe.wing_element_3_h
+ <---(id:7714)        promotion  dec    Aframe.wing_element_3StressBox.wing_element_3_h
+
+(id:1046)             source     out    Aframe.wing_element_4_h
+ <---(id:7997)        promotion  dec    Aframe.wing_element_4StressBox.wing_element_4_h
+
+(id:1300)             source     out    Aframe.wing_element_5_h
+ <---(id:8280)        promotion  dec    Aframe.wing_element_5StressBox.wing_element_5_h
+
+(id:1554)             source     out    Aframe.wing_element_6_h
+ <---(id:8563)        promotion  dec    Aframe.wing_element_6StressBox.wing_element_6_h
+
+(id:1808)             source     out    Aframe.wing_element_7_h
+ <---(id:8846)        promotion  dec    Aframe.wing_element_7StressBox.wing_element_7_h
+
+(id:2062)             source     out    Aframe.wing_element_8_h
+ <---(id:9129)        promotion  dec    Aframe.wing_element_8StressBox.wing_element_8_h
+
+(id:2316)             source     out    Aframe.wing_element_9_h
+ <---(id:9412)        promotion  dec    Aframe.wing_element_9StressBox.wing_element_9_h
+
+(id:2570)             source     out    Aframe.wing_element_10_h
+ <---(id:9695)        promotion  dec    Aframe.wing_element_10StressBox.wing_element_10_h
+
+(id:2824)             source     out    Aframe.wing_element_11_h
+ <---(id:9978)        promotion  dec    Aframe.wing_element_11StressBox.wing_element_11_h
+
+(id:3078)             source     out    Aframe.wing_element_12_h
+ <---(id:10261)       promotion  dec    Aframe.wing_element_12StressBox.wing_element_12_h
+
+(id:3332)             source     out    Aframe.wing_element_13_h
+ <---(id:10544)       promotion  dec    Aframe.wing_element_13StressBox.wing_element_13_h
+
+(id:3586)             source     out    Aframe.wing_element_14_h
+ <---(id:10827)       promotion  dec    Aframe.wing_element_14StressBox.wing_element_14_h
+
+(id:3840)             source     out    Aframe.wing_element_15_h
+ <---(id:11110)       promotion  dec    Aframe.wing_element_15StressBox.wing_element_15_h
+
+(id:4094)             source     out    Aframe.wing_element_16_h
+ <---(id:11393)       promotion  dec    Aframe.wing_element_16StressBox.wing_element_16_h
+
+(id:4348)             source     out    Aframe.wing_element_17_h
+ <---(id:11676)       promotion  dec    Aframe.wing_element_17StressBox.wing_element_17_h
+
+(id:4602)             source     out    Aframe.wing_element_18_h
+ <---(id:11959)       promotion  dec    Aframe.wing_element_18StressBox.wing_element_18_h
+
+(id:4631)             source     out    Aframe.wing_element_18_Iz
+ <---(id:11957)       promotion  dec    Aframe.wing_element_18StressBox.wing_element_18_Iz
+
+(id:4625)             source     out    Aframe.wing_element_18_Iy
+ <---(id:11956)       promotion  dec    Aframe.wing_element_18StressBox.wing_element_18_Iy
+
+(id:4647)             source     out    Aframe.wing_element_18_J
+ <---(id:11955)       promotion  dec    Aframe.wing_element_18StressBox.wing_element_18_J
+
+(id:4650)             source     out    Aframe.wing_element_18_Q
+ <---(id:11984)       promotion  dec    Aframe.wing_element_18StressBox.wing_element_18_Q
+
+(id:4606)             source     out    Aframe.wing_element_18_tweb
+ <---(id:11983)       promotion  dec    Aframe.wing_element_18StressBox.wing_element_18_tweb
+
+(id:4377)             source     out    Aframe.wing_element_17_Iz
+ <---(id:11674)       promotion  dec    Aframe.wing_element_17StressBox.wing_element_17_Iz
+
+(id:4371)             source     out    Aframe.wing_element_17_Iy
+ <---(id:11673)       promotion  dec    Aframe.wing_element_17StressBox.wing_element_17_Iy
+
+(id:4393)             source     out    Aframe.wing_element_17_J
+ <---(id:11672)       promotion  dec    Aframe.wing_element_17StressBox.wing_element_17_J
+
+(id:4396)             source     out    Aframe.wing_element_17_Q
+ <---(id:11701)       promotion  dec    Aframe.wing_element_17StressBox.wing_element_17_Q
+
+(id:4352)             source     out    Aframe.wing_element_17_tweb
+ <---(id:11700)       promotion  dec    Aframe.wing_element_17StressBox.wing_element_17_tweb
+
+(id:4123)             source     out    Aframe.wing_element_16_Iz
+ <---(id:11391)       promotion  dec    Aframe.wing_element_16StressBox.wing_element_16_Iz
+
+(id:4117)             source     out    Aframe.wing_element_16_Iy
+ <---(id:11390)       promotion  dec    Aframe.wing_element_16StressBox.wing_element_16_Iy
+
+(id:4139)             source     out    Aframe.wing_element_16_J
+ <---(id:11389)       promotion  dec    Aframe.wing_element_16StressBox.wing_element_16_J
+
+(id:4142)             source     out    Aframe.wing_element_16_Q
+ <---(id:11418)       promotion  dec    Aframe.wing_element_16StressBox.wing_element_16_Q
+
+(id:4098)             source     out    Aframe.wing_element_16_tweb
+ <---(id:11417)       promotion  dec    Aframe.wing_element_16StressBox.wing_element_16_tweb
+
+(id:3869)             source     out    Aframe.wing_element_15_Iz
+ <---(id:11108)       promotion  dec    Aframe.wing_element_15StressBox.wing_element_15_Iz
+
+(id:3863)             source     out    Aframe.wing_element_15_Iy
+ <---(id:11107)       promotion  dec    Aframe.wing_element_15StressBox.wing_element_15_Iy
+
+(id:3885)             source     out    Aframe.wing_element_15_J
+ <---(id:11106)       promotion  dec    Aframe.wing_element_15StressBox.wing_element_15_J
+
+(id:3888)             source     out    Aframe.wing_element_15_Q
+ <---(id:11135)       promotion  dec    Aframe.wing_element_15StressBox.wing_element_15_Q
+
+(id:3844)             source     out    Aframe.wing_element_15_tweb
+ <---(id:11134)       promotion  dec    Aframe.wing_element_15StressBox.wing_element_15_tweb
+
+(id:3615)             source     out    Aframe.wing_element_14_Iz
+ <---(id:10825)       promotion  dec    Aframe.wing_element_14StressBox.wing_element_14_Iz
+
+(id:3609)             source     out    Aframe.wing_element_14_Iy
+ <---(id:10824)       promotion  dec    Aframe.wing_element_14StressBox.wing_element_14_Iy
+
+(id:3631)             source     out    Aframe.wing_element_14_J
+ <---(id:10823)       promotion  dec    Aframe.wing_element_14StressBox.wing_element_14_J
+
+(id:3634)             source     out    Aframe.wing_element_14_Q
+ <---(id:10852)       promotion  dec    Aframe.wing_element_14StressBox.wing_element_14_Q
+
+(id:3590)             source     out    Aframe.wing_element_14_tweb
+ <---(id:10851)       promotion  dec    Aframe.wing_element_14StressBox.wing_element_14_tweb
+
+(id:3361)             source     out    Aframe.wing_element_13_Iz
+ <---(id:10542)       promotion  dec    Aframe.wing_element_13StressBox.wing_element_13_Iz
+
+(id:3355)             source     out    Aframe.wing_element_13_Iy
+ <---(id:10541)       promotion  dec    Aframe.wing_element_13StressBox.wing_element_13_Iy
+
+(id:3377)             source     out    Aframe.wing_element_13_J
+ <---(id:10540)       promotion  dec    Aframe.wing_element_13StressBox.wing_element_13_J
+
+(id:3380)             source     out    Aframe.wing_element_13_Q
+ <---(id:10569)       promotion  dec    Aframe.wing_element_13StressBox.wing_element_13_Q
+
+(id:3336)             source     out    Aframe.wing_element_13_tweb
+ <---(id:10568)       promotion  dec    Aframe.wing_element_13StressBox.wing_element_13_tweb
+
+(id:3107)             source     out    Aframe.wing_element_12_Iz
+ <---(id:10259)       promotion  dec    Aframe.wing_element_12StressBox.wing_element_12_Iz
+
+(id:3101)             source     out    Aframe.wing_element_12_Iy
+ <---(id:10258)       promotion  dec    Aframe.wing_element_12StressBox.wing_element_12_Iy
+
+(id:3123)             source     out    Aframe.wing_element_12_J
+ <---(id:10257)       promotion  dec    Aframe.wing_element_12StressBox.wing_element_12_J
+
+(id:3126)             source     out    Aframe.wing_element_12_Q
+ <---(id:10286)       promotion  dec    Aframe.wing_element_12StressBox.wing_element_12_Q
+
+(id:3082)             source     out    Aframe.wing_element_12_tweb
+ <---(id:10285)       promotion  dec    Aframe.wing_element_12StressBox.wing_element_12_tweb
+
+(id:2853)             source     out    Aframe.wing_element_11_Iz
+ <---(id:9976)        promotion  dec    Aframe.wing_element_11StressBox.wing_element_11_Iz
+
+(id:2847)             source     out    Aframe.wing_element_11_Iy
+ <---(id:9975)        promotion  dec    Aframe.wing_element_11StressBox.wing_element_11_Iy
+
+(id:2869)             source     out    Aframe.wing_element_11_J
+ <---(id:9974)        promotion  dec    Aframe.wing_element_11StressBox.wing_element_11_J
+
+(id:2872)             source     out    Aframe.wing_element_11_Q
+ <---(id:10003)       promotion  dec    Aframe.wing_element_11StressBox.wing_element_11_Q
+
+(id:2828)             source     out    Aframe.wing_element_11_tweb
+ <---(id:10002)       promotion  dec    Aframe.wing_element_11StressBox.wing_element_11_tweb
+
+(id:2599)             source     out    Aframe.wing_element_10_Iz
+ <---(id:9693)        promotion  dec    Aframe.wing_element_10StressBox.wing_element_10_Iz
+
+(id:2593)             source     out    Aframe.wing_element_10_Iy
+ <---(id:9692)        promotion  dec    Aframe.wing_element_10StressBox.wing_element_10_Iy
+
+(id:2615)             source     out    Aframe.wing_element_10_J
+ <---(id:9691)        promotion  dec    Aframe.wing_element_10StressBox.wing_element_10_J
+
+(id:2618)             source     out    Aframe.wing_element_10_Q
+ <---(id:9720)        promotion  dec    Aframe.wing_element_10StressBox.wing_element_10_Q
+
+(id:2574)             source     out    Aframe.wing_element_10_tweb
+ <---(id:9719)        promotion  dec    Aframe.wing_element_10StressBox.wing_element_10_tweb
+
+(id:2345)             source     out    Aframe.wing_element_9_Iz
+ <---(id:9410)        promotion  dec    Aframe.wing_element_9StressBox.wing_element_9_Iz
+
+(id:2339)             source     out    Aframe.wing_element_9_Iy
+ <---(id:9409)        promotion  dec    Aframe.wing_element_9StressBox.wing_element_9_Iy
+
+(id:2361)             source     out    Aframe.wing_element_9_J
+ <---(id:9408)        promotion  dec    Aframe.wing_element_9StressBox.wing_element_9_J
+
+(id:2364)             source     out    Aframe.wing_element_9_Q
+ <---(id:9437)        promotion  dec    Aframe.wing_element_9StressBox.wing_element_9_Q
+
+(id:2320)             source     out    Aframe.wing_element_9_tweb
+ <---(id:9436)        promotion  dec    Aframe.wing_element_9StressBox.wing_element_9_tweb
+
+(id:2091)             source     out    Aframe.wing_element_8_Iz
+ <---(id:9127)        promotion  dec    Aframe.wing_element_8StressBox.wing_element_8_Iz
+
+(id:2085)             source     out    Aframe.wing_element_8_Iy
+ <---(id:9126)        promotion  dec    Aframe.wing_element_8StressBox.wing_element_8_Iy
+
+(id:2107)             source     out    Aframe.wing_element_8_J
+ <---(id:9125)        promotion  dec    Aframe.wing_element_8StressBox.wing_element_8_J
+
+(id:2110)             source     out    Aframe.wing_element_8_Q
+ <---(id:9154)        promotion  dec    Aframe.wing_element_8StressBox.wing_element_8_Q
+
+(id:2066)             source     out    Aframe.wing_element_8_tweb
+ <---(id:9153)        promotion  dec    Aframe.wing_element_8StressBox.wing_element_8_tweb
+
+(id:1837)             source     out    Aframe.wing_element_7_Iz
+ <---(id:8844)        promotion  dec    Aframe.wing_element_7StressBox.wing_element_7_Iz
+
+(id:1831)             source     out    Aframe.wing_element_7_Iy
+ <---(id:8843)        promotion  dec    Aframe.wing_element_7StressBox.wing_element_7_Iy
+
+(id:1853)             source     out    Aframe.wing_element_7_J
+ <---(id:8842)        promotion  dec    Aframe.wing_element_7StressBox.wing_element_7_J
+
+(id:1856)             source     out    Aframe.wing_element_7_Q
+ <---(id:8871)        promotion  dec    Aframe.wing_element_7StressBox.wing_element_7_Q
+
+(id:1812)             source     out    Aframe.wing_element_7_tweb
+ <---(id:8870)        promotion  dec    Aframe.wing_element_7StressBox.wing_element_7_tweb
+
+(id:1583)             source     out    Aframe.wing_element_6_Iz
+ <---(id:8561)        promotion  dec    Aframe.wing_element_6StressBox.wing_element_6_Iz
+
+(id:1577)             source     out    Aframe.wing_element_6_Iy
+ <---(id:8560)        promotion  dec    Aframe.wing_element_6StressBox.wing_element_6_Iy
+
+(id:1599)             source     out    Aframe.wing_element_6_J
+ <---(id:8559)        promotion  dec    Aframe.wing_element_6StressBox.wing_element_6_J
+
+(id:1602)             source     out    Aframe.wing_element_6_Q
+ <---(id:8588)        promotion  dec    Aframe.wing_element_6StressBox.wing_element_6_Q
+
+(id:1558)             source     out    Aframe.wing_element_6_tweb
+ <---(id:8587)        promotion  dec    Aframe.wing_element_6StressBox.wing_element_6_tweb
+
+(id:1329)             source     out    Aframe.wing_element_5_Iz
+ <---(id:8278)        promotion  dec    Aframe.wing_element_5StressBox.wing_element_5_Iz
+
+(id:1323)             source     out    Aframe.wing_element_5_Iy
+ <---(id:8277)        promotion  dec    Aframe.wing_element_5StressBox.wing_element_5_Iy
+
+(id:1345)             source     out    Aframe.wing_element_5_J
+ <---(id:8276)        promotion  dec    Aframe.wing_element_5StressBox.wing_element_5_J
+
+(id:1348)             source     out    Aframe.wing_element_5_Q
+ <---(id:8305)        promotion  dec    Aframe.wing_element_5StressBox.wing_element_5_Q
+
+(id:1304)             source     out    Aframe.wing_element_5_tweb
+ <---(id:8304)        promotion  dec    Aframe.wing_element_5StressBox.wing_element_5_tweb
+
+(id:1075)             source     out    Aframe.wing_element_4_Iz
+ <---(id:7995)        promotion  dec    Aframe.wing_element_4StressBox.wing_element_4_Iz
+
+(id:1069)             source     out    Aframe.wing_element_4_Iy
+ <---(id:7994)        promotion  dec    Aframe.wing_element_4StressBox.wing_element_4_Iy
+
+(id:1091)             source     out    Aframe.wing_element_4_J
+ <---(id:7993)        promotion  dec    Aframe.wing_element_4StressBox.wing_element_4_J
+
+(id:1094)             source     out    Aframe.wing_element_4_Q
+ <---(id:8022)        promotion  dec    Aframe.wing_element_4StressBox.wing_element_4_Q
+
+(id:1050)             source     out    Aframe.wing_element_4_tweb
+ <---(id:8021)        promotion  dec    Aframe.wing_element_4StressBox.wing_element_4_tweb
+
+(id:821)              source     out    Aframe.wing_element_3_Iz
+ <---(id:7712)        promotion  dec    Aframe.wing_element_3StressBox.wing_element_3_Iz
+
+(id:815)              source     out    Aframe.wing_element_3_Iy
+ <---(id:7711)        promotion  dec    Aframe.wing_element_3StressBox.wing_element_3_Iy
+
+(id:837)              source     out    Aframe.wing_element_3_J
+ <---(id:7710)        promotion  dec    Aframe.wing_element_3StressBox.wing_element_3_J
+
+(id:840)              source     out    Aframe.wing_element_3_Q
+ <---(id:7739)        promotion  dec    Aframe.wing_element_3StressBox.wing_element_3_Q
+
+(id:796)              source     out    Aframe.wing_element_3_tweb
+ <---(id:7738)        promotion  dec    Aframe.wing_element_3StressBox.wing_element_3_tweb
+
+(id:567)              source     out    Aframe.wing_element_2_Iz
+ <---(id:7429)        promotion  dec    Aframe.wing_element_2StressBox.wing_element_2_Iz
+
+(id:561)              source     out    Aframe.wing_element_2_Iy
+ <---(id:7428)        promotion  dec    Aframe.wing_element_2StressBox.wing_element_2_Iy
+
+(id:583)              source     out    Aframe.wing_element_2_J
+ <---(id:7427)        promotion  dec    Aframe.wing_element_2StressBox.wing_element_2_J
+
+(id:586)              source     out    Aframe.wing_element_2_Q
+ <---(id:7456)        promotion  dec    Aframe.wing_element_2StressBox.wing_element_2_Q
+
+(id:542)              source     out    Aframe.wing_element_2_tweb
+ <---(id:7455)        promotion  dec    Aframe.wing_element_2StressBox.wing_element_2_tweb
+
+(id:313)              source     out    Aframe.wing_element_1_Iz
+ <---(id:7146)        promotion  dec    Aframe.wing_element_1StressBox.wing_element_1_Iz
+
+(id:307)              source     out    Aframe.wing_element_1_Iy
+ <---(id:7145)        promotion  dec    Aframe.wing_element_1StressBox.wing_element_1_Iy
+
+(id:329)              source     out    Aframe.wing_element_1_J
+ <---(id:7144)        promotion  dec    Aframe.wing_element_1StressBox.wing_element_1_J
+
+(id:332)              source     out    Aframe.wing_element_1_Q
+ <---(id:7173)        promotion  dec    Aframe.wing_element_1StressBox.wing_element_1_Q
+
+(id:288)              source     out    Aframe.wing_element_1_tweb
+ <---(id:7172)        promotion  dec    Aframe.wing_element_1StressBox.wing_element_1_tweb
+
+(id:58)               source     out    Aframe.wing_element_0_Iz
+ <---(id:6863)        promotion  dec    Aframe.wing_element_0StressBox.wing_element_0_Iz
+
+(id:52)               source     out    Aframe.wing_element_0_Iy
+ <---(id:6862)        promotion  dec    Aframe.wing_element_0StressBox.wing_element_0_Iy
+
+(id:74)               source     out    Aframe.wing_element_0_J
+ <---(id:6861)        promotion  dec    Aframe.wing_element_0StressBox.wing_element_0_J
+
+(id:77)               source     out    Aframe.wing_element_0_Q
+ <---(id:6890)        promotion  dec    Aframe.wing_element_0StressBox.wing_element_0_Q
+
+(id:32)               source     out    Aframe.wing_element_0_tweb
+ <---(id:6889)        promotion  dec    Aframe.wing_element_0StressBox.wing_element_0_tweb
+
+(id:10538)            source     out    Aframe.wing_element_12StressBox.wing_element_12_stress_array
+ <---(id:6767)        promotion  dec    Aframe.wing_element_12_stress_array
+
+(id:10514)            source     out    Aframe.wing_element_12StressBox.wing_element_12_shear_stress
+ <---(id:6511)        promotion  dec    Aframe.wing_element_12_shear_stress
+
+(id:10288)            source     out    Aframe.wing_element_12StressBox.wing_element_12_torsional_stress
+ <---(id:6512)        promotion  dec    Aframe.wing_element_12_torsional_stress
+
+(id:10287)            source     out    Aframe.wing_element_12StressBox.wing_element_12_axial_stress
+ <---(id:6509)        promotion  dec    Aframe.wing_element_12_axial_stress
+
+(id:8557)             source     out    Aframe.wing_element_5StressBox.wing_element_5_stress_array
+ <---(id:6683)        promotion  dec    Aframe.wing_element_5_stress_array
+
+(id:8533)             source     out    Aframe.wing_element_5StressBox.wing_element_5_shear_stress
+ <---(id:6434)        promotion  dec    Aframe.wing_element_5_shear_stress
+
+(id:8307)             source     out    Aframe.wing_element_5StressBox.wing_element_5_torsional_stress
+ <---(id:6435)        promotion  dec    Aframe.wing_element_5_torsional_stress
+
+(id:8306)             source     out    Aframe.wing_element_5StressBox.wing_element_5_axial_stress
+ <---(id:6432)        promotion  dec    Aframe.wing_element_5_axial_stress
+
+(id:10255)            source     out    Aframe.wing_element_11StressBox.wing_element_11_stress_array
+ <---(id:6755)        promotion  dec    Aframe.wing_element_11_stress_array
+
+(id:10231)            source     out    Aframe.wing_element_11StressBox.wing_element_11_shear_stress
+ <---(id:6500)        promotion  dec    Aframe.wing_element_11_shear_stress
+
+(id:10005)            source     out    Aframe.wing_element_11StressBox.wing_element_11_torsional_stress
+ <---(id:6501)        promotion  dec    Aframe.wing_element_11_torsional_stress
+
+(id:10004)            source     out    Aframe.wing_element_11StressBox.wing_element_11_axial_stress
+ <---(id:6498)        promotion  dec    Aframe.wing_element_11_axial_stress
+
+(id:8274)             source     out    Aframe.wing_element_4StressBox.wing_element_4_stress_array
+ <---(id:6671)        promotion  dec    Aframe.wing_element_4_stress_array
+
+(id:8250)             source     out    Aframe.wing_element_4StressBox.wing_element_4_shear_stress
+ <---(id:6423)        promotion  dec    Aframe.wing_element_4_shear_stress
+
+(id:8024)             source     out    Aframe.wing_element_4StressBox.wing_element_4_torsional_stress
+ <---(id:6424)        promotion  dec    Aframe.wing_element_4_torsional_stress
+
+(id:8023)             source     out    Aframe.wing_element_4StressBox.wing_element_4_axial_stress
+ <---(id:6421)        promotion  dec    Aframe.wing_element_4_axial_stress
+
+(id:11953)            source     out    Aframe.wing_element_17StressBox.wing_element_17_stress_array
+ <---(id:6827)        promotion  dec    Aframe.wing_element_17_stress_array
+
+(id:11929)            source     out    Aframe.wing_element_17StressBox.wing_element_17_shear_stress
+ <---(id:6566)        promotion  dec    Aframe.wing_element_17_shear_stress
+
+(id:11703)            source     out    Aframe.wing_element_17StressBox.wing_element_17_torsional_stress
+ <---(id:6567)        promotion  dec    Aframe.wing_element_17_torsional_stress
+
+(id:11702)            source     out    Aframe.wing_element_17StressBox.wing_element_17_axial_stress
+ <---(id:6564)        promotion  dec    Aframe.wing_element_17_axial_stress
+
+(id:9972)             source     out    Aframe.wing_element_10StressBox.wing_element_10_stress_array
+ <---(id:6743)        promotion  dec    Aframe.wing_element_10_stress_array
+
+(id:9948)             source     out    Aframe.wing_element_10StressBox.wing_element_10_shear_stress
+ <---(id:6489)        promotion  dec    Aframe.wing_element_10_shear_stress
+
+(id:9722)             source     out    Aframe.wing_element_10StressBox.wing_element_10_torsional_stress
+ <---(id:6490)        promotion  dec    Aframe.wing_element_10_torsional_stress
+
+(id:9721)             source     out    Aframe.wing_element_10StressBox.wing_element_10_axial_stress
+ <---(id:6487)        promotion  dec    Aframe.wing_element_10_axial_stress
+
+(id:7991)             source     out    Aframe.wing_element_3StressBox.wing_element_3_stress_array
+ <---(id:6659)        promotion  dec    Aframe.wing_element_3_stress_array
+
+(id:7967)             source     out    Aframe.wing_element_3StressBox.wing_element_3_shear_stress
+ <---(id:6412)        promotion  dec    Aframe.wing_element_3_shear_stress
+
+(id:7741)             source     out    Aframe.wing_element_3StressBox.wing_element_3_torsional_stress
+ <---(id:6413)        promotion  dec    Aframe.wing_element_3_torsional_stress
+
+(id:7740)             source     out    Aframe.wing_element_3StressBox.wing_element_3_axial_stress
+ <---(id:6410)        promotion  dec    Aframe.wing_element_3_axial_stress
+
+(id:11670)            source     out    Aframe.wing_element_16StressBox.wing_element_16_stress_array
+ <---(id:6815)        promotion  dec    Aframe.wing_element_16_stress_array
+
+(id:11646)            source     out    Aframe.wing_element_16StressBox.wing_element_16_shear_stress
+ <---(id:6555)        promotion  dec    Aframe.wing_element_16_shear_stress
+
+(id:11420)            source     out    Aframe.wing_element_16StressBox.wing_element_16_torsional_stress
+ <---(id:6556)        promotion  dec    Aframe.wing_element_16_torsional_stress
+
+(id:11419)            source     out    Aframe.wing_element_16StressBox.wing_element_16_axial_stress
+ <---(id:6553)        promotion  dec    Aframe.wing_element_16_axial_stress
+
+(id:9689)             source     out    Aframe.wing_element_9StressBox.wing_element_9_stress_array
+ <---(id:6731)        promotion  dec    Aframe.wing_element_9_stress_array
+
+(id:9665)             source     out    Aframe.wing_element_9StressBox.wing_element_9_shear_stress
+ <---(id:6478)        promotion  dec    Aframe.wing_element_9_shear_stress
+
+(id:9439)             source     out    Aframe.wing_element_9StressBox.wing_element_9_torsional_stress
+ <---(id:6479)        promotion  dec    Aframe.wing_element_9_torsional_stress
+
+(id:9438)             source     out    Aframe.wing_element_9StressBox.wing_element_9_axial_stress
+ <---(id:6476)        promotion  dec    Aframe.wing_element_9_axial_stress
+
+(id:7142)             source     out    Aframe.wing_element_0StressBox.wing_element_0_stress_array
+ <---(id:6623)        promotion  dec    Aframe.wing_element_0_stress_array
+
+(id:7118)             source     out    Aframe.wing_element_0StressBox.wing_element_0_shear_stress
+ <---(id:6379)        promotion  dec    Aframe.wing_element_0_shear_stress
+
+(id:6892)             source     out    Aframe.wing_element_0StressBox.wing_element_0_torsional_stress
+ <---(id:6380)        promotion  dec    Aframe.wing_element_0_torsional_stress
+
+(id:6891)             source     out    Aframe.wing_element_0StressBox.wing_element_0_axial_stress
+ <---(id:6377)        promotion  dec    Aframe.wing_element_0_axial_stress
+
+(id:7708)             source     out    Aframe.wing_element_2StressBox.wing_element_2_stress_array
+ <---(id:6647)        promotion  dec    Aframe.wing_element_2_stress_array
+
+(id:7684)             source     out    Aframe.wing_element_2StressBox.wing_element_2_shear_stress
+ <---(id:6401)        promotion  dec    Aframe.wing_element_2_shear_stress
+
+(id:7458)             source     out    Aframe.wing_element_2StressBox.wing_element_2_torsional_stress
+ <---(id:6402)        promotion  dec    Aframe.wing_element_2_torsional_stress
+
+(id:7457)             source     out    Aframe.wing_element_2StressBox.wing_element_2_axial_stress
+ <---(id:6399)        promotion  dec    Aframe.wing_element_2_axial_stress
+
+(id:12519)            source     out    Aframe.wing_element_19StressBox.wing_element_19_stress_array
+ <---(id:6851)        promotion  dec    Aframe.wing_element_19_stress_array
+
+(id:12495)            source     out    Aframe.wing_element_19StressBox.wing_element_19_shear_stress
+ <---(id:6588)        promotion  dec    Aframe.wing_element_19_shear_stress
+
+(id:12269)            source     out    Aframe.wing_element_19StressBox.wing_element_19_torsional_stress
+ <---(id:6589)        promotion  dec    Aframe.wing_element_19_torsional_stress
+
+(id:12268)            source     out    Aframe.wing_element_19StressBox.wing_element_19_axial_stress
+ <---(id:6586)        promotion  dec    Aframe.wing_element_19_axial_stress
+
+(id:11387)            source     out    Aframe.wing_element_15StressBox.wing_element_15_stress_array
+ <---(id:6803)        promotion  dec    Aframe.wing_element_15_stress_array
+
+(id:11363)            source     out    Aframe.wing_element_15StressBox.wing_element_15_shear_stress
+ <---(id:6544)        promotion  dec    Aframe.wing_element_15_shear_stress
+
+(id:11137)            source     out    Aframe.wing_element_15StressBox.wing_element_15_torsional_stress
+ <---(id:6545)        promotion  dec    Aframe.wing_element_15_torsional_stress
+
+(id:11136)            source     out    Aframe.wing_element_15StressBox.wing_element_15_axial_stress
+ <---(id:6542)        promotion  dec    Aframe.wing_element_15_axial_stress
+
+(id:9406)             source     out    Aframe.wing_element_8StressBox.wing_element_8_stress_array
+ <---(id:6719)        promotion  dec    Aframe.wing_element_8_stress_array
+
+(id:9382)             source     out    Aframe.wing_element_8StressBox.wing_element_8_shear_stress
+ <---(id:6467)        promotion  dec    Aframe.wing_element_8_shear_stress
+
+(id:9156)             source     out    Aframe.wing_element_8StressBox.wing_element_8_torsional_stress
+ <---(id:6468)        promotion  dec    Aframe.wing_element_8_torsional_stress
+
+(id:9155)             source     out    Aframe.wing_element_8StressBox.wing_element_8_axial_stress
+ <---(id:6465)        promotion  dec    Aframe.wing_element_8_axial_stress
+
+(id:12236)            source     out    Aframe.wing_element_18StressBox.wing_element_18_stress_array
+ <---(id:6839)        promotion  dec    Aframe.wing_element_18_stress_array
+
+(id:12212)            source     out    Aframe.wing_element_18StressBox.wing_element_18_shear_stress
+ <---(id:6577)        promotion  dec    Aframe.wing_element_18_shear_stress
+
+(id:11986)            source     out    Aframe.wing_element_18StressBox.wing_element_18_torsional_stress
+ <---(id:6578)        promotion  dec    Aframe.wing_element_18_torsional_stress
+
+(id:11985)            source     out    Aframe.wing_element_18StressBox.wing_element_18_axial_stress
+ <---(id:6575)        promotion  dec    Aframe.wing_element_18_axial_stress
+
+(id:7425)             source     out    Aframe.wing_element_1StressBox.wing_element_1_stress_array
+ <---(id:6635)        promotion  dec    Aframe.wing_element_1_stress_array
+
+(id:7401)             source     out    Aframe.wing_element_1StressBox.wing_element_1_shear_stress
+ <---(id:6390)        promotion  dec    Aframe.wing_element_1_shear_stress
+
+(id:7175)             source     out    Aframe.wing_element_1StressBox.wing_element_1_torsional_stress
+ <---(id:6391)        promotion  dec    Aframe.wing_element_1_torsional_stress
+
+(id:7174)             source     out    Aframe.wing_element_1StressBox.wing_element_1_axial_stress
+ <---(id:6388)        promotion  dec    Aframe.wing_element_1_axial_stress
+
+(id:11104)            source     out    Aframe.wing_element_14StressBox.wing_element_14_stress_array
+ <---(id:6791)        promotion  dec    Aframe.wing_element_14_stress_array
+
+(id:11080)            source     out    Aframe.wing_element_14StressBox.wing_element_14_shear_stress
+ <---(id:6533)        promotion  dec    Aframe.wing_element_14_shear_stress
+
+(id:10854)            source     out    Aframe.wing_element_14StressBox.wing_element_14_torsional_stress
+ <---(id:6534)        promotion  dec    Aframe.wing_element_14_torsional_stress
+
+(id:10853)            source     out    Aframe.wing_element_14StressBox.wing_element_14_axial_stress
+ <---(id:6531)        promotion  dec    Aframe.wing_element_14_axial_stress
+
+(id:9123)             source     out    Aframe.wing_element_7StressBox.wing_element_7_stress_array
+ <---(id:6707)        promotion  dec    Aframe.wing_element_7_stress_array
+
+(id:9099)             source     out    Aframe.wing_element_7StressBox.wing_element_7_shear_stress
+ <---(id:6456)        promotion  dec    Aframe.wing_element_7_shear_stress
+
+(id:8873)             source     out    Aframe.wing_element_7StressBox.wing_element_7_torsional_stress
+ <---(id:6457)        promotion  dec    Aframe.wing_element_7_torsional_stress
+
+(id:8872)             source     out    Aframe.wing_element_7StressBox.wing_element_7_axial_stress
+ <---(id:6454)        promotion  dec    Aframe.wing_element_7_axial_stress
+
+(id:10821)            source     out    Aframe.wing_element_13StressBox.wing_element_13_stress_array
+ <---(id:6779)        promotion  dec    Aframe.wing_element_13_stress_array
+
+(id:10797)            source     out    Aframe.wing_element_13StressBox.wing_element_13_shear_stress
+ <---(id:6522)        promotion  dec    Aframe.wing_element_13_shear_stress
+
+(id:10571)            source     out    Aframe.wing_element_13StressBox.wing_element_13_torsional_stress
+ <---(id:6523)        promotion  dec    Aframe.wing_element_13_torsional_stress
+
+(id:10570)            source     out    Aframe.wing_element_13StressBox.wing_element_13_axial_stress
+ <---(id:6520)        promotion  dec    Aframe.wing_element_13_axial_stress
+
+(id:8840)             source     out    Aframe.wing_element_6StressBox.wing_element_6_stress_array
+ <---(id:6695)        promotion  dec    Aframe.wing_element_6_stress_array
+
+(id:8816)             source     out    Aframe.wing_element_6StressBox.wing_element_6_shear_stress
+ <---(id:6445)        promotion  dec    Aframe.wing_element_6_shear_stress
+
+(id:8590)             source     out    Aframe.wing_element_6StressBox.wing_element_6_torsional_stress
+ <---(id:6446)        promotion  dec    Aframe.wing_element_6_torsional_stress
+
+(id:8589)             source     out    Aframe.wing_element_6StressBox.wing_element_6_axial_stress
+ <---(id:6443)        promotion  dec    Aframe.wing_element_6_axial_stress
+
