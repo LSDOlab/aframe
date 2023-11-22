@@ -65,7 +65,7 @@ class EBBeam(m3l.ExplicitOperation):
     #     displacement_nodes = arguments['displacement_nodes']
     #     derivatives['nodal_displacement', 'displacement'] = displacement_map(geo_mesh, displacement_nodes)
 
-    def evaluate(self, beam_mesh : m3l.Variable, t_web : m3l.Variable=None, t_cap : m3l.Variable=None, forces:m3l.Variable=None, moments:m3l.Variable=None) -> Tuple[m3l.Variable, m3l.Variable]:
+    def evaluate(self, beam_mesh : m3l.Variable, t_web : m3l.Variable=None, t_cap : m3l.Variable=None, forces:m3l.Variable=None, moments:m3l.Variable=None) -> EBBeamOutputs:
         '''
         Evaluates the beam model.
         
