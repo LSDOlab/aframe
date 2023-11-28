@@ -151,6 +151,7 @@ if __name__ == '__main__':
     element_Iz_out = sim['wing_izo'] # (n-1)
     element_J_out = sim['wing_jo'] # (n-1)
     bkl = sim['wing_top_bkl']
+    bot_bkl = sim['wing_bot_bkl']
 
     beamNodalDf = pd.DataFrame(
         data={
@@ -193,3 +194,6 @@ if __name__ == '__main__':
 
     #plt.plot(element_loads[:,4])
     #plt.show()
+
+    print('top buckle', bkl)
+    print('bot buckle', bot_bkl)
