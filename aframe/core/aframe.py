@@ -71,8 +71,11 @@ class Aframe(ModuleCSDL):
             if cs == 'box':
                 width = self.register_module_input(beam_name + '_width', shape=(n), promotes=True)
                 height = self.register_module_input(beam_name + '_height', shape=(n), promotes=True)
+                # tweb_in = self.register_module_input(beam_name + '_tweb', shape=(n))
+                # tcap_in = self.register_module_input(beam_name + '_tcap', shape=(n))
                 tweb_in = self.register_module_input(beam_name + '_tweb', shape=(n))
-                tcap_in = self.register_module_input(beam_name + '_tcap', shape=(n))
+                tbot_in = self.register_module_input(beam_name + '_tbot', shape=(n))
+                ttop_in = self.register_module_input(beam_name + '_ttop', shape=(n))
 
                 # create elemental outputs
                 w_vec, h_vec = self.create_output(beam_name + '_w', shape=(n - 1), val=0), self.create_output(beam_name + '_h', shape=(n - 1), val=0)
@@ -89,17 +92,20 @@ class Aframe(ModuleCSDL):
                     w = self.register_output(element_name + '_w', w_vec[i])
 
                     tweb = self.register_output(element_name + '_tweb', (tweb_in[i]+tweb_in[i+1])/2)
-                    tcap = self.register_output(element_name + '_tcap', (tcap_in[i]+tcap_in[i+1])/2)
+                    #tcap = self.register_output(element_name + '_tcap', (tcap_in[i]+tcap_in[i+1])/2)
+                    ttop = self.register_output(element_name + '_ttop', (ttop_in[i]+ttop_in[i+1])/2)
+                    tbot = self.register_output(element_name + '_tbot', (tbot_in[i]+tbot_in[i+1])/2)
 
-
+                    tcap_avg = (ttop + tbot)/2
 
                     # compute the box-beam cs properties
-                    w_i, h_i = w - 2*tweb, h - 2*tcap
+                    # w_i, h_i = w - 2*tweb, h - 2*tcap
+                    w_i, h_i = w - 2*tweb, h - ttop - tbot
                     A = self.register_output(element_name + '_A', (((w*h) - (w_i*h_i))**2 + 1E-14)**0.5)
                     iyo[i] = Iy = self.register_output(element_name + '_Iy', (w*(h**3) - w_i*(h_i**3))/12)
                     izo[i] = Iz = self.register_output(element_name + '_Iz', ((w**3)*h - (w_i**3)*h_i)/12)
                     # jo[i] = J = self.register_output(element_name + '_J', (w*h*(h**2 + w**2)/12) - (w_i*h_i*(h_i**2 + w_i**2)/12))
-                    jo[i] = J = self.register_output(element_name + '_J', (2*tweb*tcap*(w-tweb)**2*(h-tcap)**2)/(w*tweb+h*tcap-tweb**2-tcap**2)) # Darshan's formula
+                    jo[i] = J = self.register_output(element_name + '_J', (2*tweb*tcap_avg*(w-tweb)**2*(h-tcap_avg)**2)/(w*tweb+h*tcap_avg-tweb**2-tcap_avg**2)) # Darshan's formula
                     # Q = 2*(h/2)*tweb*(h/4) + (w - 2*tweb)*tcap*((h/2) - (tcap/2))
                     Q = self.register_output(element_name + '_Q', (A/2)*(h/4))
                     self.register_output(element_name + '_Ix', 1*J) # I think J is the same as Ix...
@@ -463,20 +469,29 @@ class Aframe(ModuleCSDL):
             total_beam_length = csdl.sum(length_helper)
             length_per_rib = total_beam_length/num_ribs
 
-            bkl = self.create_output(beam_name + '_bkl', shape=(n - 1), val=0)
+            # bkl = self.create_output(beam_name + '_bkl', shape=(n - 1), val=0)
+            top_bkl = self.create_output(beam_name + '_top_bkl', shape=(n - 1), val=0)
+            bot_bkl = self.create_output(beam_name + '_bot_bkl', shape=(n - 1), val=0)
             for i in range(n - 1):
                 element_name = beam_name + '_element_' + str(i)
 
                 wb = self.declare_variable(element_name + '_w')
-                tcapb = self.declare_variable(element_name + '_tcap')
+                # tcapb = self.declare_variable(element_name + '_tcap')
+                ttopb = self.declare_variable(element_name + '_ttop')
+                tbotb = self.declare_variable(element_name + '_tbot')
 
-                critical_stress = k*E*(tcapb/wb)**2/(1 - v**2) # Roark's simply-supported panel buckling
-                #self.print_var(critical_stress)
+                critical_stress_top = k*E*(ttopb/wb)**2/(1 - v**2) # Roark's simply-supported panel buckling
+                critical_stress_bot = k*E*(tbotb/wb)**2/(1 - v**2)
 
-                actual_stress_array = self.declare_variable(element_name + '_stress_array', shape=(5))
-                actual_stress = (actual_stress_array[0] + actual_stress_array[1])/2
+                #actual_stress_array = self.declare_variable(element_name + '_stress_array', shape=(5))
+                #actual_stress = (actual_stress_array[0] + actual_stress_array[1])/2
+                axial_stress_array = self.declare_variable(element_name + '_axial_stress', shape=(5))
+                top_stress = (axial_stress_array[0] + axial_stress_array[1])/2
+                bot_stress = (axial_stress_array[2] + axial_stress_array[3])/2
 
-                bkl[i] = actual_stress/critical_stress # greater than 1 = bad
+                # bkl[i] = actual_stress/critical_stress # greater than 1 = bad
+                top_bkl[i] = top_stress/critical_stress_top
+                bot_bkl[i] = bot_stress/critical_stress_bot
 
             # for i in range(num_ribs - 1): # iterate over the panels
                 
