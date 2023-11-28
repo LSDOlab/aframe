@@ -271,7 +271,7 @@ class Aframe(ModuleCSDL):
             r_a = self.declare_variable(element_name + 'node_a', shape=(3))
             r_b = self.declare_variable(element_name + 'node_b', shape=(3))
 
-            r_cg = self.register_output(element_name+'r_cg', (r_a + r_b)/2)\
+            r_cg = self.register_output(element_name+'r_cg', (r_a + r_b)/2)
             
             # assign r_cg to the r*mass vector:
             rm_vec[i,:] = csdl.reshape(r_cg*csdl.expand(m, (3)), new_shape=(1,3))
