@@ -105,6 +105,7 @@ class EBBeam(m3l.ExplicitOperation):
 
         # Create the M3L variables that are being output
         displacements = m3l.Variable(name=f'{beam_name}_displacement', shape=mesh.shape, operation=self)
+        # stresses = m3l.Variable(name=f"{beam_name}_stress", shape=mesh.shape)
         rotations = m3l.Variable(name=f'{beam_name}_rotation', shape=mesh.shape, operation=self)
         mass = m3l.Variable(name='mass', shape=(1,), operation=self)
         cg = m3l.Variable(name='cg_vector', shape=(3,), operation=self)
