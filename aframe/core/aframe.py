@@ -66,6 +66,7 @@ class Aframe(ModuleCSDL):
             # self.print_var(mesh_in)
             if mesh_units == 'm': mesh = 1*mesh_in
             elif mesh_units == 'ft': mesh = 0.304*mesh_in
+            else: raise NotImplementedError
 
 
             if cs == 'box':
@@ -493,7 +494,6 @@ class Aframe(ModuleCSDL):
                 # bkl[i] = critical_stress/actual_stress
 
             # for i in range(num_ribs - 1): # iterate over the panels
-                
 
 
 

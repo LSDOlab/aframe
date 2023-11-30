@@ -88,8 +88,10 @@ class Run(csdl.Model):
         if self.parameters['optimization_flag']:
             self.add_constraint('wing_stress', upper=2.16e8, scaler=1E-8)
             self.add_constraint('wing_bkl', upper=1, scaler=1E0)
-            self.add_design_variable('wing_tcap', lower=0.001, upper=0.2, scaler=1E2)
-            self.add_design_variable('wing_tweb', lower=0.001, upper=0.2, scaler=1E3)
+            # self.add_design_variable('wing_tcap', lower=0.00127, upper=0.2, scaler=1E2)
+            # self.add_design_variable('wing_tweb', lower=0.00127, upper=0.2, scaler=1E3)
+            self.add_design_variable('wing_tcap', lower=0.0001, upper=0.2, scaler=1E2)
+            self.add_design_variable('wing_tweb', lower=0.0001, upper=0.2, scaler=1E2)
             self.add_objective('mass', scaler=1E-2)
         
         
