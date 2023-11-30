@@ -78,7 +78,9 @@ class Run(csdl.Model):
         self.create_input('wing_mesh', shape=(len(nodes),3), val=nodes)
         self.create_input('wing_height', shape=(len(nodes)), val=height)
         self.create_input('wing_width', shape=(len(nodes)), val=width)
-        self.create_input('wing_tcap', shape=(len(nodes)), val=tcap)
+        # self.create_input('wing_tcap', shape=(len(nodes)), val=tcap)
+        self.create_input('wing_ttop', shape=(len(nodes)), val=tcap)
+        self.create_input('wing_tbot', shape=(len(nodes)), val=tcap)
         self.create_input('wing_tweb', shape=(len(nodes)), val=tweb)
         self.create_input('wing_forces', shape=(len(nodes),3), val=forces)
         
@@ -87,7 +89,9 @@ class Run(csdl.Model):
 
         if self.parameters['optimization_flag']:
             self.add_constraint('wing_stress', upper=2.16e8, scaler=1E-8)
-            self.add_design_variable('wing_tcap', lower=0.001, upper=0.2, scaler=1E2)
+            # self.add_design_variable('wing_tcap', lower=0.001, upper=0.2, scaler=1E2)
+            self.add_design_variable('wing_ttop', lower=0.001, upper=0.2, scaler=1E2)
+            self.add_design_variable('wing_tbot', lower=0.001, upper=0.2, scaler=1E2)
             self.add_design_variable('wing_tweb', lower=0.001, upper=0.2, scaler=1E3)
             self.add_objective('mass', scaler=1E-2)
         
@@ -128,7 +132,10 @@ if __name__ == '__main__':
     spanwise_location_ft = sim['wing_mesh'][:, 1]*m2ft
     width_in = sim['wing_width']*m2in
     height_in = sim['wing_height']*m2in
-    tcap_in = sim['wing_tcap']*m2in
+    # tcap_in = sim['wing_tcap']*m2in
+    ttop_in = sim['wing_ttop']*m2in
+    tbot_in = sim['wing_tbot']*m2in
+    tcap_in = (ttop_in + tbot_in)/2 # temp for pd dataframe
     tweb_in = sim['wing_tweb']*m2in
     nodal_forces_lbf = sim['wing_forces']*N2lbf
     
@@ -143,7 +150,8 @@ if __name__ == '__main__':
     element_Iy_out = sim['wing_iyo'] # (n-1)
     element_Iz_out = sim['wing_izo'] # (n-1)
     element_J_out = sim['wing_jo'] # (n-1)
-    bkl = sim['wing_bkl']
+    bkl = sim['wing_top_bkl']
+    bot_bkl = sim['wing_bot_bkl']
 
     beamNodalDf = pd.DataFrame(
         data={
@@ -186,3 +194,6 @@ if __name__ == '__main__':
 
     #plt.plot(element_loads[:,4])
     #plt.show()
+
+    print('top buckle', bkl)
+    print('bot buckle', bot_bkl)

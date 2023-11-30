@@ -69,10 +69,13 @@ class Aframe(csdl.Model):
 
 
             if cs == 'box':
-                width = self.declare_variable(beam_name + '_width', shape=(n))
-                height = self.declare_variable(beam_name + '_height', shape=(n))
-                tweb_in = self.declare_variable(beam_name + '_tweb', shape=(n))
-                tcap_in = self.declare_variable(beam_name + '_tcap', shape=(n))
+                width = self.register_module_input(beam_name + '_width', shape=(n), promotes=True)
+                height = self.register_module_input(beam_name + '_height', shape=(n), promotes=True)
+                # tweb_in = self.register_module_input(beam_name + '_tweb', shape=(n))
+                # tcap_in = self.register_module_input(beam_name + '_tcap', shape=(n))
+                tweb_in = self.register_module_input(beam_name + '_tweb', shape=(n))
+                tbot_in = self.register_module_input(beam_name + '_tbot', shape=(n))
+                ttop_in = self.register_module_input(beam_name + '_ttop', shape=(n))
 
                 # create elemental outputs
                 w_vec, h_vec = self.create_output(beam_name + '_w', shape=(n - 1), val=0), self.create_output(beam_name + '_h', shape=(n - 1), val=0)
@@ -89,17 +92,20 @@ class Aframe(csdl.Model):
                     w = self.register_output(element_name + '_w', w_vec[i])
 
                     tweb = self.register_output(element_name + '_tweb', (tweb_in[i]+tweb_in[i+1])/2)
-                    tcap = self.register_output(element_name + '_tcap', (tcap_in[i]+tcap_in[i+1])/2)
+                    #tcap = self.register_output(element_name + '_tcap', (tcap_in[i]+tcap_in[i+1])/2)
+                    ttop = self.register_output(element_name + '_ttop', (ttop_in[i]+ttop_in[i+1])/2)
+                    tbot = self.register_output(element_name + '_tbot', (tbot_in[i]+tbot_in[i+1])/2)
 
-
+                    tcap_avg = (ttop + tbot)/2
 
                     # compute the box-beam cs properties
-                    w_i, h_i = w - 2*tweb, h - 2*tcap
+                    # w_i, h_i = w - 2*tweb, h - 2*tcap
+                    w_i, h_i = w - 2*tweb, h - ttop - tbot
                     A = self.register_output(element_name + '_A', (((w*h) - (w_i*h_i))**2 + 1E-14)**0.5)
                     iyo[i] = Iy = self.register_output(element_name + '_Iy', (w*(h**3) - w_i*(h_i**3))/12)
                     izo[i] = Iz = self.register_output(element_name + '_Iz', ((w**3)*h - (w_i**3)*h_i)/12)
                     # jo[i] = J = self.register_output(element_name + '_J', (w*h*(h**2 + w**2)/12) - (w_i*h_i*(h_i**2 + w_i**2)/12))
-                    jo[i] = J = self.register_output(element_name + '_J', (2*tweb*tcap*(w-tweb)**2*(h-tcap)**2)/(w*tweb+h*tcap-tweb**2-tcap**2)) # Darshan's formula
+                    jo[i] = J = self.register_output(element_name + '_J', (2*tweb*tcap_avg*(w-tweb)**2*(h-tcap_avg)**2)/(w*tweb+h*tcap_avg-tweb**2-tcap_avg**2)) # Darshan's formula
                     # Q = 2*(h/2)*tweb*(h/4) + (w - 2*tweb)*tcap*((h/2) - (tcap/2))
                     Q = self.register_output(element_name + '_Q', (A/2)*(h/4))
                     self.register_output(element_name + '_Ix', 1*J) # I think J is the same as Ix...
