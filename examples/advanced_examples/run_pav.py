@@ -60,7 +60,7 @@ mass_rev = np.array([1.59267758, 1.59293928, 1.76015184, 1.96724632, 2.21743341,
 mass = (mass_fwd + mass_rev)/2
 gravity_loads = mass*9.81
 
-forces[:,2] -= gravity_loads
+forces[:,2] -= gravity_loads*1.5
 # endregion
 
 class Run(csdl.Model):
@@ -87,6 +87,7 @@ class Run(csdl.Model):
 
         if self.parameters['optimization_flag']:
             self.add_constraint('wing_stress', upper=2.16e8, scaler=1E-8)
+            self.add_constraint('wing_bkl', upper=1, scaler=1E0)
             self.add_design_variable('wing_tcap', lower=0.001, upper=0.2, scaler=1E2)
             self.add_design_variable('wing_tweb', lower=0.001, upper=0.2, scaler=1E3)
             self.add_objective('mass', scaler=1E-2)
@@ -120,10 +121,15 @@ if __name__ == '__main__':
         Run(beams=beams,
             bounds=bounds,
             joints=joints,
-            optimization_flag=False), 
+            optimization_flag=True), 
         analytics=True
         )
     sim.run()
+
+    # prob = CSDLProblem(problem_name='run_opt', simulator=sim)
+    # optimizer = SLSQP(prob, maxiter=1000, ftol=1E-8)
+    # optimizer.solve()
+    # optimizer.print_results()
 
     spanwise_location_ft = sim['wing_mesh'][:, 1]*m2ft
     width_in = sim['wing_width']*m2in
@@ -186,3 +192,5 @@ if __name__ == '__main__':
 
     #plt.plot(element_loads[:,4])
     #plt.show()
+
+    print(sim['mass'])

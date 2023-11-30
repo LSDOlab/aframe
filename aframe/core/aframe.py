@@ -454,14 +454,24 @@ class Aframe(ModuleCSDL):
             E = beams[beam_name]['E']
             v = 0.33 # Poisson's ratio
             k = 6.3
-            num_ribs = 12
 
-            length_helper = self.create_output(beam_name + '_length_helper', shape=(n - 1), val=0)
+            # length_helper = self.create_output(beam_name + '_length_helper', shape=(n - 1), val=0)
+            k_helper = self.create_output(beam_name + '_k_helper', shape=(n - 1), val=0)
             for i in range(n - 1):
                 element_name = beam_name + '_element_' + str(i)
-                length_helper[i] = self.declare_variable(element_name + 'L')
-            total_beam_length = csdl.sum(length_helper)
-            length_per_rib = total_beam_length/num_ribs
+                element_length = self.declare_variable(element_name + 'L')
+
+                tcapk = self.declare_variable(element_name + '_tcap')
+                wk = self.declare_variable(element_name + '_w')
+
+                ab = element_length/wk
+
+                k_helper[i] = 67.004*ab**6 - 422.76*ab**5 + 1087.2*ab**4 - 1458.3*ab**3 + 1076.7*ab**2 - 415.58*ab + 72.003
+
+            # self.print_var(k_helper)
+
+            # total_beam_length = csdl.sum(length_helper)
+            # length_per_rib = total_beam_length/num_ribs
 
             bkl = self.create_output(beam_name + '_bkl', shape=(n - 1), val=0)
             for i in range(n - 1):
@@ -470,13 +480,15 @@ class Aframe(ModuleCSDL):
                 wb = self.declare_variable(element_name + '_w')
                 tcapb = self.declare_variable(element_name + '_tcap')
 
-                critical_stress = k*E*(tcapb/wb)**2/(1 - v**2) # Roark's simply-supported panel buckling
+                # critical_stress = k*E*(tcapb/wb)**2/(1 - v**2) # Roark's simply-supported panel buckling
+                critical_stress = k_helper[i]*E*(tcapb/wb)**2/(1 - v**2) # Roark's simply-supported panel buckling
                 #self.print_var(critical_stress)
 
                 actual_stress_array = self.declare_variable(element_name + '_stress_array', shape=(5))
                 actual_stress = (actual_stress_array[0] + actual_stress_array[1])/2
 
-                bkl[i] = actual_stress/critical_stress # greater than 1 = bad
+                # bkl[i] = actual_stress/critical_stress # greater than 1 = bad
+                bkl[i] = critical_stress/actual_stress
 
             # for i in range(num_ribs - 1): # iterate over the panels
                 
