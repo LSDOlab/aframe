@@ -468,7 +468,9 @@ class Aframe(ModuleCSDL):
 
                 k_helper[i] = 67.004*ab**6 - 422.76*ab**5 + 1087.2*ab**4 - 1458.3*ab**3 + 1076.7*ab**2 - 415.58*ab + 72.003
 
-            # self.print_var(k_helper)
+            self.print_var(k_helper)
+
+            #k_helper = self.create_input('k_helper', shape=(n-1), val=np.array([7.766565398,7.767718172,7.766565398,6.983369643,6.628895391,6.360493199,6.3,6.3,6.3,6.3,6.3]))
 
             # total_beam_length = csdl.sum(length_helper)
             # length_per_rib = total_beam_length/num_ribs
@@ -487,8 +489,8 @@ class Aframe(ModuleCSDL):
                 actual_stress_array = self.declare_variable(element_name + '_stress_array', shape=(5))
                 actual_stress = (actual_stress_array[0] + actual_stress_array[1])/2
 
-                # bkl[i] = actual_stress/critical_stress # greater than 1 = bad
-                bkl[i] = critical_stress/actual_stress
+                bkl[i] = actual_stress/critical_stress # greater than 1 = bad
+                # bkl[i] = critical_stress/actual_stress
 
             # for i in range(num_ribs - 1): # iterate over the panels
                 

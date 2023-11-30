@@ -124,12 +124,12 @@ if __name__ == '__main__':
             optimization_flag=True), 
         analytics=True
         )
-    sim.run()
+    # sim.run()
 
-    # prob = CSDLProblem(problem_name='run_opt', simulator=sim)
-    # optimizer = SLSQP(prob, maxiter=1000, ftol=1E-8)
-    # optimizer.solve()
-    # optimizer.print_results()
+    prob = CSDLProblem(problem_name='run_opt', simulator=sim)
+    optimizer = SLSQP(prob, maxiter=1000, ftol=1E-8)
+    optimizer.solve()
+    optimizer.print_results()
 
     spanwise_location_ft = sim['wing_mesh'][:, 1]*m2ft
     width_in = sim['wing_width']*m2in
