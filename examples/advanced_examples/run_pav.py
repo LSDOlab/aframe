@@ -89,10 +89,11 @@ class Run(csdl.Model):
         if self.parameters['optimization_flag']:
             self.add_constraint('wing_stress', upper=2.16e8, scaler=1E-8)
             self.add_constraint('wing_bkl', upper=1, scaler=1E0)
-            # self.add_design_variable('wing_tcap', lower=0.00127, upper=0.2, scaler=1E2)
-            # self.add_design_variable('wing_tweb', lower=0.00127, upper=0.2, scaler=1E3)
-            self.add_design_variable('wing_tcap', lower=0.0001, upper=0.2, scaler=1E2)
-            self.add_design_variable('wing_tweb', lower=0.0001, upper=0.2, scaler=1E2)
+            self.add_constraint('wing_spar_bkl', upper=1, scaler=1E0)
+            self.add_design_variable('wing_tcap', lower=0.00127, upper=0.2, scaler=1E2)
+            self.add_design_variable('wing_tweb', lower=0.00127, upper=0.2, scaler=1E3)
+            # self.add_design_variable('wing_tcap', lower=0.0001, upper=0.2, scaler=1E2)
+            # self.add_design_variable('wing_tweb', lower=0.0001, upper=0.2, scaler=1E2)
             self.add_objective('mass', scaler=1E-2)
         
         
@@ -181,8 +182,8 @@ if __name__ == '__main__':
             'Skin critical buckling stress (psi)': sim['wing_bkl_crt_stress']*Npm22psi,
             'Skin applied buckling stress (psi)': sim['wing_bkl_act_stress']*Npm22psi,
             'Skin buckle ratio': bkl,
-            'Spar critical buckling force (lbf)': sim['wing_spar_bkl_crt_force']*N2lbf,
-            'Spar applied buckling force (lbf)': sim['wing_spar_bkl_act_force']*N2lbf,
+            'Spar critical buckling stress (psi)': sim['wing_spar_bkl_crt_stress']*Npm22psi,
+            'Spar applied buckling stress (psi)': sim['wing_spar_bkl_act_stress']*Npm22psi,
             'Spar buckle ratio': sim['wing_spar_bkl'],
         },
     )

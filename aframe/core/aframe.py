@@ -417,7 +417,7 @@ class Aframe(ModuleCSDL):
             d[n - 1,:] = csdl.reshape(dnb, (1,3))
 
 
-        
+
 
         # perform a stress recovery:
         for beam_name in beams:
@@ -445,10 +445,14 @@ class Aframe(ModuleCSDL):
             stress = (fwd + rev)/2
             self.register_output(beam_name + '_stress', stress)
 
-
-
-
-
+        """
+        Stress on a cross-section is arranged in the following format
+        0---------------------------------1
+        --                              --
+        4-                              --
+        --                              --
+        3---------------------------------2
+        """
         # Skin buckling:
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])
@@ -512,10 +516,10 @@ class Aframe(ModuleCSDL):
                 element_length = self.declare_variable(element_name + 'L')
                 wk = self.declare_variable(element_name + '_w')
                 ab = element_length / wk
-                k_helper_spar[i] = 1360*ab**4 - 2911.4*ab**3 +2397.4*ab**2 - 914.45*ab + 159.95  # todo: proper regression equation
+                k_helper_spar[i] = 120.19*ab**6 - 758.64*ab**5 + 1954*ab**4 - 2629.5*ab**3 + 1952.5*ab**2 - 760.4*ab + 143.4
 
-            crt_force = self.create_output(beam_name + '_spar_bkl_crt_force', shape=(n - 1), val=0)
-            act_force = self.create_output(beam_name + '_spar_bkl_act_force', shape=(n - 1), val=0)
+            spar_crt_stress = self.create_output(beam_name + '_spar_bkl_crt_stress', shape=(n - 1), val=0)
+            spar_act_stress = self.create_output(beam_name + '_spar_bkl_act_stress', shape=(n - 1), val=0)
             spar_bkl = self.create_output(beam_name + '_spar_bkl', shape=(n - 1), val=0)
             for i in range(n - 1):
                 element_name = beam_name + '_element_' + str(i)
@@ -524,17 +528,22 @@ class Aframe(ModuleCSDL):
                 hb = self.declare_variable(element_name + '_h')
                 twebk = self.declare_variable(element_name + '_tweb')
 
-                critical_force = k_helper_spar[i] * (0.91/(1-v**2)) * E * (twebk / wb) ** 2
-                crt_force[i] = critical_force
+                critical_stress = k_helper_spar[i] * (0.91/(1-v**2)) * E * (twebk / wb) ** 2
+                spar_crt_stress[i] = critical_stress
 
                 actual_stress_array = self.declare_variable(element_name + '_stress_array', shape=(5))
-                actual_stress = (actual_stress_array[0] + actual_stress_array[1]) / 2  # todo which stress should be used?
+                self.print_var(wb)
+                self.print_var(hb)
+                self.print_var(twebk)
+                self.print_var(actual_stress_array)
 
-                area = twebk*hb
-                actual_force = actual_stress * area
-                act_force[i] = actual_force
+                # area = twebk*hb
+                # actual_force = actual_stress_array[4] * area
+                # act_force[i] = actual_force
+                spar_act_stress[i] = actual_stress_array[4]
 
-                spar_bkl[i] = actual_force / critical_force  # greater than 1 = bad
+                # spar_bkl[i] = actual_force / critical_force  # greater than 1 = bad
+                spar_bkl[i] = actual_stress_array[4] / critical_stress  # greater than 1 = bad
 
 
         # output dummy forces and moments for CADDEE:
