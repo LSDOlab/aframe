@@ -449,7 +449,7 @@ class Aframe(ModuleCSDL):
 
 
 
-        # buckling:
+        # Skin buckling:
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])
             E = beams[beam_name]['E']
@@ -457,25 +457,27 @@ class Aframe(ModuleCSDL):
             k = 6.3
 
             # length_helper = self.create_output(beam_name + '_length_helper', shape=(n - 1), val=0)
-            k_helper = self.create_output(beam_name + '_k_helper', shape=(n - 1), val=0)
+            k_helper_skin = self.create_output(beam_name + '_k_helper_skin', shape=(n - 1), val=0)
             for i in range(n - 1):
                 element_name = beam_name + '_element_' + str(i)
                 element_length = self.declare_variable(element_name + 'L')
 
-                tcapk = self.declare_variable(element_name + '_tcap')
+                # tcapk = self.declare_variable(element_name + '_tcap')
                 wk = self.declare_variable(element_name + '_w')
 
                 ab = element_length/wk
 
-                k_helper[i] = 67.004*ab**6 - 422.76*ab**5 + 1087.2*ab**4 - 1458.3*ab**3 + 1076.7*ab**2 - 415.58*ab + 72.003
+                k_helper_skin[i] = 67.004*ab**6 - 422.76*ab**5 + 1087.2*ab**4 - 1458.3*ab**3 + 1076.7*ab**2 - 415.58*ab + 72.003
 
-            self.print_var(k_helper)
+            # self.print_var(k_helper_skin)
 
             #k_helper = self.create_input('k_helper', shape=(n-1), val=np.array([7.766565398,7.767718172,7.766565398,6.983369643,6.628895391,6.360493199,6.3,6.3,6.3,6.3,6.3]))
 
             # total_beam_length = csdl.sum(length_helper)
             # length_per_rib = total_beam_length/num_ribs
 
+            crt_stress = self.create_output(beam_name + '_bkl_crt_stress', shape=(n - 1), val=0)
+            act_stress = self.create_output(beam_name + '_bkl_act_stress', shape=(n - 1), val=0)
             bkl = self.create_output(beam_name + '_bkl', shape=(n - 1), val=0)
             for i in range(n - 1):
                 element_name = beam_name + '_element_' + str(i)
@@ -484,19 +486,55 @@ class Aframe(ModuleCSDL):
                 tcapb = self.declare_variable(element_name + '_tcap')
 
                 # critical_stress = k*E*(tcapb/wb)**2/(1 - v**2) # Roark's simply-supported panel buckling
-                critical_stress = k_helper[i]*E*(tcapb/wb)**2/(1 - v**2) # Roark's simply-supported panel buckling
+                critical_stress = k_helper_skin[i]*E*(tcapb/wb)**2/(1 - v**2) # Roark's simply-supported panel buckling
                 #self.print_var(critical_stress)
+                crt_stress[i] = critical_stress
 
                 actual_stress_array = self.declare_variable(element_name + '_stress_array', shape=(5))
                 actual_stress = (actual_stress_array[0] + actual_stress_array[1])/2
+                act_stress[i] = actual_stress
 
                 bkl[i] = actual_stress/critical_stress # greater than 1 = bad
                 # bkl[i] = critical_stress/actual_stress
 
             # for i in range(num_ribs - 1): # iterate over the panels
 
+        # Spar buckling:
+        for beam_name in beams:
+            n = len(beams[beam_name]['nodes'])
+            E = beams[beam_name]['E']
+            v = 0.33  # Poisson's ratio
 
+            # length_helper = self.create_output(beam_name + '_length_helper', shape=(n - 1), val=0)
+            k_helper_spar = self.create_output(beam_name + '_k_helper_spar', shape=(n - 1), val=0)
+            for i in range(n - 1):
+                element_name = beam_name + '_element_' + str(i)
+                element_length = self.declare_variable(element_name + 'L')
+                wk = self.declare_variable(element_name + '_w')
+                ab = element_length / wk
+                k_helper_spar[i] = 1360*ab**4 - 2911.4*ab**3 +2397.4*ab**2 - 914.45*ab + 159.95  # todo: proper regression equation
 
+            crt_force = self.create_output(beam_name + '_spar_bkl_crt_force', shape=(n - 1), val=0)
+            act_force = self.create_output(beam_name + '_spar_bkl_act_force', shape=(n - 1), val=0)
+            spar_bkl = self.create_output(beam_name + '_spar_bkl', shape=(n - 1), val=0)
+            for i in range(n - 1):
+                element_name = beam_name + '_element_' + str(i)
+
+                wb = self.declare_variable(element_name + '_w')
+                hb = self.declare_variable(element_name + '_h')
+                twebk = self.declare_variable(element_name + '_tweb')
+
+                critical_force = k_helper_spar[i] * (0.91/(1-v**2)) * E * (twebk / wb) ** 2
+                crt_force[i] = critical_force
+
+                actual_stress_array = self.declare_variable(element_name + '_stress_array', shape=(5))
+                actual_stress = (actual_stress_array[0] + actual_stress_array[1]) / 2  # todo which stress should be used?
+
+                area = twebk*hb
+                actual_force = actual_stress * area
+                act_force[i] = actual_force
+
+                spar_bkl[i] = actual_force / critical_force  # greater than 1 = bad
 
 
         # output dummy forces and moments for CADDEE:

@@ -17,6 +17,7 @@ N2lbf = 0.224809
 Npm22psi = 0.000145038
 Nm2lbft = 0.73756214728
 m42in4 = 2402509.607720009
+kg2lbs = 2.20462262
 
 # region Data
 nodes = np.array([[ 2.94811022e+00,  4.26720000e+00,  6.04990180e-01],
@@ -101,7 +102,7 @@ class Run(csdl.Model):
 
 if __name__ == '__main__':
 
-    fileObj = open('examples/advanced_examples/PAVsymbbeam_data.p', 'rb')
+    fileObj = open('PAVsymbbeam_data.p', 'rb')
     PAVsymbbeam_data = pickle.load(fileObj)
     fileObj.close()
 
@@ -126,7 +127,7 @@ if __name__ == '__main__':
             optimization_flag=True), 
         analytics=True
         )
-    # sim.run()
+    sim.run()
 
     prob = CSDLProblem(problem_name='run_opt', simulator=sim)
     optimizer = SLSQP(prob, maxiter=1000, ftol=1E-8)
@@ -177,7 +178,12 @@ if __name__ == '__main__':
             'Iy (in^4)': element_Iy_out * m42in4,
             'Iz (in^4)': element_Iz_out * m42in4,
             'J (in^4)': element_J_out * m42in4,
-            'Buckle ratio': bkl,
+            'Skin critical buckling stress (psi)': sim['wing_bkl_crt_stress']*Npm22psi,
+            'Skin applied buckling stress (psi)': sim['wing_bkl_act_stress']*Npm22psi,
+            'Skin buckle ratio': bkl,
+            'Spar critical buckling force (lbf)': sim['wing_spar_bkl_crt_force']*N2lbf,
+            'Spar applied buckling force (lbf)': sim['wing_spar_bkl_act_force']*N2lbf,
+            'Spar buckle ratio': sim['wing_spar_bkl'],
         },
     )
     with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
@@ -195,4 +201,4 @@ if __name__ == '__main__':
     #plt.plot(element_loads[:,4])
     #plt.show()
 
-    print(sim['mass'])
+    print('Wingbox mass (lbs)', sim['mass']*kg2lbs)
