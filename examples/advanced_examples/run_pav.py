@@ -155,6 +155,14 @@ if __name__ == '__main__':
     element_J_out = sim['wing_jo'] # (n-1)
     bkl = sim['wing_bkl']
 
+
+    elmt_tweb = np.empty((len(nodes)-1, ))
+    elmt_tcap = np.empty((len(nodes) - 1,))
+    for i in range(len(nodes)-1):
+        element_name = 'wing' + '_element_' + str(i)
+        elmt_tcap[i] = sim[element_name + '_tcap']
+        elmt_tweb[i] = sim[element_name + '_tweb']
+
     beamNodalDf = pd.DataFrame(
         data={
             'Spanwise y-location (ft)': spanwise_location_ft,
@@ -171,6 +179,8 @@ if __name__ == '__main__':
     beamElementDf = pd.DataFrame(
         data={
             'Spanwise y-location (ft)': np.average([spanwise_location_ft[:-1], spanwise_location_ft[1:]], axis=0),
+            'Element Web thickness (in)': elmt_tweb * m2in,
+            'Element Cap thickness (in)': elmt_tcap * m2in,
             'Axial stress (psi)': element_axial_stress*Npm22psi,
             'Shear stress (psi)': element_shear_stress*Npm22psi,
             'Torsional stress (psi)': element_torsional_stress*Npm22psi,
