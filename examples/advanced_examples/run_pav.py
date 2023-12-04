@@ -213,3 +213,4 @@ if __name__ == '__main__':
     #plt.show()
 
     print('Wingbox mass (lbs)', sim['mass']*kg2lbs)
+    print('Spar Kc: ', sim['wing_k_helper_spar'])

@@ -495,7 +495,7 @@ class Aframe(ModuleCSDL):
                 crt_stress[i] = critical_stress
 
                 actual_stress_array = self.declare_variable(element_name + '_stress_array', shape=(5))
-                actual_stress = (actual_stress_array[0] + actual_stress_array[1])/2
+                actual_stress = csdl.max(actual_stress_array[0], actual_stress_array[1])
                 act_stress[i] = actual_stress
 
                 bkl[i] = actual_stress/critical_stress # greater than 1 = bad
@@ -515,8 +515,10 @@ class Aframe(ModuleCSDL):
                 element_name = beam_name + '_element_' + str(i)
                 element_length = self.declare_variable(element_name + 'L')
                 wk = self.declare_variable(element_name + '_w')
-                ab = element_length / wk
-                k_helper_spar[i] = 120.19*ab**6 - 758.64*ab**5 + 1954*ab**4 - 2629.5*ab**3 + 1952.5*ab**2 - 760.4*ab + 143.4
+                hk = self.declare_variable(element_name + '_h')
+                ab = element_length / hk
+                # k_helper_spar[i] = 120.19*ab**6 - 758.64*ab**5 + 1954*ab**4 - 2629.5*ab**3 + 1952.5*ab**2 - 760.4*ab + 143.4
+                k_helper_spar[i] = 21.6 + ab*0  # asymptote value  #todo: this is a hardcode. Need if-else
 
             spar_crt_stress = self.create_output(beam_name + '_spar_bkl_crt_stress', shape=(n - 1), val=0)
             spar_act_stress = self.create_output(beam_name + '_spar_bkl_act_stress', shape=(n - 1), val=0)
@@ -528,22 +530,25 @@ class Aframe(ModuleCSDL):
                 hb = self.declare_variable(element_name + '_h')
                 twebk = self.declare_variable(element_name + '_tweb')
 
-                critical_stress = k_helper_spar[i] * (0.91/(1-v**2)) * E * (twebk / wb) ** 2
+                critical_stress = k_helper_spar[i] * (0.91/(1-v**2)) * E * (twebk / hb) ** 2
                 spar_crt_stress[i] = critical_stress
 
                 actual_stress_array = self.declare_variable(element_name + '_stress_array', shape=(5))
-                self.print_var(wb)
-                self.print_var(hb)
-                self.print_var(twebk)
-                self.print_var(actual_stress_array)
+                # self.print_var(wb)
+                # self.print_var(hb)
+                # self.print_var(twebk)
+                # self.print_var(actual_stress_array)
 
                 # area = twebk*hb
                 # actual_force = actual_stress_array[4] * area
                 # act_force[i] = actual_force
-                spar_act_stress[i] = actual_stress_array[4]
+                # spar_act_stress[i] = (actual_stress_array[0] + actual_stress_array[3] + actual_stress_array[4]) / 3
+                # self.print_var(actual_stress_array)
+                spar_act_stress[i] = csdl.max(actual_stress_array[0], actual_stress_array[3], actual_stress_array[4])
+                # spar_act_stress[i] = (actual_stress_array[0] + actual_stress_array[1]) / 2
 
                 # spar_bkl[i] = actual_force / critical_force  # greater than 1 = bad
-                spar_bkl[i] = actual_stress_array[4] / critical_stress  # greater than 1 = bad
+                spar_bkl[i] = spar_act_stress[i] / critical_stress  # greater than 1 = bad
 
 
         # output dummy forces and moments for CADDEE:
