@@ -120,17 +120,25 @@ class MassCSDL(ModuleCSDL):
             #tweb = self.declare_variable(beam_name + '_tweb', shape=(n - 1))
             #tcap = self.declare_variable(beam_name + '_tcap', shape=(n - 1))
             tweb_in = self.register_module_input(beam_name + '_tweb', shape=(n), computed_upstream=False)
-            tcap_in = self.register_module_input(beam_name + '_tcap', shape=(n), computed_upstream=False)
+            # tcap_in = self.register_module_input(beam_name + '_tcap', shape=(n), computed_upstream=False)
+            tbot_in = self.register_module_input(beam_name + '_tbot', shape=(n))
+            ttop_in = self.register_module_input(beam_name + '_ttop', shape=(n))
+
 
             tweb = self.create_output('marius_tweb', shape=(n-1), val=0)
-            tcap = self.create_output('marius_tcap', shape=(n-1), val=0)
+            # tcap = self.create_output('marius_tcap', shape=(n-1), val=0)
+            ttop = self.create_output('marius_ttop', shape=(n-1), val=0)
+            tbot = self.create_output('marius_tbot', shape=(n-1), val=0)
             for i in range(n - 1):
                 tweb[i] = (tweb_in[i]+tweb_in[i+1])/2
-                tcap[i] = (tcap_in[i]+tcap_in[i+1])/2
+                # tcap[i] = (tcap_in[i]+tcap_in[i+1])/2
+                ttop[i] = (ttop_in[i]+ttop_in[i+1])/2
+                tbot[i] = (tbot_in[i]+tbot_in[i+1])/2
 
             # get cs area:
             w_i = w - 2*tweb
-            h_i = h - 2*tcap
+            # h_i = h - 2*tcap
+            h_i = h - ttop - tbot
             A = (((w*h) - (w_i*h_i))**2 + 1E-14)**0.5
 
             # iterate over the elements:
