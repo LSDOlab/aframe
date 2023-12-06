@@ -127,18 +127,20 @@ class StressBox(csdl.Model):
         axial_stress = self.create_output(name + '_axial_stress', shape=(5), val=0)
         torsional_stress = self.create_output(name + '_torsional_stress', shape=(5), val=0)
 
-        # self.print_var(tweb)
+        axial_stress_a = loads_a[0]/A
+        axial_stress_b = loads_b[0]/A
 
         for point in range(5):
             x = x_coord[point]
             y = y_coord[point]
             r = (x**2 + y**2)**0.5
 
-            s_axial_a = (loads_a[0]/A) + (loads_a[4]*y/Iy) + (loads_a[5]*x/Iz)
-            s_axial_b = (loads_b[0]/A) + (loads_b[4]*y/Iy) + (loads_b[5]*x/Iz)
+            s_axial_a = axial_stress_a + (loads_a[4]*y/Iy) + (loads_a[5]*x/Iz)
+            s_axial_b = axial_stress_b + (loads_b[4]*y/Iy) + (loads_b[5]*x/Iz)
 
             s_axial_a_4bkl = (s_axial_a**2)**0.5 * 1
             s_axial_b_4bkl = (s_axial_b**2)**0.5 * 1
+            #s4bkl[point] = (s_axial_a + s_axial_b)/2
 
             # axial_stress[point] = (s_axial_a + s_axial_b)/2
             axial_stress[point] = (s_axial_a_4bkl + s_axial_b_4bkl)/2
@@ -161,15 +163,15 @@ class StressBox(csdl.Model):
             stress_b[point] = (s_axial_b**2 + 3*tau_b**2 + 1E-14)**0.5
             
 
-        max_stress_a = csdl.max(1E-3*stress_a)/1E-3
-        max_stress_b = csdl.max(1E-3*stress_b)/1E-3
+        # max_stress_a = csdl.max(1E-3*stress_a)/1E-3
+        # max_stress_b = csdl.max(1E-3*stress_b)/1E-3
 
-        #stress_ab = self.create_output(name + 'stress_ab', shape=(2), val=0)
-        #stress_ab[0] = max_stress_a
-        #stress_ab[1] = max_stress_b
+        # stress_ab = self.create_output(name + 'stress_ab', shape=(2), val=0)
+        # stress_ab[0] = max_stress_a
+        # stress_ab[1] = max_stress_b
 
         # self.register_output(name + '_stress', csdl.max(1E-3*stress_ab)/1E-3)
-        self.register_output(name + '_stress', (max_stress_a + max_stress_b)/2)
+        # self.register_output(name + '_stress', (max_stress_a + max_stress_b)/2)
         
 
         self.register_output(name + '_stress_array', (stress_a + stress_b)/2) # a more reliable stress constraint

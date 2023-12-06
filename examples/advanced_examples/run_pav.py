@@ -180,20 +180,20 @@ if __name__ == '__main__':
             'Buckle ratio': bkl,
         },
     )
-    with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
-        print(beamNodalDf)
-        print(beamElementDf)
+    # with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
+    #     print(beamNodalDf)
+    #     print(beamElementDf)
 
-    beamNodalDf.to_excel('pav_3g_results_nodal.xlsx')
-    beamElementDf.to_excel('pav_3g_results_element.xlsx')
+    # beamNodalDf.to_excel('pav_3g_results_nodal.xlsx')
+    # beamElementDf.to_excel('pav_3g_results_element.xlsx')
+
     print('Max stress (psi): ', np.max(stress_psi))
     print('displacement (in): ', np.max(disp_in))
 
-    #plt.plot(stress_psi)
-    #plt.show()
-
-    #plt.plot(element_loads[:,4])
-    #plt.show()
-
     print('top buckle', bkl)
     print('bot buckle', bot_bkl)
+
+    stress2 = sim['wing_stress_2']
+    test = sim['wing_test']
+    print(np.max(stress2, axis=1)*Npm22psi)
+    # print(stress2)

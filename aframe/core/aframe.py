@@ -454,6 +454,73 @@ class Aframe(ModuleCSDL):
 
 
 
+        # test stress recovery mainly for buckling:
+        for beam_name in beams:
+            n = len(beams[beam_name]['nodes'])
+
+            stress2 = self.create_output(beam_name + '_stress_2', shape=(n - 1, 5), val=0)
+            test = self.create_output(beam_name + '_test', shape=(n - 1), val=0)
+            for i in range(n - 1):
+                element_name = beam_name + '_element_' + str(i)
+                A = self.declare_variable(element_name + '_A')
+                w = self.declare_variable(element_name + '_w')
+                h = self.declare_variable(element_name + '_h')
+                J = self.declare_variable(element_name + '_J')
+                Iy = self.declare_variable(element_name + '_Iy') # height axis
+                Iz = self.declare_variable(element_name + '_Iz') # width axis
+                tweb = self.declare_variable(element_name + '_tweb')
+                Q = self.declare_variable(element_name + '_Q')
+
+                element_loads = self.declare_variable(element_name + 'local_loads', shape=(12))
+                loads_a = element_loads[0:6] # take the loads at node a only
+                loads_b = element_loads[6:12] # take the loads at node b only
+                loads = (loads_a**2 + loads_b**2)**0.5 # average the loads
+                f_x = loads[0] # axial
+                f_y = loads[1]
+                f_z = loads[2]
+                m_y = loads[4]
+                m_x = loads[5]
+                m_z = loads[3] # torque
+
+                test[i] = m_y
+
+                axial_stress = f_x/A
+
+                # create the point coordinate matrix
+                x_coord = self.create_output(element_name + 'x_coord_2', shape=(5),val=0)
+                y_coord = self.create_output(element_name + 'y_coord_2', shape=(5),val=0)
+                x_coord[0], y_coord[0] = -w/2, h/2 # point 1
+                x_coord[1], y_coord[1] = w/2, h/2 # point 2
+                x_coord[2], y_coord[2] = w/2, -h/2 # point 3
+                x_coord[3], y_coord[3] = -w/2, -h/2 # point 4
+                x_coord[4] = -w/2 # point 5
+
+                shear_vec = self.create_output(element_name + 'shear_vec', shape=(5), val=0)
+                s4bkl = self.create_output(element_name + 's4bkl', shape=(5), val=0)
+                for j in range(5):
+                    x, y = x_coord[j], y_coord[j]
+                    r = (x**2 + y**2)**0.5
+                    torsional_stress = m_z*r/J
+
+                    bend_stress_y = m_y*y/Iy
+                    bend_stress_x = m_x*x/Iz
+
+                    if j == 4: shear_vec[j] = f_z*Q/(Iy*2*tweb)
+
+                    tau = torsional_stress + shear_vec[j]
+
+                    stress2[i,j] = csdl.reshape(((axial_stress + bend_stress_x + bend_stress_y)**2 + 3*tau**2)**0.5, (1,1))
+
+                    s4bkl[j] = axial_stress + bend_stress_x + bend_stress_y
+
+                s4bklt = self.register_output(element_name + 's4bklt', (s4bkl[0] + s4bkl[1])/2)
+                s4bklb = self.register_output(element_name + 's4bklb', (s4bkl[2] + s4bkl[3])/2)
+
+
+
+
+
+
         # buckling:
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])
@@ -483,11 +550,8 @@ class Aframe(ModuleCSDL):
                 critical_stress_top = k*E*(ttopb/wb)**2/(1 - v**2) # Roark's simply-supported panel buckling
                 critical_stress_bot = k*E*(tbotb/wb)**2/(1 - v**2)
 
-                #actual_stress_array = self.declare_variable(element_name + '_stress_array', shape=(5))
-                #actual_stress = (actual_stress_array[0] + actual_stress_array[1])/2
-                axial_stress_array = self.declare_variable(element_name + '_axial_stress', shape=(5))
-                top_stress = (axial_stress_array[0] + axial_stress_array[1])/2
-                bot_stress = (axial_stress_array[2] + axial_stress_array[3])/2
+                top_stress = self.declare_variable(element_name + 's4bklt')
+                bot_stress = self.declare_variable(element_name + 's4bklb')
 
                 # bkl[i] = actual_stress/critical_stress # greater than 1 = bad
                 top_bkl[i] = top_stress/critical_stress_top
