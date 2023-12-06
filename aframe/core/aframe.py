@@ -474,13 +474,22 @@ class Aframe(ModuleCSDL):
                 element_loads = self.declare_variable(element_name + 'local_loads', shape=(12))
                 loads_a = element_loads[0:6] # take the loads at node a only
                 loads_b = element_loads[6:12] # take the loads at node b only
-                loads = (loads_a**2 + loads_b**2)**0.5 # average the loads
+                loads = (loads_a**2 + loads_b**2)**0.5
+                # loads = (loads_a + loads_b)/2 # average the loads
                 f_x = loads[0] # axial
                 f_y = loads[1]
                 f_z = loads[2]
                 m_y = loads[4]
                 m_x = loads[5]
                 m_z = loads[3] # torque
+
+                my_a = loads_a[4]
+                my_b = loads_b[4]
+                my_delta = (my_a - my_b)/(((my_a - my_b)**2)**0.5) # signum function
+
+                mx_a = loads_a[5]
+                mx_b = loads_b[5]
+                mx_delta = (mx_a - mx_b)/(((mx_a - mx_b)**2)**0.5) # signum function
 
                 test[i] = m_y
 
@@ -502,8 +511,8 @@ class Aframe(ModuleCSDL):
                     r = (x**2 + y**2)**0.5
                     torsional_stress = m_z*r/J
 
-                    bend_stress_y = m_y*y/Iy
-                    bend_stress_x = m_x*x/Iz
+                    bend_stress_y = my_delta * m_y*y/Iy
+                    bend_stress_x = mx_delta * m_x*x/Iz
 
                     if j == 4: shear_vec[j] = f_z*Q/(Iy*2*tweb)
 
