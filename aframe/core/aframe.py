@@ -505,7 +505,8 @@ class Aframe(ModuleCSDL):
                 x_coord[4] = -w/2 # point 5
 
                 shear_vec = self.create_output(element_name + 'shear_vec', shape=(5), val=0)
-                s4bkl = self.create_output(element_name + 's4bkl', shape=(5), val=0)
+                s4bkl_tt = self.create_output(element_name + 's4bkl_tt', shape=(5), val=0)
+                s4bkl_bb = self.create_output(element_name + 's4bkl_bb', shape=(5), val=0)
                 for j in range(5):
                     x, y = x_coord[j], y_coord[j]
                     r = (x**2 + y**2)**0.5
@@ -520,10 +521,11 @@ class Aframe(ModuleCSDL):
 
                     stress2[i,j] = csdl.reshape(((axial_stress + bend_stress_x + bend_stress_y)**2 + 3*tau**2)**0.5, (1,1))
 
-                    s4bkl[j] = axial_stress + bend_stress_x + bend_stress_y
+                    s4bkl_tt[j] = my_delta * ((axial_stress + bend_stress_x + bend_stress_y)**2)**0.5
+                    s4bkl_bb[j] = -1 * my_delta * ((axial_stress + bend_stress_x + bend_stress_y)**2)**0.5
 
-                s4bklt = self.register_output(element_name + 's4bklt', (s4bkl[0] + s4bkl[1])/2)
-                s4bklb = self.register_output(element_name + 's4bklb', (s4bkl[2] + s4bkl[3])/2)
+                s4bklt = self.register_output(element_name + 's4bklt', (s4bkl_tt[0] + s4bkl_tt[1])/2)
+                s4bklb = self.register_output(element_name + 's4bklb', (s4bkl_bb[2] + s4bkl_bb[3])/2)
 
 
 
