@@ -11,6 +11,9 @@ from dataclasses import dataclass
 class EBBeamOutputs:
     """Data class for Euler--Bernoulli beam outputs"""
     displacements : m3l.Variable
+    stresses : m3l.Variable
+    top_buckling : m3l.Variable
+    bot_buckling : m3l.Variable
     rotations : m3l.Variable
     mass : m3l.Variable
     cg_vector : m3l.Variable
@@ -65,7 +68,8 @@ class EBBeam(m3l.ExplicitOperation):
     #     displacement_nodes = arguments['displacement_nodes']
     #     derivatives['nodal_displacement', 'displacement'] = displacement_map(geo_mesh, displacement_nodes)
 
-    def evaluate(self, beam_mesh : m3l.Variable, t_web : m3l.Variable=None, t_cap : m3l.Variable=None, forces:m3l.Variable=None, moments:m3l.Variable=None) -> EBBeamOutputs:
+    def evaluate(self, beam_mesh : m3l.Variable, t_web : m3l.Variable, t_top : m3l.Variable, t_bot : m3l.Variable,
+                 forces:m3l.Variable=None, moments:m3l.Variable=None) -> EBBeamOutputs:
         '''
         Evaluates the beam model.
         
@@ -88,14 +92,16 @@ class EBBeam(m3l.ExplicitOperation):
         mesh = beam_mesh.beam_nodes
         beam_height = beam_mesh.height
         beam_width = beam_mesh.width
-
+        
         # Gets information for naming/shapes
         beam_name = list(self.parameters['beams'].keys())[0]   # this is only taking the first mesh added to the solver.
+        n = len(self.beams[beam_name]['nodes'])
 
         self.arguments = {}
         self.arguments[f'{beam_name}_width'] = beam_width
         self.arguments[f'{beam_name}_height'] = beam_height
-        self.arguments[f'{beam_name}_tcap'] = t_cap
+        self.arguments[f'{beam_name}_ttop'] = t_top
+        self.arguments[f'{beam_name}_tbot'] = t_bot
         self.arguments[f'{beam_name}_tweb'] = t_web
         self.arguments[f'{beam_name}_mesh'] = mesh
         if forces is not None:
@@ -105,18 +111,24 @@ class EBBeam(m3l.ExplicitOperation):
 
         # Create the M3L variables that are being output
         displacements = m3l.Variable(name=f'{beam_name}_displacement', shape=mesh.shape, operation=self)
-        # stresses = m3l.Variable(name=f"{beam_name}_stress", shape=mesh.shape)
         rotations = m3l.Variable(name=f'{beam_name}_rotation', shape=mesh.shape, operation=self)
         mass = m3l.Variable(name='mass', shape=(1,), operation=self)
         cg = m3l.Variable(name='cg_vector', shape=(3,), operation=self)
         inertia_tensor = m3l.Variable(name='inertia_tensor', shape=(3,3), operation=self)
-        
+
+        stresses = m3l.Variable(name=f"{beam_name}_stress", shape=(n, 5), operation=self)
+        top_buckling = m3l.Variable(name=f"{beam_name}_top_bkl", shape=(n-1, ), operation=self)
+        bot_buckling = m3l.Variable(name=f"{beam_name}_bot_bkl", shape=(n-1, ), operation=self)
+
         outputs = EBBeamOutputs(
             displacements=displacements,
             rotations=rotations,
             mass=mass,
             cg_vector=cg,
             inertia_tensor=inertia_tensor,
+            stresses=stresses,
+            top_buckling=top_buckling,
+            bot_buckling=bot_buckling,
         )
         
         return outputs

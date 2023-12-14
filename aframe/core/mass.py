@@ -39,7 +39,7 @@ class BeamMassModel(m3l.ExplicitOperation):
         
         return csdl_model
 
-    def evaluate(self, width, height, t_cap, t_web, beam_nodes) -> BeamMassProps:
+    def evaluate(self, width, height, t_top, t_bot, t_web, beam_nodes) -> BeamMassProps:
         self.arguments = {}
         beams = self.parameters['beams']
 
@@ -47,8 +47,9 @@ class BeamMassModel(m3l.ExplicitOperation):
             self.arguments[f'{beam_name}_mesh'] = beam_nodes
             self.arguments[f'{beam_name}_width'] = width
             self.arguments[f'{beam_name}_height'] = height
-            self.arguments[f'{beam_name}_tweb'] = t_cap
-            self.arguments[f'{beam_name}_tcap'] = t_web
+            self.arguments[f'{beam_name}_tweb'] = t_web
+            self.arguments[f'{beam_name}_ttop'] = t_top
+            self.arguments[f'{beam_name}_tbot'] = t_bot
 
         mass = m3l.Variable(name='mass', shape=(1,), operation=self)
         cg_vector = m3l.Variable(name='cg_vector', shape=(3, ), operation=self)
@@ -84,17 +85,10 @@ class MassCSDL(csdl.Model):
                 elements.append(beam_name + '_element_' + str(i))
                 element_density_list.append(beams[beam_name]['rho'])
 
-
-
-        
-
-
         m_vec = self.create_output('m_vec',shape=(len(beams)),val=0) # stores the mass for each beam
         for j, beam_name in enumerate(beams):
             n = len(beams[beam_name]['nodes'])
             rho = beams[beam_name]['rho']
-
-            
 
             # get the mesh:
             mesh_in = self.declare_variable(beam_name + '_mesh', shape=(n,3))
@@ -118,17 +112,25 @@ class MassCSDL(csdl.Model):
             #tweb = self.declare_variable(beam_name + '_tweb', shape=(n - 1))
             #tcap = self.declare_variable(beam_name + '_tcap', shape=(n - 1))
             tweb_in = self.declare_variable(beam_name + '_tweb', shape=(n))
-            tcap_in = self.declare_variable(beam_name + '_tcap', shape=(n))
+            # tcap_in = self.declare_variable(beam_name + '_tcap', shape=(n), computed_upstream=False)
+            tbot_in = self.declare_variable(beam_name + '_tbot', shape=(n))
+            ttop_in = self.declare_variable(beam_name + '_ttop', shape=(n))
+
 
             tweb = self.create_output('marius_tweb', shape=(n-1), val=0)
-            tcap = self.create_output('marius_tcap', shape=(n-1), val=0)
+            # tcap = self.create_output('marius_tcap', shape=(n-1), val=0)
+            ttop = self.create_output('marius_ttop', shape=(n-1), val=0)
+            tbot = self.create_output('marius_tbot', shape=(n-1), val=0)
             for i in range(n - 1):
                 tweb[i] = (tweb_in[i]+tweb_in[i+1])/2
-                tcap[i] = (tcap_in[i]+tcap_in[i+1])/2
+                # tcap[i] = (tcap_in[i]+tcap_in[i+1])/2
+                ttop[i] = (ttop_in[i]+ttop_in[i+1])/2
+                tbot[i] = (tbot_in[i]+tbot_in[i+1])/2
 
             # get cs area:
             w_i = w - 2*tweb
-            h_i = h - 2*tcap
+            # h_i = h - 2*tcap
+            h_i = h - ttop - tbot
             A = (((w*h) - (w_i*h_i))**2 + 1E-14)**0.5
 
             # iterate over the elements:

@@ -68,14 +68,15 @@ class Aframe(csdl.Model):
             elif mesh_units == 'ft': mesh = 0.304*mesh_in
 
 
+
             if cs == 'box':
-                width = self.register_module_input(beam_name + '_width', shape=(n), promotes=True)
-                height = self.register_module_input(beam_name + '_height', shape=(n), promotes=True)
-                # tweb_in = self.register_module_input(beam_name + '_tweb', shape=(n))
-                # tcap_in = self.register_module_input(beam_name + '_tcap', shape=(n))
-                tweb_in = self.register_module_input(beam_name + '_tweb', shape=(n))
-                tbot_in = self.register_module_input(beam_name + '_tbot', shape=(n))
-                ttop_in = self.register_module_input(beam_name + '_ttop', shape=(n))
+                width = self.declare_variable(beam_name + '_width', shape=(n))
+                height = self.declare_variable(beam_name + '_height', shape=(n))
+                # tweb_in = self.declare_variable(beam_name + '_tweb', shape=(n))
+                # tcap_in = self.declare_variable(beam_name + '_tcap', shape=(n))
+                tweb_in = self.declare_variable(beam_name + '_tweb', shape=(n))
+                tbot_in = self.declare_variable(beam_name + '_tbot', shape=(n))
+                ttop_in = self.declare_variable(beam_name + '_ttop', shape=(n))
 
                 # create elemental outputs
                 w_vec, h_vec = self.create_output(beam_name + '_w', shape=(n - 1), val=0), self.create_output(beam_name + '_h', shape=(n - 1), val=0)
@@ -101,7 +102,15 @@ class Aframe(csdl.Model):
                     # compute the box-beam cs properties
                     # w_i, h_i = w - 2*tweb, h - 2*tcap
                     w_i, h_i = w - 2*tweb, h - ttop - tbot
+                    
+                    self.register_output(element_name + 'w_i', w_i / w)
+                    self.register_output(element_name + 'h_i', h_i / h)
+
+                    self.add_constraint(element_name + 'w_i', lower=0.4, upper=0.99, scaler=1)
+                    self.add_constraint(element_name + 'h_i', lower=0.4, upper=0.99,  scaler=1)
+
                     A = self.register_output(element_name + '_A', (((w*h) - (w_i*h_i))**2 + 1E-14)**0.5)
+                    # self.print_var(A)
                     iyo[i] = Iy = self.register_output(element_name + '_Iy', (w*(h**3) - w_i*(h_i**3))/12)
                     izo[i] = Iz = self.register_output(element_name + '_Iz', ((w**3)*h - (w_i**3)*h_i)/12)
                     # jo[i] = J = self.register_output(element_name + '_J', (w*h*(h**2 + w**2)/12) - (w_i*h_i*(h_i**2 + w_i**2)/12))
@@ -220,6 +229,7 @@ class Aframe(csdl.Model):
                     col_i = node_b_index*6
                     col_f = node_b_index*6 + 6
                     k[row_i:row_f, col_i:col_f] = k22
+
 
         comp_model = ComputationModel(
             num_elements=num_elements,
