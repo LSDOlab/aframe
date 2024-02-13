@@ -37,7 +37,9 @@ class Run(csdl.Model):
         self.create_input('wing_mesh', shape=(len(mesh), 3), val=mesh)
         self.create_input('wing_height', shape=(len(mesh)), val=h)
         self.create_input('wing_width', shape=(len(mesh)), val=w)
-        self.create_input('wing_tcap', shape=(len(mesh)), val=0.01)
+        # self.create_input('wing_tcap', shape=(len(mesh)), val=0.01)
+        self.create_input('wing_ttop', shape=(len(mesh)), val=0.01)
+        self.create_input('wing_tbot', shape=(len(mesh)), val=0.01)
         self.create_input('wing_tweb', shape=(len(mesh)), val=0.001)
         self.create_input('wing_forces', shape=(len(mesh),3), val=forces)
 
@@ -47,7 +49,9 @@ class Run(csdl.Model):
 
 
         self.add_constraint('wing_stress', upper=450E6, scaler=1E-8)
-        self.add_design_variable('wing_tcap', lower=0.00001, upper=0.5, scaler=1E1)
+        # self.add_design_variable('wing_tcap', lower=0.00001, upper=0.5, scaler=1E1)
+        self.add_design_variable('wing_ttop', lower=0.00001, upper=0.5, scaler=1E1)
+        self.add_design_variable('wing_tbot', lower=0.00001, upper=0.5, scaler=1E1)
         self.add_design_variable('wing_tweb', lower=0.00001, upper=0.5, scaler=1E2)
         self.add_objective('mass', scaler=1E-2)
 
@@ -69,19 +73,21 @@ if __name__ == '__main__':
 
 
     sim = python_csdl_backend.Simulator(Run(beams=beams,bounds=bounds,joints=joints))
-    sim.run()
+    # sim.run()
 
     
-    #prob = CSDLProblem(problem_name='run_opt', simulator=sim)
-    #optimizer = SLSQP(prob, maxiter=1000, ftol=1E-8)
-    #optimizer.solve()
-    #optimizer.print_results()
+    prob = CSDLProblem(problem_name='run_opt', simulator=sim)
+    optimizer = SLSQP(prob, maxiter=1000, ftol=1E-8)
+    optimizer.solve()
+    optimizer.print_results()
 
 
-    print('tcap: ', sim['wing_tcap'])
+    # print('tcap: ', sim['wing_tcap'])
+    print('ttop: ', sim['wing_ttop'])
+    print('tbot: ', sim['wing_tbot'])
     print('tweb: ', sim['wing_tweb'])
 
-    print('bkl: ', sim['wing_bkl'])
+    # print('bkl: ', sim['wing_bkl'])
 
     cg = sim['cg_vector']
 

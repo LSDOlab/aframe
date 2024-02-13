@@ -485,11 +485,11 @@ class Aframe(ModuleCSDL):
 
                 my_a = loads_a[4]
                 my_b = loads_b[4]
-                my_delta = (my_a - my_b)/(((my_a - my_b)**2)**0.5) # signum function
+                my_delta = (my_a - my_b)/(((my_a - my_b)**2 + 1E-6)**0.5) # signum function
 
                 mx_a = loads_a[5]
                 mx_b = loads_b[5]
-                mx_delta = (mx_a - mx_b)/(((mx_a - mx_b)**2)**0.5) # signum function
+                mx_delta = (mx_a - mx_b)/(((mx_a - mx_b)**2 + 1E-6)**0.5) # signum function
 
                 test[i] = m_y
 
