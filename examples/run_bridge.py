@@ -52,17 +52,29 @@ if __name__ == '__main__':
     
     beams, bounds, joints = {}, {}, {}
 
-    beams['b1'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'tube','nodes': list(range(n)),'a': [0,0,0],'b': [1,0,0]}
-    beams['b2'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'tube','nodes': list(range(n)),'a': [0,0,0],'b': [0.5,1,0]}
-    beams['b3'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'tube','nodes': list(range(n)),'a': [0.5,1,0],'b': [1,0,0]}
-    beams['b4'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'tube','nodes': list(range(n)),'a': [0.5,1,0],'b': [1.5,1,0]}
-    beams['b5'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'tube','nodes': list(range(n)),'a': [1,0,0],'b': [1.5,1,0]}
-    beams['b6'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'tube','nodes': list(range(n)),'a': [1,0,0],'b': [2,0,0]}
-    beams['b7'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'tube','nodes': list(range(n)),'a': [1.5,1,0],'b': [2,0,0]}
-    beams['b8'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'tube','nodes': list(range(n)),'a': [1.5,1,0],'b': [2.5,1,0]}
-    beams['b9'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'tube','nodes': list(range(n)),'a': [2,0,0],'b': [2.5,1,0]}
-    beams['b10'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'tube','nodes': list(range(n)),'a': [2,0,0],'b': [3,0,0]}
-    beams['b11'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'tube','nodes': list(range(n)),'a': [2.5,1,0],'b': [3,0,0]}
+    # beams['b1'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'tube','nodes': list(range(n)),'a': [0,0,0],'b': [1,0,0]}
+    # beams['b2'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'tube','nodes': list(range(n)),'a': [0,0,0],'b': [0.5,1,0]}
+    # beams['b3'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'tube','nodes': list(range(n)),'a': [0.5,1,0],'b': [1,0,0]}
+    # beams['b4'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'tube','nodes': list(range(n)),'a': [0.5,1,0],'b': [1.5,1,0]}
+    # beams['b5'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'tube','nodes': list(range(n)),'a': [1,0,0],'b': [1.5,1,0]}
+    # beams['b6'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'tube','nodes': list(range(n)),'a': [1,0,0],'b': [2,0,0]}
+    # beams['b7'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'tube','nodes': list(range(n)),'a': [1.5,1,0],'b': [2,0,0]}
+    # beams['b8'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'tube','nodes': list(range(n)),'a': [1.5,1,0],'b': [2.5,1,0]}
+    # beams['b9'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'tube','nodes': list(range(n)),'a': [2,0,0],'b': [2.5,1,0]}
+    # beams['b10'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'tube','nodes': list(range(n)),'a': [2,0,0],'b': [3,0,0]}
+    # beams['b11'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'tube','nodes': list(range(n)),'a': [2.5,1,0],'b': [3,0,0]}
+
+    beams['b1'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'box','nodes': list(range(n)),'a': [0,0,0],'b': [1,0,0]}
+    beams['b2'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'box','nodes': list(range(n)),'a': [0,0,0],'b': [0.5,1,0]}
+    beams['b3'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'box','nodes': list(range(n)),'a': [0.5,1,0],'b': [1,0,0]}
+    beams['b4'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'box','nodes': list(range(n)),'a': [0.5,1,0],'b': [1.5,1,0]}
+    beams['b5'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'box','nodes': list(range(n)),'a': [1,0,0],'b': [1.5,1,0]}
+    beams['b6'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'box','nodes': list(range(n)),'a': [1,0,0],'b': [2,0,0]}
+    beams['b7'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'box','nodes': list(range(n)),'a': [1.5,1,0],'b': [2,0,0]}
+    beams['b8'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'box','nodes': list(range(n)),'a': [1.5,1,0],'b': [2.5,1,0]}
+    beams['b9'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'box','nodes': list(range(n)),'a': [2,0,0],'b': [2.5,1,0]}
+    beams['b10'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'box','nodes': list(range(n)),'a': [2,0,0],'b': [3,0,0]}
+    beams['b11'] = {'E': 69E9,'G': 26E9,'rho': 2700,'cs': 'box','nodes': list(range(n)),'a': [2.5,1,0],'b': [3,0,0]}
 
     bounds['fixed_left'] = {'beam': 'b1','node': 0,'fdim': [1,1,1,1,1,1]}
     bounds['fixed_right'] = {'beam': 'b10','node': n-1,'fdim': [1,1,1,1,1,1]}
@@ -112,6 +124,6 @@ if __name__ == '__main__':
     plt.arrow(1.5,1,0,0.2,width=0.04,color='red')
 
     # plot the cg:
-    plt.scatter(sim['cg'][0],sim['cg'][1],color='blue',s=50,edgecolors='black')
+    # plt.scatter(sim['cg'][0],sim['cg'][1],color='blue',s=50,edgecolors='black')
 
     plt.show()
