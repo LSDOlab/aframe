@@ -117,10 +117,10 @@ class MassCSDL(csdl.Model):
             ttop_in = self.declare_variable(beam_name + '_ttop', shape=(n))
 
 
-            tweb = self.create_output('marius_tweb', shape=(n-1), val=0)
+            tweb = self.create_output(beam_name + 'marius_tweb', shape=(n-1), val=0)
             # tcap = self.create_output('marius_tcap', shape=(n-1), val=0)
-            ttop = self.create_output('marius_ttop', shape=(n-1), val=0)
-            tbot = self.create_output('marius_tbot', shape=(n-1), val=0)
+            ttop = self.create_output(beam_name + 'marius_ttop', shape=(n-1), val=0)
+            tbot = self.create_output(beam_name + 'marius_tbot', shape=(n-1), val=0)
             for i in range(n - 1):
                 tweb[i] = (tweb_in[i]+tweb_in[i+1])/2
                 # tcap[i] = (tcap_in[i]+tcap_in[i+1])/2
@@ -135,8 +135,9 @@ class MassCSDL(csdl.Model):
 
             # iterate over the elements:
             em_vec = self.create_output(beam_name + '_em_vec',shape=(n - 1),val=0)
-            # for i in range(n - 1):
-            for i, element_name in enumerate(elements):
+            for i in range(n - 1):
+            # for i, element_name in enumerate(elements):
+                element_name = beam_name + '_element_' + str(i)
 
                 node_a = csdl.reshape(mesh[i, :], (3))
                 node_b = csdl.reshape(mesh[i + 1, :], (3))
