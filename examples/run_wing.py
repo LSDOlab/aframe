@@ -75,25 +75,18 @@ if __name__ == '__main__':
     sim = python_csdl_backend.Simulator(Run(beams=beams,bounds=bounds,joints=joints))
     # sim.run()
 
-    
+    # optimization:
     prob = CSDLProblem(problem_name='run_opt', simulator=sim)
     optimizer = SLSQP(prob, maxiter=1000, ftol=1E-8)
     optimizer.solve()
     optimizer.print_results()
 
 
-    # print('tcap: ', sim['wing_tcap'])
-    print('ttop: ', sim['wing_ttop'])
-    print('tbot: ', sim['wing_tbot'])
-    print('tweb: ', sim['wing_tweb'])
-
-    # print('bkl: ', sim['wing_bkl'])
-
-    cg = sim['cg_vector']
-
-
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
+    ax.view_init(elev=35, azim=-10)
+    ax.set_box_aspect((1, 4, 1))
+
     for beam_name in beams:
         n = len(beams[beam_name]['nodes'])
         for i in range(n - 1):
@@ -109,16 +102,18 @@ if __name__ == '__main__':
             ax.scatter(na[0], na[1], na[2],color='yellow',edgecolors='black',linewidth=1,zorder=10,label='_nolegend_',s=30)
             ax.scatter(nb[0], nb[1], nb[2],color='yellow',edgecolors='black',linewidth=1,zorder=10,label='_nolegend_',s=30)
 
-
-    ax.scatter(cg[0],cg[1],cg[2],color='blue',s=50,edgecolors='black')
+    cg = sim['cg_vector']
+    ax.scatter(cg[0]+0.2,cg[1],cg[2],color='blue',s=55,edgecolors='black',zorder=50)
 
 
     ax.set_xlim(-5,5)
-    ax.set_ylim(-10,10)
+    ax.set_ylim(-8,8)
     ax.set_zlim(0,5)
-    plt.show()
 
+    ax.set_xlabel('x (m)')
+    ax.set_ylabel('y (m)')
+    ax.set_zlabel('z (m)')
 
-    #print(sim['wing_stress'])
-    plt.plot(sim['wing_stress'])
+    # plt.savefig('wing.png', dpi=800, bbox_inches='tight')
+    plt.savefig('wing.png', dpi=800)
     plt.show()

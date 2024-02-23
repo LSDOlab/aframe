@@ -26,7 +26,7 @@ class Run(csdl.Model):
         # dummy mesh generation code:
         for beam_name in beams:
             self.create_input(beam_name+'_thick', shape=(n), val=np.ones((n))*0.001)
-            self.create_input(beam_name+'_radius', shape=(n), val=np.ones((n))*0.1)
+            self.create_input(beam_name+'_radius', shape=(n), val=np.ones((n))*0.05)
 
             num_beam_nodes = len(beams[beam_name]['nodes'])
             # get the beam start/stop coordinates
@@ -98,6 +98,7 @@ if __name__ == '__main__':
             plt.plot(xu,yu,color='silver',linewidth=4)
             plt.scatter(xu,yu,s=50,color='silver',edgecolors='black',linewidth=0.5,zorder=5)
 
+    # plot the deformed bridge:
     for beam_name in beams:
         n = len(beams[beam_name]['nodes'])
         for i in range(n - 1):
@@ -108,13 +109,13 @@ if __name__ == '__main__':
             x = np.array([na[0], nb[0]])
             y = np.array([na[1], nb[1]])
             z = np.array([na[2], nb[2]])
-            plt.plot(x,y,color='k',zorder=7)
-            plt.scatter(x,y,s=50,zorder=10,color='yellow',edgecolors='black',linewidth=1)
+            plt.plot(x,y,linewidth=2,color='k',zorder=7)
+            plt.scatter(x,y,s=55,zorder=10,color='yellow',edgecolors='black',linewidth=1)
 
     # plot the applied force arrow:
-    plt.arrow(1.5,1,0,0.2,width=0.04,color='red')
+    plt.arrow(1.5,1.13,0,0.1,width=0.03,color='red')
 
-    # plot the cg:
-    # plt.scatter(sim['cg'][0],sim['cg'][1],color='blue',s=50,edgecolors='black')
-
+    plt.xlabel('x (m)')
+    plt.ylabel('y (m)')
+    plt.savefig('bridge.png', dpi=800, bbox_inches='tight')
     plt.show()
