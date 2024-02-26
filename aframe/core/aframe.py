@@ -231,6 +231,146 @@ class Aframe(csdl.Model):
                     k[row_i:row_f, col_i:col_f] = k22
 
 
+
+            elif cs == 'tube':
+                radius = self.register_module_input(beam_name + '_radius', shape=(n), promotes=True)
+                thick_in = self.register_module_input(beam_name + '_thick', shape=(n))
+
+                # create elemental outputs
+                r_vec = self.create_output(beam_name + '_r', shape=(n - 1), val=0)
+                iyo, izo, jo = self.create_output(beam_name + '_iyo', shape=(n - 1), val=0), self.create_output(beam_name + '_izo', shape=(n - 1), val=0), self.create_output(beam_name + '_jo', shape=(n - 1), val=0)
+
+                for i in range(n - 1):
+                    element_name = beam_name + '_element_' + str(i)
+                    if mesh_units == 'm': converted_radius = 1*radius
+                    elif mesh_units == 'ft': converted_radius = 0.304*radius
+
+                    r_vec[i] = (converted_radius[i] + converted_radius[i + 1])/2
+                    r = self.register_output(element_name + '_r', r_vec[i])
+
+                    thick = self.register_output(element_name + '_thick', (thick_in[i]+thick_in[i+1])/2)
+
+                    # compute the tube cs properties
+                    r1, r2 = r - thick, r
+                    A = self.register_output(element_name + '_A', np.pi * (r2**2 - r1**2))
+                    iyo[i] = Iy = self.register_output(element_name + '_Iy', np.pi * (r2**4 - r1**4) / 4.0)
+                    izo[i] = Iz = self.register_output(element_name + '_Iz', np.pi * (r2**4 - r1**4) / 4.0)
+                    jo[i] = J = self.register_output(element_name + '_J', np.pi * (r2**4 - r1**4) / 2.0)
+                    Q = self.register_output(element_name + '_Q', 1*J)
+                    self.register_output(element_name + '_Ix', 1*J) # I think J is the same as Ix...
+
+                    node_a = self.register_output(beam_name + '_element_' + str(i) + 'node_a', csdl.reshape(mesh[i, :], (3)))
+                    node_b = self.register_output(beam_name + '_element_' + str(i) + 'node_b', csdl.reshape(mesh[i + 1, :], (3)))
+                    
+                    # calculate the stiffness matrix for each element:
+                    L = self.register_output(element_name + 'L', csdl.pnorm(node_b - node_a, pnorm_type=2)) + 1E-12
+
+                    kp = self.create_output(element_name + 'kp', shape=(12,12), val=0)
+                    # the upper left block
+                    kp[0,0] = csdl.reshape(A*E/L, (1,1))
+                    kp[1,1] = csdl.reshape(12*E*Iz/L**3, (1,1))
+                    kp[1,5] = csdl.reshape(6*E*Iz/L**2, (1,1))
+                    kp[5,1] = csdl.reshape(6*E*Iz/L**2, (1,1))
+                    kp[2,2] = csdl.reshape(12*E*Iy/L**3, (1,1))
+                    kp[2,4] = csdl.reshape(-6*E*Iy/L**2, (1,1))
+                    kp[4,2] = csdl.reshape(-6*E*Iy/L**2, (1,1))
+                    kp[3,3] = csdl.reshape(G*J/L, (1,1))
+                    kp[4,4] = csdl.reshape(4*E*Iy/L, (1,1))
+                    kp[5,5] = csdl.reshape(4*E*Iz/L, (1,1))
+                    # the upper right block
+                    kp[0,6] = csdl.reshape(-A*E/L, (1,1))
+                    kp[1,7] = csdl.reshape(-12*E*Iz/L**3, (1,1))
+                    kp[1,11] = csdl.reshape(6*E*Iz/L**2, (1,1))
+                    kp[2,8] = csdl.reshape(-12*E*Iy/L**3, (1,1))
+                    kp[2,10] = csdl.reshape(-6*E*Iy/L**2, (1,1))
+                    kp[3,9] = csdl.reshape(-G*J/L, (1,1))
+                    kp[4,8] = csdl.reshape(6*E*Iy/L**2, (1,1))
+                    kp[4,10] = csdl.reshape(2*E*Iy/L, (1,1))
+                    kp[5,7] = csdl.reshape(-6*E*Iz/L**2, (1,1))
+                    kp[5,11] = csdl.reshape(2*E*Iz/L, (1,1))
+                    # the lower left block
+                    kp[6,0] = csdl.reshape(-A*E/L, (1,1))
+                    kp[7,1] = csdl.reshape(-12*E*Iz/L**3, (1,1))
+                    kp[7,5] = csdl.reshape(-6*E*Iz/L**2, (1,1))
+                    kp[8,2] = csdl.reshape(-12*E*Iy/L**3, (1,1))
+                    kp[8,4] = csdl.reshape(6*E*Iy/L**2, (1,1))
+                    kp[9,3] = csdl.reshape(-G*J/L, (1,1))
+                    kp[10,2] = csdl.reshape(-6*E*Iy/L**2, (1,1))
+                    kp[10,4] = csdl.reshape(2*E*Iy/L, (1,1))
+                    kp[11,1] = csdl.reshape(6*E*Iz/L**2, (1,1))
+                    kp[11,5] = csdl.reshape(2*E*Iz/L, (1,1))
+                    # the lower right block
+                    kp[6,6] = csdl.reshape(A*E/L, (1,1))
+                    kp[7,7] = csdl.reshape(12*E*Iz/L**3, (1,1))
+                    kp[7,11] = csdl.reshape(-6*E*Iz/L**2, (1,1))
+                    kp[11,7] = csdl.reshape(-6*E*Iz/L**2, (1,1))
+                    kp[8,8] = csdl.reshape(12*E*Iy/L**3, (1,1))
+                    kp[8,10] = csdl.reshape(6*E*Iy/L**2, (1,1))
+                    kp[10,8] = csdl.reshape(6*E*Iy/L**2, (1,1))
+                    kp[9,9] = csdl.reshape(G*J/L, (1,1))
+                    kp[10,10] = csdl.reshape(4*E*Iy/L, (1,1))
+                    kp[11,11] = csdl.reshape(4*E*Iz/L, (1,1))
+
+                    # transform the local stiffness to global coordinates:
+                    cp = (node_b - node_a)/csdl.expand(L, (3))
+                    ll, mm, nn = cp[0], cp[1], cp[2]
+                    D = (ll**2 + mm**2)**0.5
+
+                    block = self.create_output(element_name + 'block',shape=(3,3),val=0)
+                    block[0,0] = csdl.reshape(ll, (1,1))
+                    block[0,1] = csdl.reshape(mm, (1,1))
+                    block[0,2] = csdl.reshape(nn, (1,1))
+                    block[1,0] = csdl.reshape(-mm/D, (1,1))
+                    block[1,1] = csdl.reshape(ll/D, (1,1))
+                    block[2,0] = csdl.reshape(-ll*nn/D, (1,1))
+                    block[2,1] = csdl.reshape(-mm*nn/D, (1,1))
+                    block[2,2] = csdl.reshape(D, (1,1))
+
+                    T = self.create_output(element_name + 'T',shape=(12,12),val=0)
+                    T[0:3,0:3] = 1*block
+                    T[3:6,3:6] = 1*block
+                    T[6:9,6:9] = 1*block
+                    T[9:12,9:12] = 1*block
+
+                    tkt = csdl.matmat(csdl.transpose(T), csdl.matmat(kp, T))
+                    # expand the transformed stiffness matrix to the global dimensions:
+                    k = self.create_output(element_name + 'k', shape=(dim,dim), val=0)
+
+                    # parse tkt:
+                    k11 = tkt[0:6,0:6] # upper left
+                    k12 = tkt[0:6,6:12] # upper right
+                    k21 = tkt[6:12,0:6] # lower left
+                    k22 = tkt[6:12,6:12] # lower right
+
+                    # assign the four block matrices to their respective positions in k:
+                    node_a_index = node_index[node_dict[beam_name][i]]
+                    node_b_index = node_index[node_dict[beam_name][i + 1]]
+
+                    row_i = node_a_index*6
+                    row_f = node_a_index*6 + 6
+                    col_i = node_a_index*6
+                    col_f = node_a_index*6 + 6
+                    k[row_i:row_f, col_i:col_f] = k11
+
+                    row_i = node_a_index*6
+                    row_f = node_a_index*6 + 6
+                    col_i = node_b_index*6
+                    col_f = node_b_index*6 + 6
+                    k[row_i:row_f, col_i:col_f] = k12
+
+                    row_i = node_b_index*6
+                    row_f = node_b_index*6 + 6
+                    col_i = node_a_index*6
+                    col_f = node_a_index*6 + 6
+                    k[row_i:row_f, col_i:col_f] = k21
+
+                    row_i = node_b_index*6
+                    row_f = node_b_index*6 + 6
+                    col_i = node_b_index*6
+                    col_f = node_b_index*6 + 6
+                    k[row_i:row_f, col_i:col_f] = k22
+
+
         comp_model = ComputationModel(
             num_elements=num_elements,
             elements=elements,
