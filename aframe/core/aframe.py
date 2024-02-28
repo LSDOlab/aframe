@@ -520,7 +520,7 @@ class Aframe(ModuleCSDL):
 
 
 
-
+        U = csdl.solve(K, Fi)
 
 
 
