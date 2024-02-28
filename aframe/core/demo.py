@@ -6,7 +6,7 @@ from aframe import ebbeam, bc
 self.add(Aframe(beams=beams, bounds=bounds, joints=joints))
 
 
-
+aluminum = {'name': 'aluminum', 'youngs_modulus': 69E9, 'G': 26E9, }
 
 beam_model = ebbeam(names=['wing', 'boom', 'tail'],
                     boundary_conditions={'wing': 10, 'boom': 2},
