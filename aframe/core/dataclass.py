@@ -25,6 +25,7 @@ class Beam:
         self.num_nodes = num_nodes
         self.material = material
         self.cs = cs
+        self.num_elements = num_nodes - 1
 
     def __str__(self):
         return f'{self.name}: num_nodes={self.num_nodes}, material={self.material.name}, cs={self.cs}'
