@@ -262,7 +262,7 @@ class BeamModel(csdl.Model):
 
 
 
-        # parse the displacements to get the deformed mesh
+        # parse the displacements to get the deformed mesh for each beam
         for beam in beams:
             mesh = self.declare_variable(beam.name + '_mesh', shape=(beam.num_nodes, 3))
             deformed_mesh = self.create_output(beam.name + '_deformed_mesh', shape=(beam.num_nodes, 3), val=0)
@@ -270,10 +270,6 @@ class BeamModel(csdl.Model):
             for i in range(beam.num_nodes):
                 node_id = index[node_dictionary[beam.name][i]]
                 deformed_mesh[i, :] = mesh[i, :] + csdl.reshape(U[node_id*6:node_id*6 + 3], (1, 3))
-
-
-
-
 
 
 
