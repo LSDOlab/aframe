@@ -1,6 +1,5 @@
 import numpy as np
 import csdl
-from aframe.core.model import Model
 from aframe.core.stress import StressBox
 from lsdo_modules.module_csdl.module_csdl import ModuleCSDL
 

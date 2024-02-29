@@ -1,4 +1,6 @@
-from aframe import BeamModel
+
+
+
 
 
 class Material:
@@ -12,28 +14,27 @@ class Material:
         return f'{self.name}: E={self.E} Pa, G={self.G} Pa, rho={self.rho} kg/m^3'
 
 
-aluminum = Material(name='aluminum', E=69E9, G=26E9, rho=2700)
-print(aluminum)
-
-
+# aluminum = Material(name='aluminum', E=69E9, G=26E9, rho=2700)
+# print(aluminum)
 
 
 
 class Beam:
-    def __init__(self, name, num_nodes, material):
+    def __init__(self, name, num_nodes, material, cs):
         self.name = name
         self.num_nodes = num_nodes
         self.material = material
+        self.cs = cs
 
     def __str__(self):
-        return f'{self.name}: num_nodes={self.num_nodes}, material={self.material.name}'
+        return f'{self.name}: num_nodes={self.num_nodes}, material={self.material.name}, cs={self.cs}'
 
 
-wing = Beam(name='wing', num_nodes=10, material=aluminum)
-print(wing)
+# wing = Beam(name='wing', num_nodes=10, material=aluminum)
+# print(wing)
 
-fuselage = Beam(name='fuselage', num_nodes=10, material=aluminum)
-print(fuselage)
+# fuselage = Beam(name='fuselage', num_nodes=10, material=aluminum)
+# print(fuselage)
 
 
 
@@ -47,8 +48,8 @@ class Joint:
         return f'beams={[self.beams[i].name for i in range(len(self.beams))]}, nodes={self.nodes}'
 
 
-joint_1 = Joint(beams=[wing, fuselage], nodes=[2, 5])
-print(joint_1)
+# joint_1 = Joint(beams=[wing, fuselage], nodes=[2, 5])
+# print(joint_1)
 
 
 
@@ -64,13 +65,15 @@ class BoundaryCondition:
 
 
 
-boundary_condition_1 = BoundaryCondition(beam=wing, node=0)
-print(boundary_condition_1)
+# boundary_condition_1 = BoundaryCondition(beam=wing, node=0)
+# print(boundary_condition_1)
+    
 
-
-
-
-
-beam_model = BeamModel(beams=[wing, fuselage],
-                       boundary_conditions=[boundary_condition_1],
-                       joints=[joint_1])
+class CSProp:
+    def __init__(self, A, Ix, Iy, Iz, J, Q):
+        self.A = A
+        self.Ix = Ix
+        self.Iy = Iy
+        self.Iz = Iz
+        self.J = J
+        self.Q = Q
