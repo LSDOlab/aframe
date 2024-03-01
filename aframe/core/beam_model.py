@@ -324,6 +324,8 @@ class BeamModel(csdl.Model):
 
             # average the opposite loads at each end of the elements (odd but it works)
             F_x = (beam_element_loads[:, 0] - beam_element_loads[:, 6]) / 2
+            F_y = (beam_element_loads[:, 1] - beam_element_loads[:, 7]) / 2
+            F_z = (beam_element_loads[:, 2] - beam_element_loads[:, 8]) / 2
             M_x = (beam_element_loads[:, 3] - beam_element_loads[:, 9]) / 2
             M_y = (beam_element_loads[:, 4] - beam_element_loads[:, 10]) / 2
             M_z = (beam_element_loads[:, 5] - beam_element_loads[:, 11]) / 2
@@ -342,9 +344,46 @@ class BeamModel(csdl.Model):
                 von_mises = (tensile_stress**2 + 3*shear_stress**2 + 1E-12)**0.5
                 beam_stress = self.register_output(beam.name + '_stress', von_mises)
 
-
             elif beam.cs == 'box':
-                pass
+                """ the stress for box beams is evaluated at four points:
+                    0 ------------------------------------- 1
+                      -                y                  -
+                      -                |                  -
+                      4                --> x              -
+                      -                                   -
+                      -                                   -
+                    3 ------------------------------------- 2
+                """
+                width = cs.width
+                height = cs.height
+                tweb = cs.tweb
+
+                coordinate_list = []
+                coordinate_list.append((-width / 2, height / 2)) # point 0
+                coordinate_list.append((width / 2, height / 2)) # point 1
+                coordinate_list.append((width / 2, -height / 2)) # point 2
+                coordinate_list.append((-width / 2, -height / 2)) # point 3
+                coordinate_list.append((-width / 2, 0)) # point 4
+
+                beam_stress = self.create_output(beam.name + '_stress', shape=(beam.num_nodes, 4), val=0)
+                for i in range(4): # ignore point 4 for now
+                    coordinate = coordinate_list[i]
+                    x, y = coordinate[0], coordinate[1]
+                    r = (x**2 + y**2)**0.5
+
+                    normal_stress = F_x / csdl.reshape(cs.A, (beam.num_elements, 1))
+                    torsional_stress = M_x * r / cs.J
+                    bending_stress_y = M_y * y / csdl.reshape(cs.Iy, (beam.num_elements, 1))
+                    bending_stress_z = M_z * x / csdl.reshape(cs.Iz, (beam.num_elements, 1))
+
+                    axial_stress = normal_stress + bending_stress_y + bending_stress_z
+
+                    # ***************************** need to figure out shear stress stuff here ********************************************************************************
+
+                    von_mises = (axial_stress**2 + 3*torsional_stress**2 + 1E-12)**0.5
+                    beam_stress[:, i] = von_mises
+
+
 
 
 
