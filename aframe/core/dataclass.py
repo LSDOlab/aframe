@@ -93,3 +93,18 @@ class CSPropTube:
         self.thickness = thickness
 
 
+class CSPropBox:
+    def __init__(self, A, Ix, Iy, Iz, J, Q, width, height, tweb, ttop, tbot):
+        self.A = A
+        self.Ix = Ix
+        self.Iy = Iy
+        self.Iz = Iz
+        self.J = J
+        self.Q = Q
+        self.width = width
+        self.height = height
+        self.tweb = tweb
+        self.ttop = ttop
+        self.tbot = tbot
+
+

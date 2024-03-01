@@ -6,12 +6,12 @@ from aframe.core.dataclass import Beam, BoundaryCondition, Joint, Material
 import matplotlib.pyplot as plt
 plt.rcParams.update(plt.rcParamsDefault)
 
-num_nodes = 5
+num_nodes = 11
 aluminum = Material(name='aluminum', E=69E9, G=26E9, rho=2700)
 wing = Beam(name='wing', num_nodes=num_nodes, material=aluminum, cs='tube')
 fuselage = Beam(name='fuselage', num_nodes=num_nodes, material=aluminum, cs='tube')
-boundary_condition_1 = BoundaryCondition(beam=wing, node=2)
-joint_1 = Joint(beams=[wing, fuselage], nodes=[2, 2])
+boundary_condition_1 = BoundaryCondition(beam=wing, node=5)
+joint_1 = Joint(beams=[wing, fuselage], nodes=[5, 5])
 
 class Run(csdl.Model):
     def initialize(self):
@@ -26,9 +26,19 @@ class Run(csdl.Model):
         fuse_mesh[:, 0] = np.linspace(-20, 20, num_nodes)
         self.create_input('fuselage_mesh', shape=(num_nodes, 3), val=fuse_mesh)
 
-        forces = np.zeros((num_nodes, 3))
-        forces[:, 2] = 1000
-        self.create_input('wing_forces', shape=(num_nodes, 3), val=forces)
+        wing_forces = np.zeros((num_nodes, 3))
+        wing_forces[:, 2] = 1000
+        self.create_input('wing_forces', shape=(num_nodes, 3), val=wing_forces)
+
+        fuse_forces = np.zeros((num_nodes, 3))
+        fuse_forces[:, 2] = 1000
+        self.create_input('fuselage_forces', shape=(num_nodes, 3), val=fuse_forces)
+
+        wing_radius = np.ones(wing.num_elements)*0.5
+        self.create_input('wing_radius', shape=(wing.num_elements), val=wing_radius)
+
+        wing_thickness = np.ones(wing.num_elements)*0.001
+        self.create_input('wing_thickness', shape=(wing.num_elements), val=wing_thickness)
 
         self.add(BeamModel(beams=[wing, fuselage],
                            boundary_conditions=[boundary_condition_1],
@@ -51,10 +61,12 @@ if __name__ == '__main__':
     undeformed_fuselage_mesh = sim['fuselage_mesh']
     deformed_fuselage_mesh = sim['fuselage_deformed_mesh']
 
+    wing_stress = sim['wing_stress']
+
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
     ax.view_init(elev=35, azim=-10)
-    ax.set_box_aspect((1, 4, 1))
+    ax.set_box_aspect((1, 2, 1))
 
     ax.scatter(undeformed_wing_mesh[:,0], undeformed_wing_mesh[:,1], undeformed_wing_mesh[:,2], color='yellow', s=50)
     ax.plot(undeformed_wing_mesh[:,0], undeformed_wing_mesh[:,1], undeformed_wing_mesh[:,2])
@@ -68,8 +80,14 @@ if __name__ == '__main__':
 
     plt.show()
 
-    # element_loads = sim['element_loads_storage']
+    plt.plot(wing_stress)
+    plt.show()
+
+    # element_loads = sim['wing_element_beam_loads']
+
+    # np.set_printoptions(linewidth=100)
     # print(element_loads)
+
     # plt.plot(element_loads[:, 0])
     # plt.plot(element_loads[:, 1])
     # plt.plot(element_loads[:, 2])
