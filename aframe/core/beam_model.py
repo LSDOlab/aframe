@@ -153,6 +153,11 @@ class BeamModel(csdl.Model):
         joints = self.parameters['joints']
 
 
+        # throw an error if there are empty beam or boundary condition lists
+        if not beams: raise Exception('Aframe error: empty beam list')
+        if not boundary_conditions: raise Exception('Aframe error: no boundary conditions specified')
+
+
         # automated beam node assignment
         node_dictionary = {}
         # start by populating the nodes dictionary as if there aren't any joints
