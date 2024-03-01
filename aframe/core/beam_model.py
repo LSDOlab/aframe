@@ -22,7 +22,7 @@ class BeamModel(csdl.Model):
 
             L = csdl.pnorm(mesh[i + 1, :] - mesh[i, :])
 
-            A, Ix, Iy, Iz, J, Q = cs.A[i], cs.Ix[i], cs.Iy[i], cs.Iz[i], cs.J[i], cs.Q[i]
+            A, Ix, Iy, Iz, J = cs.A[i], cs.Ix[i], cs.Iy[i], cs.Iz[i], cs.J[i]
 
             kp = self.create_output(beam.name + str(i) + 'kp', shape=(12, 12), val=0)
             # the upper left block
