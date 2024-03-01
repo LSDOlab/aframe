@@ -532,7 +532,7 @@ class Aframe(ModuleCSDL):
                 T = self.declare_variable(element_name + 'T',shape=(12,12))
 
                 # element local loads output (required for the stress recovery):
-                ans = csdl.matvec(kp,csdl.matvec(T,d))
+                ans = csdl.matvec(kp, csdl.matvec(T, d))
                 self.register_output(element_name + 'local_loads', ans)
                 element_loads[i,:] = csdl.reshape(ans[0:6], (1,6))
 

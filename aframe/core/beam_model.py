@@ -181,12 +181,13 @@ class BeamModel(csdl.Model):
         global_stiffness_matrix, mass, rmvec, element_index = 0, 0, 0, 0
         local_stiffness_storage = self.create_output('local_stiffness_storage', shape=(num_elements, 12, 12), val=0)
         transformations_storage = self.create_output('transformations_storage', shape=(num_elements, 12, 12), val=0)
+        cs_storage = self.create_output('cs_storage', shape=(num_elements, 4), val=0)
         for beam in beams:
             mesh = self.declare_variable(beam.name + '_mesh', shape=(beam.num_nodes, 3))
 
             if beam.cs == 'tube':
-                radius = self.declare_variable(beam.name + '_radius', shape=(beam.num_nodes))
-                thickness = self.declare_variable(beam.name + '_thickness', shape=(beam.num_nodes))
+                radius = self.declare_variable(beam.name + '_radius', shape=(beam.num_elements))
+                thickness = self.declare_variable(beam.name + '_thickness', shape=(beam.num_elements))
                 inner_radius, outer_radius = radius - thickness, radius
 
                 A = np.pi * (outer_radius**2 - inner_radius**2)
@@ -197,8 +198,12 @@ class BeamModel(csdl.Model):
 
             beam_stiffness, local_stiffness, transformations = self.stiffness(beam=beam, mesh=mesh, cs=cs, dimension=dimension, node_dictionary=node_dictionary, index=index)
             global_stiffness_matrix = global_stiffness_matrix + csdl.reshape(beam_stiffness, (dimension, dimension))
-            local_stiffness_storage[element_index:element_index + beam.num_nodes - 1, :, :] = local_stiffness
-            transformations_storage[element_index:element_index + beam.num_nodes - 1, :, :] = local_stiffness
+            local_stiffness_storage[element_index:element_index + beam.num_elements, :, :] = local_stiffness
+            transformations_storage[element_index:element_index + beam.num_elements, :, :] = local_stiffness
+            cs_storage[element_index:element_index + beam.num_elements, 0] = csdl.reshape(A, (beam.num_elements, 1))
+            cs_storage[element_index:element_index + beam.num_elements, 1] = csdl.reshape(Ix, (beam.num_elements, 1))
+            cs_storage[element_index:element_index + beam.num_elements, 2] = csdl.reshape(Iy, (beam.num_elements, 1))
+            cs_storage[element_index:element_index + beam.num_elements, 3] = csdl.reshape(Iz, (beam.num_elements, 1))
 
             beam_mass, beam_rmvec = self.mass_properties(beam, mesh, cs)
             mass = mass + beam_mass
@@ -276,11 +281,10 @@ class BeamModel(csdl.Model):
 
         # recover the elemental forces/moments
         element_index = 0
+        element_loads_storage = self.create_output('element_loads_storage', shape=(num_elements, 12), val=0)
         for beam in beams:
-            # element_loads = self.create_output(beam.name + '_element_loads', shape=(beam.num_nodes - 1, 6), val=0)
-            local_stiffness = local_stiffness_storage[element_index:element_index + beam.num_nodes - 1, :, :]
-            transformations = transformations_storage[element_index:element_index + beam.num_nodes - 1, :, :]
-            element_index += beam.num_elements
+            local_stiffness = local_stiffness_storage[element_index:element_index + beam.num_elements, :, :]
+            transformations = transformations_storage[element_index:element_index + beam.num_elements, :, :]
 
             for i in range(beam.num_elements):
                 node_a_id, node_b_id = index[node_dictionary[beam.name][i]], index[node_dictionary[beam.name][i + 1]]
@@ -292,8 +296,37 @@ class BeamModel(csdl.Model):
 
                 # element local loads output (required for the stress recovery)
                 element_loads = csdl.matvec(kp, csdl.matvec(T, d))
-                # self.register_output(element_name + 'local_loads', element_loads)
-                # element_loads[i,:] = csdl.reshape(element_loads[0:6], (1,6))
+                element_loads_storage[element_index + i, :] = csdl.reshape(element_loads, (1, 12))
+            
+            element_index += beam.num_elements
+
+
+
+
+        # stress recovery
+        element_index = 0
+        for beam in beams:
+            beam_element_loads = element_loads_storage[element_index:element_index + beam.num_elements, :]
+            A = cs_storage[element_index:element_index + beam.num_elements, 0]
+            element_index += beam.num_elements
+
+            F_x = beam_element_loads[:, 0]
+
+            if beam.cs == 'tube':
+                axial_stress = F_x / A
+                # torsional_stress = M_x / A
+                # bending_stress = M_y * r / Iy
+
+                # tensile_stress = axial_stress + bending_stress
+                # shear_stress = torsional_stress
+
+                # von_mises = (tensile_stress**2 + 3*shear_stress**2)**0.5
+
+                # beam_stress = self.register_output(beam.name + '_stress', von_mises)
+
+
+            elif beam.cs == 'box':
+                pass
 
 
 

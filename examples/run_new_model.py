@@ -6,21 +6,24 @@ from aframe.core.dataclass import Beam, BoundaryCondition, Joint, Material
 import matplotlib.pyplot as plt
 plt.rcParams.update(plt.rcParamsDefault)
 
-num_nodes = 10
+num_nodes = 5
 aluminum = Material(name='aluminum', E=69E9, G=26E9, rho=2700)
 wing = Beam(name='wing', num_nodes=num_nodes, material=aluminum, cs='tube')
-boundary_condition_1 = BoundaryCondition(beam=wing, node=0)
+boundary_condition_1 = BoundaryCondition(beam=wing, node=2)
 
 class Run(csdl.Model):
     def initialize(self):
         pass
     def define(self):
 
-        mesh = np.zeros((num_nodes,3))
-        mesh[:,1] = np.linspace(-20,20,num_nodes)
+        mesh = np.zeros((num_nodes, 3))
+        mesh[:, 1] = np.linspace(-20, 20, num_nodes)
         self.create_input('wing_mesh', shape=(num_nodes, 3), val=mesh)
 
-        # solve the beam group:
+        forces = np.zeros((num_nodes, 3))
+        forces[:, 2] = 1000
+        self.create_input('wing_forces', shape=(num_nodes, 3), val=forces)
+
         self.add(BeamModel(beams=[wing],
                            boundary_conditions=[boundary_condition_1],
                            joints=[]))
@@ -37,13 +40,38 @@ if __name__ == '__main__':
     sim = python_csdl_backend.Simulator(Run())
     sim.run()
 
+    undeformed_mesh = sim['wing_mesh']
     deformed_mesh = sim['wing_deformed_mesh']
 
-    fig = plt.figure()
-    ax = fig.add_subplot(projection='3d')
-    ax.view_init(elev=35, azim=-10)
-    ax.set_box_aspect((1, 4, 1))
+    # fig = plt.figure()
+    # ax = fig.add_subplot(projection='3d')
+    # ax.view_init(elev=35, azim=-10)
+    # ax.set_box_aspect((1, 4, 1))
 
-    ax.scatter(deformed_mesh[:,0], deformed_mesh[:,1], deformed_mesh[:,2])
+    # ax.scatter(undeformed_mesh[:,0], undeformed_mesh[:,1], undeformed_mesh[:,2], color='yellow', s=50)
+    # ax.plot(undeformed_mesh[:,0], undeformed_mesh[:,1], undeformed_mesh[:,2])
+    # ax.scatter(deformed_mesh[:,0], deformed_mesh[:,1], deformed_mesh[:,2], color='blue', s=50)
+    # ax.plot(deformed_mesh[:,0], deformed_mesh[:,1], deformed_mesh[:,2], color='blue')
 
-    plt.show()
+    # plt.show()
+
+    # element_loads = sim['element_loads_storage']
+    # print(element_loads)
+    # plt.plot(element_loads[:, 0])
+    # plt.plot(element_loads[:, 1])
+    # plt.plot(element_loads[:, 2])
+    # #plt.plot(element_loads[:, 3])
+    # plt.plot(element_loads[:, 4])
+    # plt.plot(element_loads[:, 5])
+
+    # plt.plot(element_loads[:, 6])
+    # plt.plot(element_loads[:, 7])
+    # plt.plot(element_loads[:, 8])
+    # #plt.plot(element_loads[:, 9])
+    # plt.plot(element_loads[:, 10])
+    # plt.plot(element_loads[:, 11])
+
+    # plt.grid()
+
+
+    # plt.show()

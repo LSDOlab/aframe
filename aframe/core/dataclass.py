@@ -78,3 +78,5 @@ class CSProp:
         self.Iz = Iz
         self.J = J
         self.Q = Q
+
+
