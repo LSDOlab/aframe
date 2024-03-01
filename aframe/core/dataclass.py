@@ -80,3 +80,16 @@ class CSProp:
         self.Q = Q
 
 
+
+class CSPropTube:
+    def __init__(self, A, Ix, Iy, Iz, J, Q, radius, thickness):
+        self.A = A
+        self.Ix = Ix
+        self.Iy = Iy
+        self.Iz = Iz
+        self.J = J
+        self.Q = Q
+        self.radius = radius
+        self.thickness = thickness
+
+

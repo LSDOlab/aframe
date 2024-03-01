@@ -1,6 +1,6 @@
 import numpy as np
 import csdl
-from aframe.core.dataclass import Beam, CSProp
+from aframe.core.dataclass import Beam, CSProp, CSPropTube
 
 class BeamModel(csdl.Model):
 
@@ -165,7 +165,7 @@ class BeamModel(csdl.Model):
         # assign nodal indices in the global system using the joints
         for joint in joints:
             joint_beams, joint_nodes = joint.beams, joint.nodes
-            node_a = node_dictionary[joint_beams[0]][joint_nodes[0]]
+            node_a = node_dictionary[joint_beams[0].name][joint_nodes[0]]
             for i, beam in enumerate(joint_beams):
                 if i != 0: node_dictionary[beam.name][joint_nodes[i]] = node_a
 
@@ -181,29 +181,28 @@ class BeamModel(csdl.Model):
         global_stiffness_matrix, mass, rmvec, element_index = 0, 0, 0, 0
         local_stiffness_storage = self.create_output('local_stiffness_storage', shape=(num_elements, 12, 12), val=0)
         transformations_storage = self.create_output('transformations_storage', shape=(num_elements, 12, 12), val=0)
-        cs_storage = self.create_output('cs_storage', shape=(num_elements, 4), val=0)
+        cs_storage, mesh_storage = [], []
         for beam in beams:
             mesh = self.declare_variable(beam.name + '_mesh', shape=(beam.num_nodes, 3))
+            mesh_storage.append(mesh)
 
             if beam.cs == 'tube':
                 radius = self.declare_variable(beam.name + '_radius', shape=(beam.num_elements))
                 thickness = self.declare_variable(beam.name + '_thickness', shape=(beam.num_elements))
+
                 inner_radius, outer_radius = radius - thickness, radius
 
                 A = np.pi * (outer_radius**2 - inner_radius**2)
                 Iy = np.pi * (outer_radius**4 - inner_radius**4) / 4.0
                 Iz = np.pi * (outer_radius**4 - inner_radius**4) / 4.0
                 Ix = J = Q = np.pi * (outer_radius**4 - inner_radius**4) / 2.0
-                cs = CSProp(A=A, Ix=Ix, Iy=Iy, Iz=Iz, J=J, Q=Q)
+                cs = CSPropTube(A=A, Ix=Ix, Iy=Iy, Iz=Iz, J=J, Q=Q, radius=radius, thickness=thickness)
+                cs_storage.append(cs)
 
             beam_stiffness, local_stiffness, transformations = self.stiffness(beam=beam, mesh=mesh, cs=cs, dimension=dimension, node_dictionary=node_dictionary, index=index)
             global_stiffness_matrix = global_stiffness_matrix + csdl.reshape(beam_stiffness, (dimension, dimension))
             local_stiffness_storage[element_index:element_index + beam.num_elements, :, :] = local_stiffness
             transformations_storage[element_index:element_index + beam.num_elements, :, :] = local_stiffness
-            cs_storage[element_index:element_index + beam.num_elements, 0] = csdl.reshape(A, (beam.num_elements, 1))
-            cs_storage[element_index:element_index + beam.num_elements, 1] = csdl.reshape(Ix, (beam.num_elements, 1))
-            cs_storage[element_index:element_index + beam.num_elements, 2] = csdl.reshape(Iy, (beam.num_elements, 1))
-            cs_storage[element_index:element_index + beam.num_elements, 3] = csdl.reshape(Iz, (beam.num_elements, 1))
 
             beam_mass, beam_rmvec = self.mass_properties(beam, mesh, cs)
             mass = mass + beam_mass
@@ -268,8 +267,8 @@ class BeamModel(csdl.Model):
 
 
         # parse the displacements to get the deformed mesh for each beam
-        for beam in beams:
-            mesh = self.declare_variable(beam.name + '_mesh', shape=(beam.num_nodes, 3))
+        for j, beam in enumerate(beams):
+            mesh = mesh_storage[j]
             deformed_mesh = self.create_output(beam.name + '_deformed_mesh', shape=(beam.num_nodes, 3), val=0)
 
             for i in range(beam.num_nodes):
@@ -305,24 +304,29 @@ class BeamModel(csdl.Model):
 
         # stress recovery
         element_index = 0
-        for beam in beams:
+        for i, beam in enumerate(beams):
             beam_element_loads = element_loads_storage[element_index:element_index + beam.num_elements, :]
-            A = cs_storage[element_index:element_index + beam.num_elements, 0]
+            cs = cs_storage[i]
             element_index += beam.num_elements
 
             F_x = beam_element_loads[:, 0]
+            M_x = beam_element_loads[:, 3]
+            M_y = beam_element_loads[:, 4]
+            M_z = beam_element_loads[:, 5]
 
             if beam.cs == 'tube':
-                axial_stress = F_x / A
-                # torsional_stress = M_x / A
-                # bending_stress = M_y * r / Iy
+                radius = csdl.reshape(cs.radius, (beam.num_elements, 1))
 
-                # tensile_stress = axial_stress + bending_stress
-                # shear_stress = torsional_stress
+                axial_stress = F_x / csdl.reshape(cs.A, (beam.num_elements, 1))
+                torsional_stress = M_x / csdl.reshape(cs.A, (beam.num_elements, 1))
+                MAX_MOMENT = (M_y**2 + M_z**2 + 1E-12)**0.5
+                bending_stress = MAX_MOMENT * radius / csdl.reshape(cs.Iy, (beam.num_elements, 1))
 
-                # von_mises = (tensile_stress**2 + 3*shear_stress**2)**0.5
+                tensile_stress = axial_stress + bending_stress
+                shear_stress = torsional_stress
 
-                # beam_stress = self.register_output(beam.name + '_stress', von_mises)
+                von_mises = (tensile_stress**2 + 3*shear_stress**2 + 1E-12)**0.5
+                beam_stress = self.register_output(beam.name + '_stress', von_mises)
 
 
             elif beam.cs == 'box':
