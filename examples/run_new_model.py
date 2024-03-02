@@ -3,16 +3,19 @@ import csdl
 import python_csdl_backend
 from aframe.core.beam_model import BeamModel
 from aframe.core.dataclass import Beam, BoundaryCondition, Joint, Material
-from aframe.utils.plot import plot_box
+from aframe.utils.plot import plot_box, plot_circle
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 plt.rcParams.update(plt.rcParamsDefault)
 
-num_nodes = 11
+
+
+num_nodes = 21
 aluminum = Material(name='aluminum', E=69E9, G=26E9, rho=2700, v=0.33)
 wing = Beam(name='wing', num_nodes=num_nodes, material=aluminum, cs='tube')
 fuselage = Beam(name='fuselage', num_nodes=num_nodes, material=aluminum, cs='tube')
-boundary_condition_1 = BoundaryCondition(beam=wing, node=5)
-joint_1 = Joint(beams=[wing, fuselage], nodes=[5, 5])
+boundary_condition_1 = BoundaryCondition(beam=wing, node=10)
+joint_1 = Joint(beams=[wing, fuselage], nodes=[10, 10])
 
 class Run(csdl.Model):
     def initialize(self):
@@ -28,18 +31,15 @@ class Run(csdl.Model):
         self.create_input('fuselage_mesh', shape=(num_nodes, 3), val=fuse_mesh)
 
         wing_forces = np.zeros((num_nodes, 3))
-        wing_forces[:, 2] = 1000
+        wing_forces[:, 2] = 20000
         self.create_input('wing_forces', shape=(num_nodes, 3), val=wing_forces)
 
         fuse_forces = np.zeros((num_nodes, 3))
         fuse_forces[:, 2] = 1000
         self.create_input('fuselage_forces', shape=(num_nodes, 3), val=fuse_forces)
 
-        wing_radius = np.ones(wing.num_elements)*0.5
-        self.create_input('wing_radius', shape=(wing.num_elements), val=wing_radius)
-
-        wing_thickness = np.ones(wing.num_elements)*0.001
-        self.create_input('wing_thickness', shape=(wing.num_elements), val=wing_thickness)
+        self.create_input('wing_radius', shape=(wing.num_elements), val=0.5)
+        self.create_input('wing_thickness', shape=(wing.num_elements), val=0.001)
 
         self.add(BeamModel(beams=[wing, fuselage],
                            boundary_conditions=[boundary_condition_1],
@@ -61,15 +61,15 @@ if __name__ == '__main__':
     deformed_wing_mesh = sim['wing_deformed_mesh']
     undeformed_fuselage_mesh = sim['fuselage_mesh']
     deformed_fuselage_mesh = sim['fuselage_deformed_mesh']
-
     wing_stress = sim['wing_stress']
+    wing_radius = sim['wing_radius']
 
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
     ax.view_init(elev=35, azim=-10)
     ax.set_box_aspect((1, 2, 1))
 
-    ax.scatter(undeformed_wing_mesh[:,0], undeformed_wing_mesh[:,1], undeformed_wing_mesh[:,2], color='yellow', s=50)
+    ax.scatter(undeformed_wing_mesh[:,0], undeformed_wing_mesh[:,1], undeformed_wing_mesh[:,2], color='yellow', edgecolor='black', s=50)
     ax.plot(undeformed_wing_mesh[:,0], undeformed_wing_mesh[:,1], undeformed_wing_mesh[:,2])
     ax.scatter(deformed_wing_mesh[:,0], deformed_wing_mesh[:,1], deformed_wing_mesh[:,2], color='blue', s=50)
     ax.plot(deformed_wing_mesh[:,0], deformed_wing_mesh[:,1], deformed_wing_mesh[:,2], color='blue')
@@ -79,31 +79,14 @@ if __name__ == '__main__':
     ax.scatter(deformed_fuselage_mesh[:,0], deformed_fuselage_mesh[:,1], deformed_fuselage_mesh[:,2], color='green', s=50)
     ax.plot(deformed_fuselage_mesh[:,0], deformed_fuselage_mesh[:,1], deformed_fuselage_mesh[:,2], color='green')
 
+    vertices = plot_circle(undeformed_wing_mesh, wing_radius*5, num_circle=20)
+    for i in range(wing.num_elements):
+        ax.add_collection3d(Poly3DCollection(vertices[i], facecolors='black', linewidths=1, edgecolors='red', alpha=0.4))
+
+
+    ax.axis('equal')
+    plt.axis('off')
     plt.show()
 
     plt.plot(wing_stress)
     plt.show()
-
-    # element_loads = sim['wing_element_beam_loads']
-
-    # np.set_printoptions(linewidth=100)
-    # print(element_loads)
-
-    # plt.plot(element_loads[:, 0])
-    # plt.plot(element_loads[:, 1])
-    # plt.plot(element_loads[:, 2])
-    # #plt.plot(element_loads[:, 3])
-    # plt.plot(element_loads[:, 4])
-    # plt.plot(element_loads[:, 5])
-
-    # plt.plot(element_loads[:, 6])
-    # plt.plot(element_loads[:, 7])
-    # plt.plot(element_loads[:, 8])
-    # #plt.plot(element_loads[:, 9])
-    # plt.plot(element_loads[:, 10])
-    # plt.plot(element_loads[:, 11])
-
-    # plt.grid()
-
-
-    # plt.show()

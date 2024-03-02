@@ -1,7 +1,7 @@
 import numpy as np
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
 import matplotlib.pyplot as plt
-
+np.set_printoptions(linewidth=50)
 
 
 
@@ -63,11 +63,10 @@ def plot_box(mesh, width, height):
 
 
 
-def plot_circle(mesh, radius):
+def plot_circle(mesh, radius, num_circle):
     n = len(mesh)
 
-    nc = 20
-    theta = np.linspace(0, 2 * np.pi, nc)
+    theta = np.linspace(0, 2 * np.pi, num_circle)
     current_normal = np.array([0, 0, 1]) # assumes the circle starts in the x-y plane
 
     vertices = []
@@ -85,19 +84,18 @@ def plot_circle(mesh, radius):
         offset = mesh[i, :] + (mesh[i + 1, :] - mesh[i, :]) / 2
 
         x, y, z = [], [], []
-        for j in range(nc):
+        for j in range(num_circle):
             coord = np.array([radius[i] * np.cos(theta[j]), radius[i] * np.sin(theta[j]), 0])
             new_coord = np.dot(rotation_matrix, coord) + offset
-            # print(new_coord[0])
             x.append(new_coord[0])
             y.append(new_coord[1])
             z.append(new_coord[2])
 
-        # print(list(zip(x, y, z)))
+
         verts = [list(zip(x, y, z))]
         vertices.append(verts)
 
-        return vertices
+    return vertices
 
 
 
@@ -107,23 +105,22 @@ def plot_circle(mesh, radius):
 
 if __name__ == '__main__':
 
-    num_nodes = 5
+    num_nodes = 6
     wing_mesh = np.zeros((num_nodes, 3))
     wing_mesh[:, 1] = np.linspace(-20, 20, num_nodes)
     wing_width = np.ones(num_nodes-1)*1
     wing_height = np.ones(num_nodes-1)*0.5
     wing_radius = np.ones(num_nodes-1)*1
 
-    vertices = plot_box(wing_mesh, wing_width, wing_height)
-    # vertices = plot_circle(wing_mesh, wing_radius)
-    print(vertices)
+    # vertices = plot_box(wing_mesh, wing_width, wing_height)
+    vertices = plot_circle(wing_mesh, wing_radius, num_circle=20)
+
 
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
     # ax.view_init(elev=35, azim=-10)
     ax.set_box_aspect((1, 4, 1))
 
-    exit()
     for i in range(num_nodes-1):
         print(i)
         ax.add_collection3d(Poly3DCollection(vertices[i], facecolors='cyan', linewidths=1, edgecolors='r', alpha=.20))
