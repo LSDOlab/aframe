@@ -1,9 +1,4 @@
 import numpy as np
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
-import matplotlib.pyplot as plt
-np.set_printoptions(linewidth=50)
-
-
 
 
 
@@ -28,7 +23,6 @@ def plot_box(mesh, width, height):
     v4 = np.array([-width / 2, -height / 2, np.zeros((n - 1))])
 
     current_normal = np.array([0, 0, 1])
-    # target_normal = mesh[n-1, :] - mesh[0, :] # fix this later
 
     vertices = []
     for i in range(n - 1):
@@ -104,6 +98,9 @@ def plot_circle(mesh, radius, num_circle):
 
 
 if __name__ == '__main__':
+    from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
+    import matplotlib.pyplot as plt
+
 
     num_nodes = 6
     wing_mesh = np.zeros((num_nodes, 3))
@@ -122,7 +119,6 @@ if __name__ == '__main__':
     ax.set_box_aspect((1, 4, 1))
 
     for i in range(num_nodes-1):
-        print(i)
         ax.add_collection3d(Poly3DCollection(vertices[i], facecolors='cyan', linewidths=1, edgecolors='r', alpha=.20))
 
     ax.plot(wing_mesh[:, 0], wing_mesh[:, 1], wing_mesh[:, 2])
