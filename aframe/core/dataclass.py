@@ -4,11 +4,12 @@
 
 
 class Material:
-    def __init__(self, name, E, G, rho):
+    def __init__(self, name, E, G, rho, v):
         self.name = name
         self.E = E
         self.G = G
         self.rho = rho
+        self.v = v
 
     def __str__(self):
         return f'{self.name}: E={self.E} Pa, G={self.G} Pa, rho={self.rho} kg/m^3'
@@ -82,25 +83,22 @@ class CSProp:
 
 
 class CSPropTube:
-    def __init__(self, A, Ix, Iy, Iz, J, Q, radius, thickness):
+    def __init__(self, A, Iy, Iz, J, radius, thickness):
         self.A = A
-        self.Ix = Ix
         self.Iy = Iy
         self.Iz = Iz
         self.J = J
-        self.Q = Q
         self.radius = radius
         self.thickness = thickness
 
 
+
 class CSPropBox:
-    def __init__(self, A, Ix, Iy, Iz, J, Q, width, height, tweb, ttop, tbot):
+    def __init__(self, A, Iy, Iz, J, width, height, tweb, ttop, tbot):
         self.A = A
-        self.Ix = Ix
         self.Iy = Iy
         self.Iz = Iz
         self.J = J
-        self.Q = Q
         self.width = width
         self.height = height
         self.tweb = tweb

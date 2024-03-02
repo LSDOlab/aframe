@@ -3,11 +3,12 @@ import csdl
 import python_csdl_backend
 from aframe.core.beam_model import BeamModel
 from aframe.core.dataclass import Beam, BoundaryCondition, Joint, Material
+from aframe.utils.plot_box import plot_box
 import matplotlib.pyplot as plt
 plt.rcParams.update(plt.rcParamsDefault)
 
 num_nodes = 11
-aluminum = Material(name='aluminum', E=69E9, G=26E9, rho=2700)
+aluminum = Material(name='aluminum', E=69E9, G=26E9, rho=2700, v=0.33)
 wing = Beam(name='wing', num_nodes=num_nodes, material=aluminum, cs='tube')
 fuselage = Beam(name='fuselage', num_nodes=num_nodes, material=aluminum, cs='tube')
 boundary_condition_1 = BoundaryCondition(beam=wing, node=5)
