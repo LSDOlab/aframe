@@ -83,6 +83,10 @@ if __name__ == '__main__':
     for i in range(wing.num_elements):
         ax.add_collection3d(Poly3DCollection(vertices[i], facecolors='black', linewidths=1, edgecolors='red', alpha=0.4))
 
+    deformed_vertices = plot_circle(deformed_wing_mesh, wing_radius*5, num_circle=20)
+    for i in range(wing.num_elements):
+        ax.add_collection3d(Poly3DCollection(deformed_vertices[i], facecolors='cyan', linewidths=1, edgecolors='red', alpha=0.4))
+
 
     ax.axis('equal')
     plt.axis('off')

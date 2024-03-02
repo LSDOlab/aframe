@@ -33,8 +33,8 @@ def plot_box(mesh, width, height):
     vertices = []
     for i in range(n - 1):
 
-        if i == 0: target_normal = mesh[i+1, :] - mesh[i, :]
-        else: target_normal = ((mesh[i+1, :] - mesh[i, :]) + (mesh[i, :] - mesh[i-1, :])) / 2
+        if i == 0: target_normal = (mesh[i+1, :] - mesh[i, :]) / np.linalg.norm(mesh[i+1, :] - mesh[i, :])
+        else: target_normal = ((mesh[i+1, :] - mesh[i, :]) + (mesh[i, :] - mesh[i-1, :])) / np.linalg.norm((mesh[i+1, :] - mesh[i, :]) + (mesh[i, :] - mesh[i-1, :]))
 
         rotation_axis = np.cross(current_normal, target_normal)
         rotation_axis /= np.linalg.norm(rotation_axis)
@@ -72,13 +72,14 @@ def plot_circle(mesh, radius, num_circle):
     vertices = []
     for i in range(n - 1):
 
-        if i == 0: target_normal = mesh[i+1, :] - mesh[i, :]
-        else: target_normal = ((mesh[i+1, :] - mesh[i, :]) + (mesh[i, :] - mesh[i-1, :])) / 2
+        if i == 0: target_normal = (mesh[i+1, :] - mesh[i, :]) / np.linalg.norm(mesh[i+1, :] - mesh[i, :])
+        else: target_normal = ((mesh[i+1, :] - mesh[i, :]) + (mesh[i, :] - mesh[i-1, :])) / np.linalg.norm((mesh[i+1, :] - mesh[i, :]) + (mesh[i, :] - mesh[i-1, :]))
 
         rotation_axis = np.cross(current_normal, target_normal)
         rotation_axis /= np.linalg.norm(rotation_axis)
         dot_product = np.dot(current_normal, target_normal)
         rotation_angle = np.arccos(dot_product)
+        print(dot_product)
         rotation_matrix = rotation_matrix_from_axis_angle(rotation_axis, rotation_angle)
 
         offset = mesh[i, :] + (mesh[i + 1, :] - mesh[i, :]) / 2
