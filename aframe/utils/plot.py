@@ -79,7 +79,6 @@ def plot_circle(mesh, radius, num_circle):
         rotation_axis /= np.linalg.norm(rotation_axis)
         dot_product = np.dot(current_normal, target_normal)
         rotation_angle = np.arccos(dot_product)
-        print(dot_product)
         rotation_matrix = rotation_matrix_from_axis_angle(rotation_axis, rotation_angle)
 
         offset = mesh[i, :] + (mesh[i + 1, :] - mesh[i, :]) / 2
