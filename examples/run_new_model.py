@@ -3,7 +3,7 @@ import csdl
 import python_csdl_backend
 from aframe.core.beam_model import BeamModel
 from aframe.core.dataclass import Beam, BoundaryCondition, Joint, Material
-from aframe.utils.plot_box import plot_box
+from aframe.utils.plot import plot_box
 import matplotlib.pyplot as plt
 plt.rcParams.update(plt.rcParamsDefault)
 

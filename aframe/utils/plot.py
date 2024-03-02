@@ -27,25 +27,19 @@ def plot_box(mesh, width, height):
     v3 = np.array([width / 2, -height / 2, np.zeros((n - 1))])
     v4 = np.array([-width / 2, -height / 2, np.zeros((n - 1))])
 
+    current_normal = np.array([0, 0, 1])
     # target_normal = mesh[n-1, :] - mesh[0, :] # fix this later
 
     vertices = []
     for i in range(n - 1):
-        edge1 = v2[:, i] - v1[:, i]
-        edge2 = v4[:, i] - v1[:, i]
-
-        current_normal = np.cross(edge1, edge2)
-        current_normal /= np.linalg.norm(current_normal)
 
         if i == 0: target_normal = mesh[i+1, :] - mesh[i, :]
         else: target_normal = ((mesh[i+1, :] - mesh[i, :]) + (mesh[i, :] - mesh[i-1, :])) / 2
 
         rotation_axis = np.cross(current_normal, target_normal)
         rotation_axis /= np.linalg.norm(rotation_axis)
-
         dot_product = np.dot(current_normal, target_normal)
         rotation_angle = np.arccos(dot_product)
-
         rotation_matrix = rotation_matrix_from_axis_angle(rotation_axis, rotation_angle)
 
         offset = mesh[i, :] + (mesh[i + 1, :] - mesh[i, :]) / 2
@@ -60,10 +54,51 @@ def plot_box(mesh, width, height):
         x = [nv1[0], nv2[0], nv3[0], nv4[0]]
         y = [nv1[1], nv2[1], nv3[1], nv4[1]]
         z = [nv1[2], nv2[2], nv3[2], nv4[2]]
-        verts = [list(zip(x,y,z))]
+        verts = [list(zip(x, y, z))]
         vertices.append(verts)
 
     return vertices
+
+
+
+
+
+def plot_circle(mesh, radius):
+    n = len(mesh)
+
+    nc = 20
+    theta = np.linspace(0, 2 * np.pi, nc)
+    current_normal = np.array([0, 0, 1]) # assumes the circle starts in the x-y plane
+
+    vertices = []
+    for i in range(n - 1):
+
+        if i == 0: target_normal = mesh[i+1, :] - mesh[i, :]
+        else: target_normal = ((mesh[i+1, :] - mesh[i, :]) + (mesh[i, :] - mesh[i-1, :])) / 2
+
+        rotation_axis = np.cross(current_normal, target_normal)
+        rotation_axis /= np.linalg.norm(rotation_axis)
+        dot_product = np.dot(current_normal, target_normal)
+        rotation_angle = np.arccos(dot_product)
+        rotation_matrix = rotation_matrix_from_axis_angle(rotation_axis, rotation_angle)
+
+        offset = mesh[i, :] + (mesh[i + 1, :] - mesh[i, :]) / 2
+
+        x, y, z = [], [], []
+        for j in range(nc):
+            coord = np.array([radius[i] * np.cos(theta[j]), radius[i] * np.sin(theta[j]), 0])
+            new_coord = np.dot(rotation_matrix, coord) + offset
+            # print(new_coord[0])
+            x.append(new_coord[0])
+            y.append(new_coord[1])
+            z.append(new_coord[2])
+
+        # print(list(zip(x, y, z)))
+        verts = [list(zip(x, y, z))]
+        vertices.append(verts)
+
+        return vertices
+
 
 
 
@@ -77,16 +112,20 @@ if __name__ == '__main__':
     wing_mesh[:, 1] = np.linspace(-20, 20, num_nodes)
     wing_width = np.ones(num_nodes-1)*1
     wing_height = np.ones(num_nodes-1)*0.5
+    wing_radius = np.ones(num_nodes-1)*1
 
     vertices = plot_box(wing_mesh, wing_width, wing_height)
-
+    # vertices = plot_circle(wing_mesh, wing_radius)
+    print(vertices)
 
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
     # ax.view_init(elev=35, azim=-10)
     ax.set_box_aspect((1, 4, 1))
 
+    exit()
     for i in range(num_nodes-1):
+        print(i)
         ax.add_collection3d(Poly3DCollection(vertices[i], facecolors='cyan', linewidths=1, edgecolors='r', alpha=.20))
 
     ax.plot(wing_mesh[:, 0], wing_mesh[:, 1], wing_mesh[:, 2])
