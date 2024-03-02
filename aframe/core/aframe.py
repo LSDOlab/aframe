@@ -713,6 +713,6 @@ class Aframe(ModuleCSDL):
 
 
         # output dummy forces and moments for CADDEE:
-        zero = self.declare_variable('zero_vec', shape=(3), val=0)
-        self.register_output('F', 1*zero)
-        self.register_output('M', 1*zero)
+        # zero = self.declare_variable('zero_vec', shape=(3), val=0)
+        # self.register_output('F', 1*zero)
+        # self.register_output('M', 1*zero)
