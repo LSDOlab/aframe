@@ -7,7 +7,7 @@ from aframe.utils.plot import plot_box
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 plt.rcParams.update(plt.rcParamsDefault)
-np.set_printoptions(linewidth=100)
+
 
 num_nodes = 11
 aluminum = Material(name='aluminum', E=69E9, G=26E9, rho=2700, v=0.33)

@@ -2,6 +2,14 @@ import numpy as np
 
 
 
+
+def plot_mesh(ax, mesh, size, line_color, marker_color, edge_color):
+    ax.scatter(mesh[:,0], mesh[:,1], mesh[:,2], color=marker_color, edgecolor=edge_color, s=size)
+    ax.plot(mesh[:,0], mesh[:,1], mesh[:,2], color=line_color)
+
+
+
+
 def rotation_matrix_from_axis_angle(axis, angle):
     c = np.cos(angle)
     s = np.sin(angle)
@@ -41,7 +49,6 @@ def plot_box(mesh, width, height):
         nv2 = np.dot(rotation_matrix, v2[:, i]) + offset # v2
         nv3 = np.dot(rotation_matrix, v3[:, i]) + offset # v3
         nv4 = np.dot(rotation_matrix, v4[:, i]) + offset # v4
-        # vertices.append((nv1, nv2, nv3, nv4))
 
         # format required for matplotlib plotting
         x = [nv1[0], nv2[0], nv3[0], nv4[0]]
