@@ -68,6 +68,17 @@ htail = Beam(name='htail', num_nodes=num_htail, material=aluminum, cs='box')
 joint_6 = Joint(beams=[vtail, htail], nodes=[num_vtail - 1, 2])
 
 
+center_wing_forces = np.zeros((center_wing.num_nodes, 3))
+center_wing_forces[:, 2] = 10000
+
+right_outer_wing_forces = np.zeros((right_outer_wing.num_nodes, 3))
+right_outer_wing_forces[:, 2] = 10000
+
+left_outer_wing_forces = np.zeros((left_outer_wing.num_nodes, 3))
+left_outer_wing_forces[:, 2] = 10000
+
+htail_forces = np.zeros((htail.num_nodes, 3))
+htail_forces[:, 2] = -3000
 
 
 
@@ -84,18 +95,18 @@ class Run(csdl.Model):
 
         self.create_input('center_wing_width', shape=(center_wing.num_elements), val=1)
         self.create_input('center_wing_height', shape=(center_wing.num_elements), val=0.4)
-        self.create_input('center_wing_tweb', shape=(center_wing.num_elements), val=0.001)
-        self.create_input('center_wing_ttop', shape=(center_wing.num_elements), val=0.001)
-        self.create_input('center_wing_tbot', shape=(center_wing.num_elements), val=0.001)
+        self.create_input('center_wing_tweb', shape=(center_wing.num_elements), val=0.002)
+        self.create_input('center_wing_ttop', shape=(center_wing.num_elements), val=0.002)
+        self.create_input('center_wing_tbot', shape=(center_wing.num_elements), val=0.002)
 
-        self.create_input('right_outer_wing_width', shape=(right_outer_wing.num_elements), val=1)
-        self.create_input('right_outer_wing_height', shape=(right_outer_wing.num_elements), val=0.4)
+        self.create_input('right_outer_wing_width', shape=(right_outer_wing.num_elements), val=0.75)
+        self.create_input('right_outer_wing_height', shape=(right_outer_wing.num_elements), val=0.3)
         self.create_input('right_outer_wing_tweb', shape=(right_outer_wing.num_elements), val=0.001)
         self.create_input('right_outer_wing_ttop', shape=(right_outer_wing.num_elements), val=0.001)
         self.create_input('right_outer_wing_tbot', shape=(right_outer_wing.num_elements), val=0.001)
 
-        self.create_input('left_outer_wing_width', shape=(left_outer_wing.num_elements), val=1)
-        self.create_input('left_outer_wing_height', shape=(left_outer_wing.num_elements), val=0.4)
+        self.create_input('left_outer_wing_width', shape=(left_outer_wing.num_elements), val=0.75)
+        self.create_input('left_outer_wing_height', shape=(left_outer_wing.num_elements), val=0.3)
         self.create_input('left_outer_wing_tweb', shape=(left_outer_wing.num_elements), val=0.001)
         self.create_input('left_outer_wing_ttop', shape=(left_outer_wing.num_elements), val=0.001)
         self.create_input('left_outer_wing_tbot', shape=(left_outer_wing.num_elements), val=0.001)
@@ -106,28 +117,22 @@ class Run(csdl.Model):
         self.create_input('aft_fuse_radius', shape=(aft_fuse.num_elements), val=0.2)
         self.create_input('aft_fuse_thickness', shape=(aft_fuse.num_elements), val=0.001)
 
-        self.create_input('vtail_width', shape=(vtail.num_elements), val=0.7)
-        self.create_input('vtail_height', shape=(vtail.num_elements), val=0.5)
+        self.create_input('vtail_width', shape=(vtail.num_elements), val=0.5)
+        self.create_input('vtail_height', shape=(vtail.num_elements), val=0.15)
         self.create_input('vtail_tweb', shape=(vtail.num_elements), val=0.001)
         self.create_input('vtail_ttop', shape=(vtail.num_elements), val=0.001)
         self.create_input('vtail_tbot', shape=(vtail.num_elements), val=0.001)
 
-        self.create_input('htail_width', shape=(htail.num_elements), val=0.7)
-        self.create_input('htail_height', shape=(htail.num_elements), val=0.5)
+        self.create_input('htail_width', shape=(htail.num_elements), val=0.5)
+        self.create_input('htail_height', shape=(htail.num_elements), val=0.2)
         self.create_input('htail_tweb', shape=(htail.num_elements), val=0.001)
         self.create_input('htail_ttop', shape=(htail.num_elements), val=0.001)
         self.create_input('htail_tbot', shape=(htail.num_elements), val=0.001)
 
-        # wing_forces = np.zeros((num_nodes, 3))
-        # wing_forces[:, 2] = 20000
-        # self.create_input('wing_forces', shape=(num_nodes, 3), val=wing_forces)
-
-        # fuse_forces = np.zeros((num_nodes, 3))
-        # fuse_forces[:, 2] = 1000
-        # self.create_input('fuselage_forces', shape=(num_nodes, 3), val=fuse_forces)
-
-        # self.create_input('wing_radius', shape=(wing.num_elements), val=0.5)
-        # self.create_input('wing_thickness', shape=(wing.num_elements), val=0.001)
+        self.create_input('center_wing_forces', shape=(center_wing.num_nodes, 3), val=center_wing_forces)
+        self.create_input('right_outer_wing_forces', shape=(right_outer_wing.num_nodes, 3), val=right_outer_wing_forces)
+        self.create_input('left_outer_wing_forces', shape=(left_outer_wing.num_nodes, 3), val=left_outer_wing_forces)
+        self.create_input('htail_forces', shape=(htail.num_nodes, 3), val=htail_forces)
 
         self.add(BeamModel(beams=[center_wing, right_outer_wing, left_outer_wing, fwd_fuse, aft_fuse, vtail, htail],
                            boundary_conditions=[boundary_condition_1],
@@ -147,13 +152,22 @@ if __name__ == '__main__':
     vtail_mesh = sim['vtail_mesh']
     htail_mesh = sim['htail_mesh']
 
+    deformed_center_wing_mesh = sim['center_wing_deformed_mesh']
+    deformed_right_outer_wing_mesh = sim['right_outer_wing_deformed_mesh']
+    deformed_left_outer_wing_mesh = sim['left_outer_wing_deformed_mesh']
+    deformed_fwd_fuse_mesh = sim['fwd_fuse_deformed_mesh']
+    deformed_aft_fuse_mesh = sim['aft_fuse_deformed_mesh']
+    deformed_vtail_mesh = sim['vtail_deformed_mesh']
+    deformed_htail_mesh = sim['htail_deformed_mesh']
 
-    fig = plt.figure()
+
+    fig = plt.figure(figsize=(16, 10))
+    fig.subplots_adjust(top=1.2, bottom=-1.2)
     ax = fig.add_subplot(projection='3d')
-    ax.view_init(elev=35, azim=-10)
-    # ax.set_box_aspect((1, 2, 1))
+    ax.view_init(elev=20, azim=210)
+    # ax.set_box_aspect((1, 1, 1))
 
-    size = 30
+    size = 10
     plot_mesh(ax=ax, mesh=center_wing_mesh, size=size, line_color='black', marker_color='yellow', edge_color='black')
     plot_mesh(ax=ax, mesh=right_outer_wing_mesh, size=size, line_color='black', marker_color='yellow', edge_color='black')
     plot_mesh(ax=ax, mesh=left_outer_wing_mesh, size=size, line_color='black', marker_color='yellow', edge_color='black')
@@ -164,29 +178,50 @@ if __name__ == '__main__':
 
 
     airplane = mesh.Mesh.from_file('zephyr.stl')
-    ax.add_collection3d(mplot3d.art3d.Poly3DCollection(airplane.vectors, alpha=0.2, facecolor='black'))
+    ax.add_collection3d(mplot3d.art3d.Poly3DCollection(airplane.vectors, alpha=0.3, facecolor='black'))
 
+    linewidth = 0.5
 
     vertices = plot_circle(fwd_fuse_mesh, radius=sim['fwd_fuse_radius'], num_circle=20)
     for i in range(fwd_fuse.num_elements):
-        ax.add_collection3d(Poly3DCollection(vertices[i], facecolors='cyan', linewidths=1, edgecolors='red', alpha=0.4))
+        ax.add_collection3d(Poly3DCollection(vertices[i], facecolors='cyan', linewidths=linewidth, edgecolors='red', alpha=0.4))
 
     vertices = plot_circle(aft_fuse_mesh, radius=sim['aft_fuse_radius'], num_circle=20)
     for i in range(aft_fuse.num_elements):
-        ax.add_collection3d(Poly3DCollection(vertices[i], facecolors='cyan', linewidths=1, edgecolors='red', alpha=0.4))
+        ax.add_collection3d(Poly3DCollection(vertices[i], facecolors='cyan', linewidths=linewidth, edgecolors='red', alpha=0.4))
 
     vertices = plot_box(center_wing_mesh, width=sim['center_wing_width'], height=sim['center_wing_height'])
     for i in range(center_wing.num_elements):
-        ax.add_collection3d(Poly3DCollection(vertices[i], facecolors='cyan', linewidths=1, edgecolors='red', alpha=0.4))
+        ax.add_collection3d(Poly3DCollection(vertices[i], facecolors='cyan', linewidths=linewidth, edgecolors='red', alpha=0.4))
 
     vertices = plot_box(right_outer_wing_mesh, width=sim['right_outer_wing_width'], height=sim['right_outer_wing_height'])
     for i in range(right_outer_wing.num_elements):
-        ax.add_collection3d(Poly3DCollection(vertices[i], facecolors='cyan', linewidths=1, edgecolors='red', alpha=0.4))
+        ax.add_collection3d(Poly3DCollection(vertices[i], facecolors='cyan', linewidths=linewidth, edgecolors='red', alpha=0.4))
 
     vertices = plot_box(left_outer_wing_mesh, width=sim['left_outer_wing_width'], height=sim['left_outer_wing_height'])
     for i in range(left_outer_wing.num_elements):
-        ax.add_collection3d(Poly3DCollection(vertices[i], facecolors='cyan', linewidths=1, edgecolors='red', alpha=0.4))
+        ax.add_collection3d(Poly3DCollection(vertices[i], facecolors='cyan', linewidths=linewidth, edgecolors='red', alpha=0.4))
+
+    vertices = plot_box(vtail_mesh, width=sim['vtail_width'], height=sim['vtail_height'])
+    for i in range(vtail.num_elements):
+        ax.add_collection3d(Poly3DCollection(vertices[i], facecolors='cyan', linewidths=linewidth, edgecolors='red', alpha=0.4))
+
+    vertices = plot_box(htail_mesh, width=sim['htail_width'], height=sim['htail_height'])
+    for i in range(htail.num_elements):
+        ax.add_collection3d(Poly3DCollection(vertices[i], facecolors='cyan', linewidths=linewidth, edgecolors='red', alpha=0.4))
+
+
+    plot_mesh(ax=ax, mesh=deformed_center_wing_mesh, size=size, line_color='black', marker_color='cyan', edge_color='black')
+    plot_mesh(ax=ax, mesh=deformed_right_outer_wing_mesh, size=size, line_color='black', marker_color='cyan', edge_color='black')
+    plot_mesh(ax=ax, mesh=deformed_left_outer_wing_mesh, size=size, line_color='black', marker_color='cyan', edge_color='black')
+    plot_mesh(ax=ax, mesh=deformed_fwd_fuse_mesh, size=size, line_color='black', marker_color='cyan', edge_color='black')
+    plot_mesh(ax=ax, mesh=deformed_aft_fuse_mesh, size=size, line_color='black', marker_color='cyan', edge_color='black')
+    plot_mesh(ax=ax, mesh=deformed_vtail_mesh, size=size, line_color='black', marker_color='cyan', edge_color='black')
+    plot_mesh(ax=ax, mesh=deformed_htail_mesh, size=size, line_color='black', marker_color='cyan', edge_color='black')
+
+
 
     ax.axis('equal')
     plt.axis('off')
+    plt.savefig('zephyr.pdf', bbox_inches='tight')
     plt.show()
