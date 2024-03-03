@@ -80,6 +80,9 @@ left_outer_wing_forces[:, 2] = 10000
 htail_forces = np.zeros((htail.num_nodes, 3))
 htail_forces[:, 2] = -3000
 
+fwd_fuse_forces = np.zeros((fwd_fuse.num_nodes, 3))
+fwd_fuse_forces[-1, 2] = -10000
+
 
 
 class Run(csdl.Model):
@@ -133,6 +136,7 @@ class Run(csdl.Model):
         self.create_input('right_outer_wing_forces', shape=(right_outer_wing.num_nodes, 3), val=right_outer_wing_forces)
         self.create_input('left_outer_wing_forces', shape=(left_outer_wing.num_nodes, 3), val=left_outer_wing_forces)
         self.create_input('htail_forces', shape=(htail.num_nodes, 3), val=htail_forces)
+        self.create_input('fwd_fuse_forces', shape=(fwd_fuse.num_nodes, 3), val=fwd_fuse_forces)
 
         self.add(BeamModel(beams=[center_wing, right_outer_wing, left_outer_wing, fwd_fuse, aft_fuse, vtail, htail],
                            boundary_conditions=[boundary_condition_1],
@@ -161,8 +165,8 @@ if __name__ == '__main__':
     deformed_htail_mesh = sim['htail_deformed_mesh']
 
 
-    fig = plt.figure(figsize=(16, 10))
-    fig.subplots_adjust(top=1.2, bottom=-1.2)
+    fig = plt.figure(figsize=(20, 20))
+    # fig.subplots_adjust(top=1.2, bottom=-1.2)
     ax = fig.add_subplot(projection='3d')
     ax.view_init(elev=20, azim=210)
     # ax.set_box_aspect((1, 1, 1))

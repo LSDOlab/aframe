@@ -4,7 +4,7 @@ import numpy as np
 
 
 def plot_mesh(ax, mesh, size, line_color, marker_color, edge_color):
-    ax.scatter(mesh[:,0], mesh[:,1], mesh[:,2], color=marker_color, edgecolor=edge_color, s=size, alpha=1)
+    ax.scatter(mesh[:,0], mesh[:,1], mesh[:,2], color=marker_color, edgecolor=edge_color, s=size, alpha=1, linewidth=0.5)
     ax.plot(mesh[:,0], mesh[:,1], mesh[:,2], color=line_color, linewidth=1)
 
 
