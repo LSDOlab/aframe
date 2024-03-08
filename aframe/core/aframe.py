@@ -55,7 +55,7 @@ class Aframe(ModuleCSDL):
 
         for beam_name in beams:
             n = len(beams[beam_name]['nodes'])
-            cs=beams[beam_name]['cs']
+            cs = beams[beam_name]['cs']
             E = beams[beam_name]['E']
             G = beams[beam_name]['G']
 
