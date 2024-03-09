@@ -130,6 +130,62 @@ class BeamModel(csdl.Model):
     
 
 
+    def mass_matrix(self, beam, mesh, cs, dimension, node_dictionary, index):
+
+        for i in range(beam.num_elements):
+            E, G, rho = beam.material.E, beam.material.G, beam.material.rho
+            L = csdl.pnorm(mesh[i + 1, :] - mesh[i, :])
+            A, Iy, Iz, J = cs.A[i], cs.Iy[i], cs.Iz[i], cs.J[i]
+
+            a = L / 2
+            coef = rho * A * a / 105
+            rx2 = J / A # Ix / A
+
+            mp = self.create_output(beam.name + str(i) + 'mp', shape=(12, 12), val=0)
+            mp[0,0] = csdl.reshape(coef*70, (1,1))
+            mp[1,1] = csdl.reshape(coef*78, (1,1))
+            mp[2,2] = csdl.reshape(coef*78, (1,1))
+            mp[3,3] = csdl.reshape(coef*78*rx2, (1,1))
+            mp[2,4] = csdl.reshape(coef*-22*a, (1,1))
+            mp[4,2] = csdl.reshape(coef*-22*a, (1,1))
+            mp[4,4] = csdl.reshape(coef*8*a**2, (1,1))
+            mp[1,5] = csdl.reshape(coef*22*a, (1,1))
+            mp[5,1] = csdl.reshape(coef*22*a, (1,1))
+            mp[5,5] = csdl.reshape(coef*8*a**2, (1,1))
+            mp[0,6] = csdl.reshape(coef*35, (1,1))
+            mp[6,0] = csdl.reshape(coef*35, (1,1))
+            mp[6,6] = csdl.reshape(coef*70, (1,1))
+            mp[1,7] = csdl.reshape(coef*27, (1,1))
+            mp[7,1] = csdl.reshape(coef*27, (1,1))
+            mp[5,7] = csdl.reshape(coef*13*a, (1,1))
+            mp[7,5] = csdl.reshape(coef*13*a, (1,1))
+            mp[7,7] = csdl.reshape(coef*78, (1,1))
+            mp[2,8] = csdl.reshape(coef*27, (1,1))
+            mp[8,2] = csdl.reshape(coef*27, (1,1))
+            mp[4,8] = csdl.reshape(coef*-13*a, (1,1))
+            mp[8,4] = csdl.reshape(coef*-13*a, (1,1))
+            mp[8,8] = csdl.reshape(coef*78, (1,1))
+            mp[3,9] = csdl.reshape(coef*-35*rx2, (1,1))
+            mp[9,3] = csdl.reshape(coef*-35*rx2, (1,1))
+            mp[9,9] = csdl.reshape(coef*70*rx2, (1,1))
+            mp[2,10] = csdl.reshape(coef*13*a, (1,1))
+            mp[10,2] = csdl.reshape(coef*13*a, (1,1))
+            mp[4,10] = csdl.reshape(coef*-6*a**2, (1,1))
+            mp[10,4] = csdl.reshape(coef*-6*a**2, (1,1))
+            mp[8,10] = csdl.reshape(coef*22*a, (1,1))
+            mp[10,8] = csdl.reshape(coef*22*a, (1,1))
+            mp[10,10] = csdl.reshape(coef*8*a**2, (1,1))
+            mp[1,11] = csdl.reshape(coef*-13*a, (1,1))
+            mp[11,1] = csdl.reshape(coef*-13*a, (1,1))
+            mp[5,11] = csdl.reshape(coef*-6*a**2, (1,1))
+            mp[11,5] = csdl.reshape(coef*-6*a**2, (1,1))
+            mp[7,11] = csdl.reshape(coef*-22*a, (1,1))
+            mp[11,7] = csdl.reshape(coef*-22*a, (1,1))
+            mp[11,11] = csdl.reshape(coef*8*a**2, (1,1))
+
+    
+
+
     def mass_properties(self, beam, mesh, cs):
         rho = beam.material.rho
 
