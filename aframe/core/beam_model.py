@@ -264,7 +264,7 @@ class BeamModel(csdl.Model):
                 ttop = self.declare_variable(beam.name + '_ttop', shape=(beam.num_elements))
                 tbot = self.declare_variable(beam.name + '_tbot', shape=(beam.num_elements))
 
-                # average nodal inputs to get elemental
+                # average nodal inputs to get elemental inputs
                 # width = (width_in[i] + width_in[i + 1]) / 2
                 # height = (height_in[i] + height_in[i + 1]) / 2
                 # tweb = (tweb_in[i] + tweb_in[i + 1]) / 2
