@@ -70,6 +70,9 @@ class EBBeam(m3l.ExplicitOperation):
 
     def evaluate(self, beam_mesh : m3l.Variable, t_web : m3l.Variable, t_top : m3l.Variable, t_bot : m3l.Variable,
                  forces:m3l.Variable=None, moments:m3l.Variable=None) -> EBBeamOutputs:
+        
+        beams = self.parameters['beams']
+
         '''
         Evaluates the beam model.
         
@@ -89,46 +92,106 @@ class EBBeam(m3l.ExplicitOperation):
 
         '''
 
-        mesh = beam_mesh.beam_nodes
-        beam_height = beam_mesh.height
-        beam_width = beam_mesh.width
+        displacements_list = []
+        rotations_list = []
+        mass_list = []
+        cg_list = []
+        inertia_tensor_list = []
+        stresses_list = []
+        top_buckling_list = []
+        bot_buckling_list = []
+
+        for i, beam_name in enumerate(beams):
+            mesh = beam_mesh[i].beam_nodes
+            beam_height = beam_mesh[i].height
+            beam_width = beam_mesh[i].width
+
+            beam_name = list(self.parameters['beams'].keys())[i]
+            n = len(self.beams[beam_name]['nodes'])
+
+            self.arguments = {}
+            self.arguments[f'{beam_name}_width'] = beam_width
+            self.arguments[f'{beam_name}_height'] = beam_height
+            self.arguments[f'{beam_name}_ttop'] = t_top
+            self.arguments[f'{beam_name}_tbot'] = t_bot
+            self.arguments[f'{beam_name}_tweb'] = t_web
+            self.arguments[f'{beam_name}_mesh'] = mesh
+
+            if forces is not None:
+                self.arguments[f'{beam_name}_forces'] = forces
+            if moments is not None:
+                self.arguments[f'{beam_name}_moments'] = moments
+
+            displacements = m3l.Variable(name=f'{beam_name}_displacement', shape=mesh.shape, operation=self)
+            rotations = m3l.Variable(name=f'{beam_name}_rotation', shape=mesh.shape, operation=self)
+            mass = m3l.Variable(name='mass', shape=(1,), operation=self)
+            cg = m3l.Variable(name='cg_vector', shape=(3,), operation=self)
+            inertia_tensor = m3l.Variable(name='inertia_tensor', shape=(3,3), operation=self)
+
+            stresses = m3l.Variable(name=f"{beam_name}_stress", shape=(n, 5), operation=self)
+            top_buckling = m3l.Variable(name=f"{beam_name}_top_bkl", shape=(n-1, ), operation=self)
+            bot_buckling = m3l.Variable(name=f"{beam_name}_bot_bkl", shape=(n-1, ), operation=self)
+
+            displacements_list.append(displacements)
+            rotations_list.append(rotations)
+            mass_list.append(mass)
+            cg_list.append(cg)
+            inertia_tensor_list.append(inertia_tensor)
+            stresses_list.append(stresses)
+            top_buckling_list.append(top_buckling)
+            bot_buckling_list.append(bot_buckling)
+
+        # mesh = beam_mesh.beam_nodes
+        # beam_height = beam_mesh.height
+        # beam_width = beam_mesh.width
         
-        # Gets information for naming/shapes
-        beam_name = list(self.parameters['beams'].keys())[0]   # this is only taking the first mesh added to the solver.
-        n = len(self.beams[beam_name]['nodes'])
+        # # Gets information for naming/shapes
+        # beam_name = list(self.parameters['beams'].keys())[0]   # this is only taking the first mesh added to the solver.
+        # n = len(self.beams[beam_name]['nodes'])
 
-        self.arguments = {}
-        self.arguments[f'{beam_name}_width'] = beam_width
-        self.arguments[f'{beam_name}_height'] = beam_height
-        self.arguments[f'{beam_name}_ttop'] = t_top
-        self.arguments[f'{beam_name}_tbot'] = t_bot
-        self.arguments[f'{beam_name}_tweb'] = t_web
-        self.arguments[f'{beam_name}_mesh'] = mesh
-        if forces is not None:
-            self.arguments[f'{beam_name}_forces'] = forces
-        if moments is not None:
-            self.arguments[f'{beam_name}_moments'] = moments
+        # self.arguments = {}
+        # self.arguments[f'{beam_name}_width'] = beam_width
+        # self.arguments[f'{beam_name}_height'] = beam_height
+        # self.arguments[f'{beam_name}_ttop'] = t_top
+        # self.arguments[f'{beam_name}_tbot'] = t_bot
+        # self.arguments[f'{beam_name}_tweb'] = t_web
+        # self.arguments[f'{beam_name}_mesh'] = mesh
+        # if forces is not None:
+        #     self.arguments[f'{beam_name}_forces'] = forces
+        # if moments is not None:
+        #     self.arguments[f'{beam_name}_moments'] = moments
 
-        # Create the M3L variables that are being output
-        displacements = m3l.Variable(name=f'{beam_name}_displacement', shape=mesh.shape, operation=self)
-        rotations = m3l.Variable(name=f'{beam_name}_rotation', shape=mesh.shape, operation=self)
-        mass = m3l.Variable(name='mass', shape=(1,), operation=self)
-        cg = m3l.Variable(name='cg_vector', shape=(3,), operation=self)
-        inertia_tensor = m3l.Variable(name='inertia_tensor', shape=(3,3), operation=self)
+        # # Create the M3L variables that are being output
+        # displacements = m3l.Variable(name=f'{beam_name}_displacement', shape=mesh.shape, operation=self)
+        # rotations = m3l.Variable(name=f'{beam_name}_rotation', shape=mesh.shape, operation=self)
+        # mass = m3l.Variable(name='mass', shape=(1,), operation=self)
+        # cg = m3l.Variable(name='cg_vector', shape=(3,), operation=self)
+        # inertia_tensor = m3l.Variable(name='inertia_tensor', shape=(3,3), operation=self)
 
-        stresses = m3l.Variable(name=f"{beam_name}_stress", shape=(n, 5), operation=self)
-        top_buckling = m3l.Variable(name=f"{beam_name}_top_bkl", shape=(n-1, ), operation=self)
-        bot_buckling = m3l.Variable(name=f"{beam_name}_bot_bkl", shape=(n-1, ), operation=self)
+        # stresses = m3l.Variable(name=f"{beam_name}_stress", shape=(n, 5), operation=self)
+        # top_buckling = m3l.Variable(name=f"{beam_name}_top_bkl", shape=(n-1, ), operation=self)
+        # bot_buckling = m3l.Variable(name=f"{beam_name}_bot_bkl", shape=(n-1, ), operation=self)
 
+        # outputs = EBBeamOutputs(
+        #     displacements=displacements,
+        #     rotations=rotations,
+        #     mass=mass,
+        #     cg_vector=cg,
+        #     inertia_tensor=inertia_tensor,
+        #     stresses=stresses,
+        #     top_buckling=top_buckling,
+        #     bot_buckling=bot_buckling,
+        # )
+            
         outputs = EBBeamOutputs(
-            displacements=displacements,
-            rotations=rotations,
-            mass=mass,
-            cg_vector=cg,
-            inertia_tensor=inertia_tensor,
-            stresses=stresses,
-            top_buckling=top_buckling,
-            bot_buckling=bot_buckling,
+            displacements=displacements_list,
+            rotations=rotations_list,
+            mass=mass_list,
+            cg_vector=cg_list,
+            inertia_tensor=inertia_tensor_list,
+            stresses=stresses_list,
+            top_buckling=top_buckling_list,
+            bot_buckling=bot_buckling_list,
         )
         
         return outputs
