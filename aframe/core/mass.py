@@ -39,23 +39,35 @@ class BeamMassModel(m3l.ExplicitOperation):
         
         return csdl_model
 
-    def evaluate(self, width, height, t_top, t_bot, t_web, beam_nodes, radius=[], thick=[]) -> BeamMassProps:
+    # def evaluate(self, width=[], height=[], t_top=[], t_bot=[], t_web=[], beam_nodes=[], radius=[], thick=[]) -> BeamMassProps:
+    def evaluate(self, inputs) -> BeamMassProps:
         self.arguments = {}
         beams = self.parameters['beams']
 
+        # example inpits dict
+        # inputs['wing'] = {'beam_nodes': wing_beam_nodes, 'width': wing_beam_width, ...}
+        # inpits['wing'] = {'beam_nodes': wing_beam_nodes, 'radius': wing_beam_radius, ...}
+
         for j, beam_name in enumerate(beams):
             if beams[beam_name]['cs'] == 'box':
-                self.arguments[f'{beam_name}_mesh'] = beam_nodes[j]
-                self.arguments[f'{beam_name}_width'] = width[j]
-                self.arguments[f'{beam_name}_height'] = height[j]
-                self.arguments[f'{beam_name}_tweb'] = t_web[j]
-                self.arguments[f'{beam_name}_ttop'] = t_top[j]
-                self.arguments[f'{beam_name}_tbot'] = t_bot[j]
+                # self.arguments[f'{beam_name}_mesh'] = beam_nodes[j]
+                # self.arguments[f'{beam_name}_width'] = width[j]
+                # self.arguments[f'{beam_name}_height'] = height[j]
+                # self.arguments[f'{beam_name}_tweb'] = t_web[j]
+                # self.arguments[f'{beam_name}_ttop'] = t_top[j]
+                # self.arguments[f'{beam_name}_tbot'] = t_bot[j]
+
+                self.arguments[f'{beam_name}_mesh'] = inputs[beam_name]['beam_nodes']
+                self.arguments[f'{beam_name}_width'] = inputs[beam_name]['width']
+                self.arguments[f'{beam_name}_height'] = inputs[beam_name]['height']
+                self.arguments[f'{beam_name}_tweb'] = inputs[beam_name]['t_web']
+                self.arguments[f'{beam_name}_ttop'] = inputs[beam_name]['t_top']
+                self.arguments[f'{beam_name}_tbot'] = inputs[beam_name]['t_bot']
 
             elif beams[beam_name]['cs'] == 'tube':
-                self.arguments[f'{beam_name}_mesh'] = beam_nodes[j]
-                self.arguments[f'{beam_name}_radius'] = radius[j]
-                self.arguments[f'{beam_name}_thick'] = thick[j]
+                self.arguments[f'{beam_name}_mesh'] = inputs[beam_name]['beam_nodes']
+                self.arguments[f'{beam_name}_radius'] = inputs[beam_name]['radius']
+                self.arguments[f'{beam_name}_thick'] = inputs[beam_name]['thick']
 
         mass = m3l.Variable(name='mass', shape=(1,), operation=self)
         cg_vector = m3l.Variable(name='cg_vector', shape=(3, ), operation=self)
