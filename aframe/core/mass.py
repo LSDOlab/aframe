@@ -172,7 +172,7 @@ class MassCSDL(csdl.Model):
         
 
 
-        self.register_module_output('mass', total_mass)
+        self.register_output('mass', total_mass)
 
         cg = total_sum_rm / csdl.expand(total_mass, (3))
         self.register_output('cg_vector', cg)
@@ -181,7 +181,7 @@ class MassCSDL(csdl.Model):
         self.register_output('cgz', cg[2])
 
 
-        inertia_tensor = self.register_module_output('inertia_tensor', shape=(3, 3), val=0)
+        inertia_tensor = self.create_output('inertia_tensor', shape=(3, 3), val=0)
         inertia_tensor[0, 0] = csdl.reshape(Ixx, (1, 1))
         inertia_tensor[0, 2] = csdl.reshape(Ixz, (1, 1))
         inertia_tensor[1, 1] = csdl.reshape(Iyy, (1, 1))
