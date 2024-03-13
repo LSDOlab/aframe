@@ -19,7 +19,7 @@ class BeamMassModel(m3l.ExplicitOperation):
         self.parameters.declare('name', types=str)
         self.parameters.declare('mesh', default=None)
         self.parameters.declare('beams', default={})
-        self.parameters.declare('mesh_units', default='ft')
+        self.parameters.declare('mesh_units', default='ft') # must be passed to mass model on creation, not when calling evaluate
         self.num_nodes = None
 
     def assign_attributes(self):
