@@ -18,7 +18,6 @@ class BeamMassModel(m3l.ExplicitOperation):
     def initialize(self, kwargs):
         self.parameters.declare('name', types=str)
         self.parameters.declare('mesh', default=None)
-
         self.parameters.declare('beams', default={})
         self.parameters.declare('mesh_units', default='ft')
         self.num_nodes = None
@@ -30,12 +29,12 @@ class BeamMassModel(m3l.ExplicitOperation):
         self.mesh_units = self.parameters['mesh_units']
 
     def compute(self):
-        beams = self.parameters['beams']
-        mesh_units = self.parameters['mesh_units']
+        #beams = self.parameters['beams']
+        #mesh_units = self.parameters['mesh_units']
 
         csdl_model = MassCSDL(
-            beams=beams,
-            mesh_units=mesh_units,)
+            beams=self.beams,
+            mesh_units=self.mesh_units,)
         
         return csdl_model
 
@@ -77,8 +76,8 @@ class BeamMassModel(m3l.ExplicitOperation):
 
 class MassCSDL(csdl.Model):
     def initialize(self):
-        self.parameters.declare('beams', default={})
-        self.parameters.declare('mesh_units', default='ft')
+        self.parameters.declare('beams')
+        self.parameters.declare('mesh_units')
 
     def define(self):
         beams = self.parameters['beams']
