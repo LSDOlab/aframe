@@ -132,6 +132,8 @@ class BeamModel(csdl.Model):
 
     def mass_matrix(self, beam, mesh, cs, dimension, node_dictionary, index):
 
+        transformations = self.create_output(beam.name + '_mass_transformations', shape=(beam.num_elements, 12, 12))
+        beam_mass = 0
         for i in range(beam.num_elements):
             E, G, rho = beam.material.E, beam.material.G, beam.material.rho
             L = csdl.pnorm(mesh[i + 1, :] - mesh[i, :])
@@ -182,6 +184,60 @@ class BeamModel(csdl.Model):
             mp[7,11] = csdl.reshape(coef*-22*a, (1,1))
             mp[11,7] = csdl.reshape(coef*-22*a, (1,1))
             mp[11,11] = csdl.reshape(coef*8*a**2, (1,1))
+
+            # transform the local mass matrix to global coordinates:
+            cp = (mesh[i + 1, :] - mesh[i, :]) / csdl.expand(L, (1, 3))
+            ll, mm, nn = cp[0, 0], cp[0, 1], cp[0, 2]
+            D = (ll**2 + mm**2)**0.5
+
+            block = self.create_output(beam.name + str(i) + '_mass_block', shape=(3, 3), val=0)
+            block[0,0] = ll
+            block[0,1] = mm
+            block[0,2] = nn
+            block[1,0] = -mm/D
+            block[1,1] = ll/D
+            block[2,0] = -ll*nn/D
+            block[2,1] = -mm*nn/D
+            block[2,2] = D
+
+            T = self.create_output(beam.name + str(i) + '_mass_T', shape=(12, 12), val=0)
+            T[0:3,0:3], T[3:6,3:6], T[6:9,6:9], T[9:12,9:12] = 1*block, 1*block, 1*block, 1*block
+            transformations[i, :, :] = csdl.reshape(T, (1, 12, 12))
+
+            tmt = csdl.matmat(csdl.transpose(T), csdl.matmat(mp, T))
+            m11, m12, m21, m22 = tmt[0:6,0:6], tmt[0:6,6:12], tmt[6:12,0:6], tmt[6:12,6:12]
+
+            # expand the transformed stiffness matrix to the global dimensions:
+            m = self.create_output(beam.name + str(i) + 'm', shape=(dimension, dimension), val=0)
+
+            # assign the four block matrices to their respective positions in m:
+            node_a_index, node_b_index = index[node_dictionary[beam.name][i]], index[node_dictionary[beam.name][i + 1]]
+
+            row_i = node_a_index*6
+            row_f = node_a_index*6 + 6
+            col_i = node_a_index*6
+            col_f = node_a_index*6 + 6
+            m[row_i:row_f, col_i:col_f] = m11
+
+            row_i = node_a_index*6
+            row_f = node_a_index*6 + 6
+            col_i = node_b_index*6
+            col_f = node_b_index*6 + 6
+            m[row_i:row_f, col_i:col_f] = m12
+
+            row_i = node_b_index*6
+            row_f = node_b_index*6 + 6
+            col_i = node_a_index*6
+            col_f = node_a_index*6 + 6
+            m[row_i:row_f, col_i:col_f] = m21
+
+            row_i = node_b_index*6
+            row_f = node_b_index*6 + 6
+            col_i = node_b_index*6
+            col_f = node_b_index*6 + 6
+            m[row_i:row_f, col_i:col_f] = m22
+
+            beam_mass = beam_mass + m
 
     
 
@@ -237,7 +293,7 @@ class BeamModel(csdl.Model):
 
 
         # construct the stiffness matrix and get the undeformed mass properties
-        global_stiffness_matrix, mass, rmvec = 0, 0, 0
+        global_stiffness_matrix, global_mass_matrix, mass, rmvec = 0, 0, 0, 0
         cs_storage, mesh_storage, transformations_storage, local_stiffness_storage = [], [], [], []
         for beam in beams:
             mesh = self.declare_variable(beam.name + '_mesh', shape=(beam.num_nodes, 3))
@@ -289,9 +345,16 @@ class BeamModel(csdl.Model):
             local_stiffness_storage.append(local_stiffness)
             transformations_storage.append(transformations)
 
+            beam_mass_matrix = self.mass_matrix(beam=beam, mesh=mesh, cs=cs, dimension=dimension, node_dictionary=node_dictionary, index=index)
+            global_mass_matrix = global_mass_matrix + csdl.reshape(beam_mass_matrix, (dimension, dimension))
+
             beam_mass, beam_rmvec = self.mass_properties(beam, mesh, cs)
             mass = mass + beam_mass
             rmvec = rmvec + beam_rmvec
+
+
+        self.register_output('global_stiffness_matrix', global_stiffness_matrix) # for Jiayao and Andrew
+        self.register_output('global_mass_matrix', global_mass_matrix) # for Jiayao and Andrew
 
         undeformed_cg = self.register_output('undeformed_cg', rmvec / csdl.expand(mass, (1, 3)))
 
@@ -336,6 +399,7 @@ class BeamModel(csdl.Model):
 
         loads = csdl.sum(nodal_loads, axes=(0, ))
         F = csdl.reshape(loads, new_shape=(6*num_unique_nodes)) # flatten loads to a vector
+        self.register_output('global_loads_vector', F) # for Jiayao and Andrew
 
 
 
