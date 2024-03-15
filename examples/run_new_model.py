@@ -94,3 +94,6 @@ if __name__ == '__main__':
 
     plt.plot(wing_stress)
     plt.show()
+
+    np.set_printoptions(edgeitems=30, linewidth=100000,)
+    print(sim['global_mass_matrix'])

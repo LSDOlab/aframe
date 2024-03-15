@@ -239,6 +239,8 @@ class BeamModel(csdl.Model):
 
             beam_mass = beam_mass + m
 
+        return beam_mass
+
     
 
 
