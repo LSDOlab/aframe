@@ -268,8 +268,10 @@ class BeamModel(csdl.Model):
 
 
         # throw an error if there are empty beam or boundary condition lists
-        if not beams: raise Exception('Aframe error: empty beam list')
-        if not boundary_conditions: raise Exception('Aframe error: no boundary conditions specified')
+        if not beams: raise Exception('Error: Empty beam list')
+        if not boundary_conditions: raise Exception('Error: No boundary conditions specified.')
+        if len(beams) - len(boundary_conditions) > len(joints): 
+            raise Exception('Error: Not enough kinematic constraints. Add joints or boundary conditions.')
 
 
         # automated beam node assignment
