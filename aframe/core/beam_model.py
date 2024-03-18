@@ -346,7 +346,7 @@ class BeamModel(csdl.Model):
                 cs = CSPropBox(A=A, Iy=Iy, Iz=Iz, J=J, width=width, height=height, tweb=tweb, ttop=ttop, tbot=tbot)
                 cs_storage.append(cs)
 
-            if beam.cs == 'ellipse':
+            elif beam.cs == 'ellipse':
                 a = self.declare_variable(beam.name + '_semi_major_axis', shape=(beam.num_elements))
                 b = self.declare_variable(beam.name + '_semi_minor_axis', shape=(beam.num_elements))
 
@@ -376,8 +376,7 @@ class BeamModel(csdl.Model):
             rmvec = rmvec + beam_rmvec
 
 
-        self.register_output('global_stiffness_matrix', global_stiffness_matrix) # for Jiayao and Andrew
-        self.register_output('global_mass_matrix', global_mass_matrix) # for Jiayao and Andrew
+
 
         undeformed_cg = self.register_output('undeformed_cg', rmvec / csdl.expand(mass, (1, 3)))
 
@@ -402,8 +401,10 @@ class BeamModel(csdl.Model):
         K = csdl.matmat(csdl.matmat(mask, global_stiffness_matrix), mask) + mask_eye
 
 
+        self.register_output('global_stiffness_matrix', K) # for Jiayao and Andrew
 
-
+        M = csdl.matmat(csdl.matmat(mask, global_mass_matrix), mask) + mask_eye
+        self.register_output('global_mass_matrix', M) # for Jiayao and Andrew
 
         # create the global loads vector
         nodal_loads = self.create_output('nodal_loads', shape=(len(beams), num_unique_nodes, 6), val=0)
@@ -429,6 +430,7 @@ class BeamModel(csdl.Model):
 
         # solve the linear system
         U = csdl.solve(K, F)
+        self.register_output('u', U) # for Jiayao and Andrew
 
 
 
