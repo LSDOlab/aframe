@@ -357,7 +357,7 @@ class BeamModel(csdl.Model):
             rmvec = rmvec + beam_rmvec
 
 
-        self.register_output('global_stiffness_matrix', global_stiffness_matrix) # for Jiayao and Andrew
+        # self.register_output('global_stiffness_matrix', global_stiffness_matrix) # for Jiayao and Andrew
         self.register_output('global_mass_matrix', global_mass_matrix) # for Jiayao and Andrew
 
         undeformed_cg = self.register_output('undeformed_cg', rmvec / csdl.expand(mass, (1, 3)))
@@ -381,6 +381,8 @@ class BeamModel(csdl.Model):
         # modify the global stiffness matrix with boundary conditions
         # first remove the row/column with a boundary condition, then add a 1
         K = csdl.matmat(csdl.matmat(mask, global_stiffness_matrix), mask) + mask_eye
+
+        self.register_output('global_stiffness_matrix', K) # for Jiayao and Andrew
 
 
 
