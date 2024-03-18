@@ -92,7 +92,6 @@ class CSPropTube:
         self.thickness = thickness
 
 
-
 class CSPropBox:
     def __init__(self, A, Iy, Iz, J, width, height, tweb, ttop, tbot):
         self.A = A
@@ -104,5 +103,15 @@ class CSPropBox:
         self.tweb = tweb
         self.ttop = ttop
         self.tbot = tbot
+
+
+class CSPropEllipse:
+    def __init__(self, A, Iy, Iz, J, major_axis, minor_axis):
+        self.A = A
+        self.Iy = Iy
+        self.Iz = Iz
+        self.J = J
+        self.major_axis = major_axis
+        self.minor_axis = minor_axis
 
 

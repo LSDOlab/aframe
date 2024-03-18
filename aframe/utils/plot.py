@@ -97,7 +97,38 @@ def plot_circle(mesh, radius, num_circle):
     return vertices
 
 
+def plot_circle(mesh, radius, num_circle):
+    n = len(mesh)
 
+    theta = np.linspace(0, 2 * np.pi, num_circle)
+    current_normal = np.array([0, 0, 1]) # assumes the circle starts in the x-y plane
+
+    vertices = []
+    for i in range(n - 1):
+
+        target_normal = (mesh[i+1, :] - mesh[i, :]) / np.linalg.norm(mesh[i+1, :] - mesh[i, :])
+
+        rotation_axis = np.cross(current_normal, target_normal)
+        rotation_axis /= np.linalg.norm(rotation_axis)
+        dot_product = np.dot(current_normal, target_normal)
+        rotation_angle = np.arccos(dot_product)
+        rotation_matrix = rotation_matrix_from_axis_angle(rotation_axis, rotation_angle)
+
+        offset = mesh[i, :] + (mesh[i + 1, :] - mesh[i, :]) / 2
+
+        x, y, z = [], [], []
+        for j in range(num_circle):
+            coord = np.array([radius[i] * np.cos(theta[j]), radius[i] * np.sin(theta[j]), 0])
+            new_coord = np.dot(rotation_matrix, coord) + offset
+            x.append(new_coord[0])
+            y.append(new_coord[1])
+            z.append(new_coord[2])
+
+
+        verts = [list(zip(x, y, z))]
+        vertices.append(verts)
+
+    return vertices
 
 
 

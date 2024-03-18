@@ -1,6 +1,6 @@
 import numpy as np
 import csdl
-from aframe.core.dataclass import Beam, CSProp, CSPropTube, CSPropBox
+from aframe.core.dataclass import Beam, CSProp, CSPropTube, CSPropBox, CSPropEllipse
 
 class BeamModel(csdl.Model):
 
@@ -17,6 +17,11 @@ class BeamModel(csdl.Model):
         beam_stiffness = 0
         local_stiffness = self.create_output(beam.name + '_local_stiffness', shape=(beam.num_elements, 12, 12))
         transformations = self.create_output(beam.name + '_transformations', shape=(beam.num_elements, 12, 12))
+        # print('shapes in the beam code')
+        # print('beam_stiffness',beam_stiffness.shape)
+        # print('local_stiffness',local_stiffness.shape)
+        # print('transformations',transformations.shape)
+
         for i in range(beam.num_elements):
             E, G = beam.material.E, beam.material.G
 
@@ -341,6 +346,22 @@ class BeamModel(csdl.Model):
                 cs = CSPropBox(A=A, Iy=Iy, Iz=Iz, J=J, width=width, height=height, tweb=tweb, ttop=ttop, tbot=tbot)
                 cs_storage.append(cs)
 
+            if beam.cs == 'ellipse':
+                a = self.declare_variable(beam.name + '_semi_major_axis', shape=(beam.num_elements))
+                b = self.declare_variable(beam.name + '_semi_minor_axis', shape=(beam.num_elements))
+
+                A = np.pi * a * b
+                Iy = np.pi / 4 * a * b**3
+                Iz = np.pi / 4 * a**3 * b
+                # Compute beta for the approximation of J
+                beta = 1 / ((1 + (b/a)**2)**0.5)
+                J = (np.pi / 2) * a * b**3 * beta
+                
+                cs = CSPropEllipse(A=A, Iy=Iy, Iz=Iz, J=J, major_axis=a, minor_axis=b)
+                cs_storage.append(cs)
+
+
+
 
             beam_stiffness, local_stiffness, transformations = self.stiffness(beam=beam, mesh=mesh, cs=cs, dimension=dimension, node_dictionary=node_dictionary, index=index)
             global_stiffness_matrix = global_stiffness_matrix + csdl.reshape(beam_stiffness, (dimension, dimension))
@@ -474,6 +495,31 @@ class BeamModel(csdl.Model):
 
                 von_mises = (tensile_stress**2 + 3*shear_stress**2 + 1E-12)**0.5
                 beam_stress = self.register_output(beam.name + '_stress', von_mises)
+            if beam.cs == 'ellipse':
+                # beam cs properties
+                a = csdl.reshape(cs.major_axis, (beam.num_elements, 1))
+                b = csdl.reshape(cs.minor_axis, (beam.num_elements, 1))
+                A = csdl.reshape(cs.A, (beam.num_elements, 1))
+                Iy = csdl.reshape(cs.Iy, (beam.num_elements, 1))
+                Iz = csdl.reshape(cs.Iz, (beam.num_elements, 1))
+                J = csdl.reshape(cs.J, (beam.num_elements, 1))
+
+                axial_stress = F_x / A
+                torsional_stress = M_x * ((a**2 + b**2)**0.5) / J  # Using the mean radius for simplicity
+                
+                # For bending stress, assuming bending occurs about the major axis for Iy and minor axis for Iz
+                # Adjust as necessary for your specific loading conditions
+                MAX_MOMENT = (M_y**2 + M_z**2 + 1E-12)**0.5
+                bending_stress_major = M_y * b / Iy  # Bending about the major axis, stress at the minor axis
+                bending_stress_minor = M_z * a / Iz  # Bending about the minor axis, stress at the major axis
+                bending_stress = (bending_stress_major**2 + bending_stress_minor**2)**0.5  # Resultant bending stress
+                
+                tensile_stress = axial_stress + bending_stress
+                shear_stress = torsional_stress
+
+                von_mises = (tensile_stress**2 + 3*shear_stress**2 + 1E-12)**0.5
+                beam_stress = self.register_output(beam.name + '_stress', von_mises)
+
 
             elif beam.cs == 'box':
                 """ the stress for box beams is evaluated at four points:

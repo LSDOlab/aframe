@@ -45,12 +45,6 @@ class Run(csdl.Model):
                            boundary_conditions=[boundary_condition_1],
                            joints=[joint_1]))
         
-        
-
-
-
-
-
 
 if __name__ == '__main__':
 
