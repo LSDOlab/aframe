@@ -5,46 +5,75 @@ import aframe as af
 
 # start recorder
 recorder = csdl.Recorder(inline=True)
+# recorder = csdl.Recorder()
 recorder.start()
 
-# create a 1D beam mesh
-num_nodes = 21
-wing_mesh = np.zeros((num_nodes, 3))
-wing_mesh[:, 1] = np.linspace(-20, 20, num_nodes)
-wing_mesh = csdl.Variable(value=wing_mesh)
+# create a 1D beam 1 mesh
+num_nodes_1 = 21
+beam_1_mesh = np.zeros((num_nodes_1, 3))
+beam_1_mesh[:, 1] = np.linspace(-20, 20, num_nodes_1)
+beam_1_mesh = csdl.Variable(value=beam_1_mesh)
+
+# create a 1D beam 2 mesh
+num_nodes_2 = 21
+beam_2_mesh = np.zeros((num_nodes_2, 3))
+beam_2_mesh[:, 0] = np.linspace(-20, 20, num_nodes_2)
+beam_2_mesh = csdl.Variable(value=beam_2_mesh)
+
+# create beam 1 loads
+beam_1_loads = np.zeros((num_nodes_1, 6))
+beam_1_loads[:, 2] = 20000
+beam_1_loads = csdl.Variable(value=beam_1_loads)
+
+# create beam 2 loads
+beam_2_loads = np.zeros((num_nodes_2, 6))
+beam_2_loads[:, 2] = 20000
+beam_2_loads = csdl.Variable(value=beam_2_loads)
 
 # create a material
 aluminum = af.Material(name='aluminum', E=69E9, G=26E9, rho=2700, v=0.33)
 
-# create cs properties
+# create cs properties for beam 1
+beam_1_radius = csdl.Variable(value=np.ones(num_nodes_1) * 0.5)
+beam_1_thickness = csdl.Variable(value=np.ones(num_nodes_1) * 0.001)
+beam_1_cs = af.CSTube(radius=beam_1_radius, thickness=beam_1_thickness)
 
-# create a beam
-wing = af.Beam(name='wing', mesh=wing_mesh, material=aluminum, cs='tube')
+# create cs properties for beam 2
+beam_2_radius = csdl.Variable(value=np.ones(num_nodes_2) * 0.5)
+beam_2_thickness = csdl.Variable(value=np.ones(num_nodes_2) * 0.001)
+beam_2_cs = af.CSTube(radius=beam_2_radius, thickness=beam_2_thickness)
 
-# create a boundary condition
-wing.AddBoundaryCondition(node=10)
+# create beam 1 with boundary conditions and loads
+beam_1 = af.Beam(name='beam_1', mesh=beam_1_mesh, material=aluminum, cs=beam_1_cs)
+beam_1.add_boundary_condition(node=10)
+beam_1.add_load(beam_1_loads)
 
-# create a load
-wing_loads = np.zeros((num_nodes, 6))
-wing_loads[:, 2] = 20000
-wing_loads = csdl.Variable(value=wing_loads)
+# create beam 2 with boundary conditions and loads
+beam_2 = af.Beam(name='beam_2', mesh=beam_2_mesh, material=aluminum, cs=beam_2_cs)
+# beam_2.add_boundary_condition(node=10)
+beam_2.add_load(beam_2_loads)
 
-wing.add_load(wing_loads)
-
-# wing_forces = af.Load(name='wing_forces', beam=wing, value=wing_forces)
-
-# instantiate the beam model and construct the F and K matrices
-frame = af.Frame(beams=[wing], joints=[])
-# or
+# instantiate the frame model and add all beams and joints
 frame = af.Frame()
-frame.add(wing)
-frame.add(joint_1)
+frame.add_beam(beam_1)
+frame.add_beam(beam_2)
+frame.add_joint(beams=[beam_1, beam_2], nodes=[10, 10])
 
-# evaluate the beam model
-wing_displacment = frame.evaluate(beam=wing, quantity='displacement')
-wing_stress = frame.evaluate(beam=wing, quantity='stress')
+# evaluating the frame model returns a solution dataclass
+# solution contains dictionaries with beam names as keys
+solution = frame.evaluate()
 
+# # displacement
+# beam_1_displacement = solution.displacement['beam_1']
+# beam_2_displacement = solution.displacement['beam_2']
+
+# # stress
+# beam_1_stress = solution.stress['beam_1']
+# beam_2_stress = solution.stress['beam_2']
+
+# # etc.
 
 # finish up
 recorder.stop()
-print(wing_stress.value)
+recorder.visualize_graph()
+# print(beam_1_displacement.value)
