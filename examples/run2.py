@@ -45,7 +45,7 @@ beam_2_cs = af.CSTube(radius=beam_2_radius, thickness=beam_2_thickness)
 
 # create beam 1 with boundary conditions and loads
 beam_1 = af.Beam(name='beam_1', mesh=beam_1_mesh, material=aluminum, cs=beam_1_cs)
-beam_1.add_boundary_condition(node=10)
+beam_1.add_boundary_condition(node=10, dof=[1, 1, 1, 1, 1, 1])
 beam_1.add_load(beam_1_loads)
 
 # create beam 2 with boundary conditions and loads

@@ -82,14 +82,17 @@ class Beam:
         self.num_elements = self.num_nodes - 1
 
         # optional
-        self.boundary_conditions = []
+        self.boundary_conditions = {}
         self.loads = []
 
         if type(self.mesh) != csdl.Variable:
             print('mesh is not a csdl.Variable')
 
-    def add_boundary_condition(self, node):
-        self.boundary_conditions.append(node)
+    def add_boundary_condition(self, node, dof):
+        # self.boundary_conditions.append(node)
+        self.boundary_conditions['name'] = {}
+        self.boundary_conditions['name']['node'] = node
+        self.boundary_conditions['name']['dof'] = dof
 
     def add_load(self, loads):
         self.loads.append(loads)

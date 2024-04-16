@@ -154,9 +154,15 @@ class Frame:
         if not self.beams: 
             raise Exception('Error: beam(s) must be added to the frame')
         
-        # check for boundary conditions
+        # create boundary conditions dictionary
         num_bc = 0
-        for beam in self.beams: num_bc += len(beam.boundary_conditions)
+        boundary_conditions = []
+        for beam in self.beams: 
+            num_bc += len(beam.boundary_conditions)
+            for i in range(len(beam.boundary_conditions)):
+                boundary_conditions.append(beam.boundary_conditions[i])
+
+        # check for boundary conditions    
         if num_bc == 0: 
             raise Exception('Error: no boundary conditions')
 
@@ -192,8 +198,34 @@ class Frame:
 
         # construct the global stiffness matrix
         global_stiffness_matrix = 0
+        transformations_storage, local_stiffness_storage = [], [], [], []
         for beam in self.beams:
 
             beam_stiffness, local_stiffness, transformations = self._stiffness_matrix(beam, dimension, index, node_dictionary)
             global_stiffness_matrix = global_stiffness_matrix + beam_stiffness
+            local_stiffness_storage.append(local_stiffness)
+            transformations_storage.append(transformations)
+
+            # beam_mass_matrix = self.mass_matrix(beam=beam, dimension=dimension, node_dictionary=node_dictionary, index=index)
+            # global_mass_matrix = global_mass_matrix + csdl.reshape(beam_mass_matrix, (dimension, dimension))
+
+            # beam_mass, beam_rmvec = self.mass_properties(beam)
+            # mass = mass + beam_mass
+            # rmvec = rmvec + beam_rmvec
+
+
+
+        # deal with the boundary conditions
+        bound_node_index_list = []
+        for bound in boundary_conditions:
+            bound_node, dof = bound.node, bound.dof
+            bound_node_index = index[node_dictionary[bound.beam.name][bound_node]]
+            # add the constrained dof index to the bound_node_index_list
+            for i, degree in enumerate(dof):
+                if degree: bound_node_index_list.append(bound_node_index*6 + i)
+
+        mask, mask_eye = self.create_output('mask', shape=(dimension, dimension), val=np.eye(dimension)), self.create_output('mask_eye', shape=(dimension, dimension), val=0)
+        zero, one = self.create_input('zero', shape=(1, 1), val=0), self.create_input('one', shape=(1, 1), val=1)
+        [(mask.__setitem__((i, i), 1*zero), mask_eye.__setitem__((i, i), 1*one)) for i in range(dimension) if i in bound_node_index_list]
+
            
