@@ -22,7 +22,7 @@ class Frame:
         #     node_a_index_array = node_a_index_array.set([i], index[node_dictionary[beam.name][i]])
         #     node_b_index_array = node_b_index_array.set([i], index[node_dictionary[beam.name][i + 1]])
 
-        
+        local_stiffness = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
         for i in csdl.frange(beam.num_elements):
             E, G = beam.material.E, beam.material.G
             L = csdl.norm(beam.mesh[i + 1, :] - beam.mesh[i, :])
@@ -76,45 +76,47 @@ class Frame:
             kp = kp.set([10, 10], 4 * E * Iy / L)
             kp = kp.set([11, 11], 4 * E * Iz / L)
 
-            cp = (beam.mesh[i + 1, :] - beam.mesh[i, :]) / L
-            ll, mm, nn = cp[0], cp[1], cp[2]
-            D = (ll**2 + mm**2)**0.5
+            local_stiffness = local_stiffness.set(csdl.slice[i, :, :], kp)
 
-            block = csdl.Variable(value=np.zeros((3, 3)))
-            block = block.set([0, 0], ll)
-            block = block.set([0, 1], mm)
-            block = block.set([0, 2], nn)
-            block = block.set([1, 0], -mm / D)
-            block = block.set([1, 1], ll / D)
-            block = block.set([2, 0], -ll * nn / D)
-            block = block.set([2, 1], -mm * nn / D)
-            block = block.set([2, 2], D)
+            # cp = (beam.mesh[i + 1, :] - beam.mesh[i, :]) / L
+            # ll, mm, nn = cp[0], cp[1], cp[2]
+            # D = (ll**2 + mm**2)**0.5
 
-            T = csdl.Variable(value=np.zeros((12, 12)))
-            T = T.set(csdl.slice[0:3, 0:3], block)
-            T = T.set(csdl.slice[3:6, 3:6], block)
-            T = T.set(csdl.slice[6:9, 6:9], block)
-            T = T.set(csdl.slice[9:12, 9:12], block)
+            # block = csdl.Variable(value=np.zeros((3, 3)))
+            # block = block.set([0, 0], ll)
+            # block = block.set([0, 1], mm)
+            # block = block.set([0, 2], nn)
+            # block = block.set([1, 0], -mm / D)
+            # block = block.set([1, 1], ll / D)
+            # block = block.set([2, 0], -ll * nn / D)
+            # block = block.set([2, 1], -mm * nn / D)
+            # block = block.set([2, 2], D)
 
-            tkt = csdl.matmat(csdl.transpose(T), csdl.matmat(kp, T))
-            k11, k12, k21, k22 = tkt[0:6,0:6], tkt[0:6,6:12], tkt[6:12,0:6], tkt[6:12,6:12]
+            # T = csdl.Variable(value=np.zeros((12, 12)))
+            # T = T.set(csdl.slice[0:3, 0:3], block)
+            # T = T.set(csdl.slice[3:6, 3:6], block)
+            # T = T.set(csdl.slice[6:9, 6:9], block)
+            # T = T.set(csdl.slice[9:12, 9:12], block)
 
-            # expand the transformed stiffness matrix to the global dimensions
-            k = csdl.Variable(value=np.zeros((dimension, dimension)))
+            # tkt = csdl.matmat(csdl.transpose(T), csdl.matmat(kp, T))
+            # k11, k12, k21, k22 = tkt[0:6,0:6], tkt[0:6,6:12], tkt[6:12,0:6], tkt[6:12,6:12]
 
-            # assign the four block matrices to their respective positions in k
-            node_a_index = index[node_dictionary[beam.name][i]]
-            node_b_index = index[node_dictionary[beam.name][i + 1]]
+            # # expand the transformed stiffness matrix to the global dimensions
+            # k = csdl.Variable(value=np.zeros((dimension, dimension)))
 
-            # node_a_index = node_a_index_array[i]
-            # node_b_index = node_b_index_array[i]
+            # # assign the four block matrices to their respective positions in k
+            # node_a_index = index[node_dictionary[beam.name][i]]
+            # node_b_index = index[node_dictionary[beam.name][i + 1]]
 
-            row_i = node_a_index * 6
-            row_f = node_a_index * 6 + 6
-            col_i = node_a_index * 6
-            col_f = node_a_index * 6 + 6
-            # k[row_i:row_f, col_i:col_f] = k11
-            k = k.set(csdl.slice[row_i:row_f, col_i:col_f], k11)
+            # # node_a_index = node_a_index_array[i]
+            # # node_b_index = node_b_index_array[i]
+
+            # row_i = node_a_index * 6
+            # row_f = node_a_index * 6 + 6
+            # col_i = node_a_index * 6
+            # col_f = node_a_index * 6 + 6
+            # # k[row_i:row_f, col_i:col_f] = k11
+            # k = k.set(csdl.slice[row_i:row_f, col_i:col_f], k11)
 
 
 
