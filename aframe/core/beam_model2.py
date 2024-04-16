@@ -15,14 +15,10 @@ class Frame:
 
     def _stiffness_matrix(self, beam, dimension, index, node_dictionary):
 
-        # # generate the nodal indices for the beam
-        # node_a_index_array = csdl.Variable(value=np.zeros((beam.num_elements)))
-        # node_b_index_array = csdl.Variable(value=np.zeros((beam.num_elements)))
-        # for i in range(beam.num_elements):
-        #     node_a_index_array = node_a_index_array.set([i], index[node_dictionary[beam.name][i]])
-        #     node_b_index_array = node_b_index_array.set([i], index[node_dictionary[beam.name][i + 1]])
-
         local_stiffness = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
+        tkt_storage = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
+        transformations = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
+
         for i in csdl.frange(beam.num_elements):
             E, G = beam.material.E, beam.material.G
             L = csdl.norm(beam.mesh[i + 1, :] - beam.mesh[i, :])
@@ -78,45 +74,71 @@ class Frame:
 
             local_stiffness = local_stiffness.set(csdl.slice[i, :, :], kp)
 
-            # cp = (beam.mesh[i + 1, :] - beam.mesh[i, :]) / L
-            # ll, mm, nn = cp[0], cp[1], cp[2]
-            # D = (ll**2 + mm**2)**0.5
+            cp = (beam.mesh[i + 1, :] - beam.mesh[i, :]) / L
+            ll, mm, nn = cp[0], cp[1], cp[2]
+            D = (ll**2 + mm**2)**0.5
 
-            # block = csdl.Variable(value=np.zeros((3, 3)))
-            # block = block.set([0, 0], ll)
-            # block = block.set([0, 1], mm)
-            # block = block.set([0, 2], nn)
-            # block = block.set([1, 0], -mm / D)
-            # block = block.set([1, 1], ll / D)
-            # block = block.set([2, 0], -ll * nn / D)
-            # block = block.set([2, 1], -mm * nn / D)
-            # block = block.set([2, 2], D)
+            block = csdl.Variable(value=np.zeros((3, 3)))
+            block = block.set([0, 0], ll)
+            block = block.set([0, 1], mm)
+            block = block.set([0, 2], nn)
+            block = block.set([1, 0], -mm / D)
+            block = block.set([1, 1], ll / D)
+            block = block.set([2, 0], -ll * nn / D)
+            block = block.set([2, 1], -mm * nn / D)
+            block = block.set([2, 2], D)
 
-            # T = csdl.Variable(value=np.zeros((12, 12)))
-            # T = T.set(csdl.slice[0:3, 0:3], block)
-            # T = T.set(csdl.slice[3:6, 3:6], block)
-            # T = T.set(csdl.slice[6:9, 6:9], block)
-            # T = T.set(csdl.slice[9:12, 9:12], block)
+            T = csdl.Variable(value=np.zeros((12, 12)))
+            T = T.set(csdl.slice[0:3, 0:3], block)
+            T = T.set(csdl.slice[3:6, 3:6], block)
+            T = T.set(csdl.slice[6:9, 6:9], block)
+            T = T.set(csdl.slice[9:12, 9:12], block)
+            transformations = transformations.set(csdl.slice[i, :, :], T)
 
-            # tkt = csdl.matmat(csdl.transpose(T), csdl.matmat(kp, T))
-            # k11, k12, k21, k22 = tkt[0:6,0:6], tkt[0:6,6:12], tkt[6:12,0:6], tkt[6:12,6:12]
+            tkt = csdl.matmat(csdl.transpose(T), csdl.matmat(kp, T))
+            tkt_storage = tkt_storage.set(csdl.slice[i, :, :], tkt)
 
-            # # expand the transformed stiffness matrix to the global dimensions
-            # k = csdl.Variable(value=np.zeros((dimension, dimension)))
 
-            # # assign the four block matrices to their respective positions in k
-            # node_a_index = index[node_dictionary[beam.name][i]]
-            # node_b_index = index[node_dictionary[beam.name][i + 1]]
+        beam_stiffness = 0
+        for i in range(beam.num_elements):
+            tkt = tkt_storage[i, :, :]
+            k11, k12, k21, k22 = tkt[0:6,0:6], tkt[0:6,6:12], tkt[6:12,0:6], tkt[6:12,6:12]
 
-            # # node_a_index = node_a_index_array[i]
-            # # node_b_index = node_b_index_array[i]
+            # expand the transformed stiffness matrix to the global dimensions
+            k = csdl.Variable(value=np.zeros((dimension, dimension)))
 
-            # row_i = node_a_index * 6
-            # row_f = node_a_index * 6 + 6
-            # col_i = node_a_index * 6
-            # col_f = node_a_index * 6 + 6
-            # # k[row_i:row_f, col_i:col_f] = k11
-            # k = k.set(csdl.slice[row_i:row_f, col_i:col_f], k11)
+            # assign the four block matrices to their respective positions in k
+            node_a_index = index[node_dictionary[beam.name][i]]
+            node_b_index = index[node_dictionary[beam.name][i + 1]]
+
+            row_i = node_a_index * 6
+            row_f = node_a_index * 6 + 6
+            col_i = node_a_index * 6
+            col_f = node_a_index * 6 + 6
+            k = k.set(csdl.slice[row_i:row_f, col_i:col_f], k11)
+
+            row_i = node_a_index*6
+            row_f = node_a_index*6 + 6
+            col_i = node_b_index*6
+            col_f = node_b_index*6 + 6
+            k = k.set(csdl.slice[row_i:row_f, col_i:col_f], k12)
+
+            row_i = node_b_index*6
+            row_f = node_b_index*6 + 6
+            col_i = node_a_index*6
+            col_f = node_a_index*6 + 6
+            k = k.set(csdl.slice[row_i:row_f, col_i:col_f], k21)
+
+            row_i = node_b_index*6
+            row_f = node_b_index*6 + 6
+            col_i = node_b_index*6
+            col_f = node_b_index*6 + 6
+            k = k.set(csdl.slice[row_i:row_f, col_i:col_f], k22)
+
+            beam_stiffness = beam_stiffness + k
+
+
+        return beam_stiffness, local_stiffness, transformations
 
 
 
@@ -169,8 +191,9 @@ class Frame:
         index = {list(node_set)[i]: i for i in range(num_unique_nodes)}
 
         # construct the global stiffness matrix
+        global_stiffness_matrix = 0
         for beam in self.beams:
-            mesh = beam.mesh
 
-            null = self._stiffness_matrix(beam, dimension, index, node_dictionary)
+            beam_stiffness, local_stiffness, transformations = self._stiffness_matrix(beam, dimension, index, node_dictionary)
+            global_stiffness_matrix = global_stiffness_matrix + beam_stiffness
            
