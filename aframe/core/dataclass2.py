@@ -89,7 +89,7 @@ class Beam:
             print('mesh type is not csdl.Variable')
 
     def add_boundary_condition(self, node, dof):
-        bc_dict = {'node': node, 'dof': dof, 'name': self.name}
+        bc_dict = {'node': node, 'dof': dof, 'beam_name': self.name}
         self.bc.append(bc_dict)
 
     def add_load(self, loads):

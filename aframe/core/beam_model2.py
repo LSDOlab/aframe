@@ -21,23 +21,15 @@ class Frame:
 
         mesh = beam.mesh
         area = beam.cs.area
-        iy = beam.cs.iy
-        iz = beam.cs.iz
-        ix = beam.cs.ix
+        iy, iz, ix = beam.cs.iy, beam.cs.iz, beam.cs.ix
         E, G = beam.material.E, beam.material.G
-
-        # print(area.value, E, iy.value, iz.value, ix.value)
-        print(mesh.value)
 
         for i in range(beam.num_elements):
             L = csdl.norm(mesh[i + 1, :] - mesh[i, :])
-            print(L.value)
             A, Iy, Iz, J = area[i], iy[i], iz[i], ix[i]
 
             kp = csdl.Variable(value=np.zeros((12, 12)))
 
-
-            s = csdl.slice
             # the upper left block
             kp = kp.set(csdl.slice[0, 0], A * E / L)
             kp = kp.set(csdl.slice[1, 1], 12 * E * Iz / L**3)
@@ -50,13 +42,8 @@ class Frame:
             kp = kp.set(csdl.slice[4, 4], 4 * E * Iy / L)
             kp = kp.set(csdl.slice[5, 5], 4 * E * Iz / L)
 
-            # print(kp.value)
-
             # the upper right block
-            print('before', kp[0,0].value)
             kp = kp.set(csdl.slice[0, 6], -A * E / L)
-            kp = kp.set(csdl.slice[0, 6], -A * E / L)
-            print('after', kp[0,0].value)
             kp = kp.set(csdl.slice[1, 7], -12 * E * Iz / L**3)
             kp = kp.set(csdl.slice[1, 11], 6 * E * Iz / L**2)
             kp = kp.set(csdl.slice[2, 8], -12 * E * Iy / L**3)
@@ -92,21 +79,20 @@ class Frame:
             kp = kp.set(csdl.slice[11, 11], 4 * E * Iz / L)
 
             local_stiffness = local_stiffness.set(csdl.slice[i, :, :], kp)
-            # print(kp.value)
 
             cp = (mesh[i + 1, :] - mesh[i, :]) / L
             ll, mm, nn = cp[0], cp[1], cp[2]
             D = (ll**2 + mm**2)**0.5
 
             block = csdl.Variable(value=np.zeros((3, 3)))
-            block = block.set([0, 0], ll)
-            block = block.set([0, 1], mm)
-            block = block.set([0, 2], nn)
-            block = block.set([1, 0], -mm / D)
-            block = block.set([1, 1], ll / D)
-            block = block.set([2, 0], -ll * nn / D)
-            block = block.set([2, 1], -mm * nn / D)
-            block = block.set([2, 2], D)
+            block = block.set(csdl.slice[0, 0], ll)
+            block = block.set(csdl.slice[0, 1], mm)
+            block = block.set(csdl.slice[0, 2], nn)
+            block = block.set(csdl.slice[1, 0], -mm / D)
+            block = block.set(csdl.slice[1, 1], ll / D)
+            block = block.set(csdl.slice[2, 0], -ll * nn / D)
+            block = block.set(csdl.slice[2, 1], -mm * nn / D)
+            block = block.set(csdl.slice[2, 2], D)
 
             T = csdl.Variable(value=np.zeros((12, 12)))
             T = T.set(csdl.slice[0:3, 0:3], block)
@@ -157,11 +143,6 @@ class Frame:
 
             beam_stiffness = beam_stiffness + k
 
-        # print(beam_stiffness[0, 0].value)
-        # print(tkt_storage[0, 0, 0].value)
-        print(local_stiffness[0, :, :].value)
-        # print(A.value, E, L.value, Iy.value, Iz.value, J.value)
-
         return beam_stiffness, local_stiffness, transformations
 
 
@@ -180,11 +161,11 @@ class Frame:
         
         # create boundary conditions dictionary
         num_bc = 0
-        boundary_conditions = []
+        # boundary_conditions = []
         for beam in self.beams: 
             num_bc += len(beam.bc)
-            for i in range(len(beam.bc)):
-                boundary_conditions.append(beam.bc[i])
+            # for i in range(len(beam.bc)):
+            #     boundary_conditions.append(beam.bc[i])
 
         # check for boundary conditions    
         if num_bc == 0: 
@@ -221,12 +202,12 @@ class Frame:
         index = {list(node_set)[i]: i for i in range(num_unique_nodes)}
 
         # construct the global stiffness matrix
-        global_stiffness_matrix = 0
+        K = 0
         transformations_storage, local_stiffness_storage = [], []
         for beam in self.beams:
 
             beam_stiffness, local_stiffness, transformations = self._stiffness_matrix(beam, dimension, index, node_dictionary)
-            global_stiffness_matrix = global_stiffness_matrix + beam_stiffness
+            K = K + beam_stiffness
             local_stiffness_storage.append(local_stiffness)
             transformations_storage.append(transformations)
 
@@ -240,43 +221,58 @@ class Frame:
         # print(global_stiffness_matrix.value)
 
         # deal with the boundary conditions
-        bound_node_index_list = []
-        for bc_dict in boundary_conditions:
-            bound_node, dof = bc_dict['node'], bc_dict['dof']
-            bound_node_index = index[node_dictionary[bc_dict['name']][bound_node]]
+        # bound_node_index_list = []
+        # for bc_dict in boundary_conditions:
+        #     bound_node, dof = bc_dict['node'], bc_dict['dof']
+        #     bound_node_index = index[node_dictionary[bc_dict['beam_name']][bound_node]]
 
-            # add the constrained dof index to the bound_node_index_list
-            for i, degree in enumerate(dof):
-                if degree: bound_node_index_list.append(bound_node_index*6 + i)
+        #     # add the constrained dof index to the bound_node_index_list
+        #     for i, degree in enumerate(dof):
+        #         if degree: bound_node_index_list.append(bound_node_index*6 + i)
 
-        mask = csdl.Variable(value=np.eye(dimension))
-        mask_eye = csdl.Variable(value=np.zeros((dimension, dimension)))
-        for i in range(dimension):
-            if i in bound_node_index_list:
-                mask = mask.set([i, i], 0)
-                mask_eye = mask_eye.set([i, i], 1)
+        # mask = csdl.Variable(value=np.eye(dimension))
+        # mask_eye = csdl.Variable(value=np.zeros((dimension, dimension)))
+        # for i in range(dimension):
+        #     if i in bound_node_index_list:
+        #         mask = mask.set([i, i], 0)
+        #         mask_eye = mask_eye.set([i, i], 1)
+
+
+        # new bc code
+        for beam in self.beams:
+            for bc in beam.bc:
+                node, dof = bc['node'], bc['dof']
+                node_index = index[node_dictionary[beam.name][node]]
+
+                for i, degree in enumerate(dof):
+                    if degree:
+                        # zero the row/column then put a 1 in the diagonal
+                        K = K.set(csdl.slice[node_index + i, :], 0) # row
+                        K = K.set(csdl.slice[:, node_index + i], 0) # column
+                        K = K.set(csdl.slice[node_index + i, node_index + i], 1)
+
 
         # modify the global stiffness matrix with boundary conditions
         # first remove the row/column with a boundary condition, then add a 1
-        K = csdl.matmat(csdl.matmat(mask, global_stiffness_matrix), mask) + mask_eye
+        # K = csdl.matmat(csdl.matmat(mask, global_stiffness_matrix), mask) + mask_eye
         # print(K[0,0].value)
 
         # create the global loads vector
-        loads = csdl.Variable(value=np.zeros((len(self.beams), num_unique_nodes, 6)))
-        for i, beam in enumerate(self.beams):
-            beam_loads = beam.loads
-            for j, node in enumerate(node_dictionary[beam.name]):
-                loads = loads.set(csdl.slice[i, index[node], :], beam_loads[j, :])
+        # loads = csdl.Variable(value=np.zeros((len(self.beams), num_unique_nodes, 6)))
+        # for i, beam in enumerate(self.beams):
+        #     beam_loads = beam.loads
+        #     for j, node in enumerate(node_dictionary[beam.name]):
+        #         loads = loads.set(csdl.slice[i, index[node], :], beam_loads[j, :])
 
-                # I changed this bit for new csdl ********************************************
-                for k in range(6):
-                    if (index[node]*6 + k) in bound_node_index_list:
-                        loads = loads.set(csdl.slice[i, index[node], k], 0)
+        #         # I changed this bit for new csdl ********************************************
+        #         for k in range(6):
+        #             if (index[node]*6 + k) in bound_node_index_list:
+        #                 loads = loads.set(csdl.slice[i, index[node], k], 0)
 
-        # F = csdl.reshape(loads, new_shape=(6*num_unique_nodes)) # flatten loads to a vector
-        F = csdl.sum(loads, axes=(0, )).flatten() # changed for new csdl ******************
-        # print(F.value)
-        # solve the linear system
-        # U = csdl.solve_linear(K, F)
+        # # F = csdl.reshape(loads, new_shape=(6*num_unique_nodes)) # flatten loads to a vector
+        # F = csdl.sum(loads, axes=(0, )).flatten() # changed for new csdl ******************
+        # # print(F.value)
+        # # solve the linear system
+        # # U = csdl.solve_linear(K, F)
 
            
