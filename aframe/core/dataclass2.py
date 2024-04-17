@@ -43,10 +43,10 @@ class CSTube:
     def __post_init__(self):
 
         if type(self.radius) != csdl.Variable:
-            print('radius is not a csdl.Variable')
+            print('radius type is not csdl.Variable')
         
         if type(self.thickness) != csdl.Variable:
-            print('thickness is not a csdl.Variable')
+            print('thickness type is not csdl.Variable')
 
 
 # @dataclass
@@ -82,19 +82,17 @@ class Beam:
         self.num_elements = self.num_nodes - 1
 
         # optional
-        self.boundary_conditions = {}
-        self.loads = []
+        self.bc = []
+        self.loads = np.zeros((self.num_nodes, 6))
 
         if type(self.mesh) != csdl.Variable:
-            print('mesh is not a csdl.Variable')
+            print('mesh type is not csdl.Variable')
 
     def add_boundary_condition(self, node, dof):
-        # self.boundary_conditions.append(node)
-        self.boundary_conditions['name'] = {}
-        self.boundary_conditions['name']['node'] = node
-        self.boundary_conditions['name']['dof'] = dof
+        bc_dict = {'node': node, 'dof': dof, 'name': self.name}
+        self.bc.append(bc_dict)
 
     def add_load(self, loads):
-        self.loads.append(loads)
+        self.loads += loads
 
 

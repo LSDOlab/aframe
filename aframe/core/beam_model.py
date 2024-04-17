@@ -17,6 +17,8 @@ class BeamModel(csdl.Model):
         beam_stiffness = 0
         local_stiffness = self.create_output(beam.name + '_local_stiffness', shape=(beam.num_elements, 12, 12))
         transformations = self.create_output(beam.name + '_transformations', shape=(beam.num_elements, 12, 12))
+        tkt_storage = self.create_output(beam.name + '_tkt_storage', shape=(beam.num_elements, 12, 12))
+
         for i in range(beam.num_elements):
             E, G = beam.material.E, beam.material.G
 
@@ -92,6 +94,7 @@ class BeamModel(csdl.Model):
             transformations[i, :, :] = csdl.reshape(T, (1, 12, 12))
 
             tkt = csdl.matmat(csdl.transpose(T), csdl.matmat(kp, T))
+            tkt_storage[i, :, :] = csdl.reshape(tkt, (1, 12, 12))
             k11, k12, k21, k22 = tkt[0:6,0:6], tkt[0:6,6:12], tkt[6:12,0:6], tkt[6:12,6:12]
 
             # expand the transformed stiffness matrix to the global dimensions:
@@ -126,6 +129,9 @@ class BeamModel(csdl.Model):
 
             beam_stiffness = beam_stiffness + k
 
+        # self.print_var(beam_stiffness[0,0])
+        # self.print_var(tkt_storage[0,0,0])
+        self.print_var(local_stiffness[0,:,:])
         return beam_stiffness, local_stiffness, transformations
     
 
@@ -359,9 +365,8 @@ class BeamModel(csdl.Model):
 
         # self.register_output('global_stiffness_matrix', global_stiffness_matrix) # for Jiayao and Andrew
         # self.register_output('global_mass_matrix', global_mass_matrix) # for Jiayao and Andrew
-
+        # self.print_var(global_stiffness_matrix)
         undeformed_cg = self.register_output('undeformed_cg', rmvec / csdl.expand(mass, (1, 3)))
-
 
 
                 
@@ -381,6 +386,7 @@ class BeamModel(csdl.Model):
         # modify the global stiffness matrix with boundary conditions
         # first remove the row/column with a boundary condition, then add a 1
         K = csdl.matmat(csdl.matmat(mask, global_stiffness_matrix), mask) + mask_eye
+        # self.print_var(K[0, 0])
 
         self.register_output('global_stiffness_matrix', K) # for Jiayao and Andrew
 
@@ -410,6 +416,7 @@ class BeamModel(csdl.Model):
 
         loads = csdl.sum(nodal_loads, axes=(0, ))
         F = csdl.reshape(loads, new_shape=(6*num_unique_nodes)) # flatten loads to a vector
+        # self.print_var(F)
         self.register_output('global_loads_vector', F) # for Jiayao and Andrew
 
 

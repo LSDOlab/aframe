@@ -19,62 +19,82 @@ class Frame:
         tkt_storage = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
         transformations = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
 
-        for i in csdl.frange(beam.num_elements):
-            E, G = beam.material.E, beam.material.G
-            L = csdl.norm(beam.mesh[i + 1, :] - beam.mesh[i, :])
-            A, Iy, Iz, J = beam.cs.area[i], beam.cs.iy[i], beam.cs.iz[i], beam.cs.ix[i]
+        mesh = beam.mesh
+        area = beam.cs.area
+        iy = beam.cs.iy
+        iz = beam.cs.iz
+        ix = beam.cs.ix
+        E, G = beam.material.E, beam.material.G
+
+        # print(area.value, E, iy.value, iz.value, ix.value)
+        print(mesh.value)
+
+        for i in range(beam.num_elements):
+            L = csdl.norm(mesh[i + 1, :] - mesh[i, :])
+            print(L.value)
+            A, Iy, Iz, J = area[i], iy[i], iz[i], ix[i]
 
             kp = csdl.Variable(value=np.zeros((12, 12)))
 
+
+            s = csdl.slice
             # the upper left block
-            kp = kp.set([0, 0], A * E / L)
-            kp = kp.set([1, 1], 12 * E * Iz / L**3)
-            kp = kp.set([1, 5], 6 * E * Iz / L**2)
-            kp = kp.set([5, 1], 6 * E * Iz / L**2)
-            kp = kp.set([2, 2], 12 * E * Iy / L**3)
-            kp = kp.set([2, 4], -6 * E * Iy / L**2)
-            kp = kp.set([4, 2], -6 * E * Iy / L**2)
-            kp = kp.set([3, 3], G * J / L)
-            kp = kp.set([4, 4], 4 * E * Iy / L)
-            kp = kp.set([5, 5], 4 * E * Iz / L)
+            kp = kp.set(csdl.slice[0, 0], A * E / L)
+            kp = kp.set(csdl.slice[1, 1], 12 * E * Iz / L**3)
+            kp = kp.set(csdl.slice[1, 5], 6 * E * Iz / L**2)
+            kp = kp.set(csdl.slice[5, 1], 6 * E * Iz / L**2)
+            kp = kp.set(csdl.slice[2, 2], 12 * E * Iy / L**3)
+            kp = kp.set(csdl.slice[2, 4], -6 * E * Iy / L**2)
+            kp = kp.set(csdl.slice[4, 2], -6 * E * Iy / L**2)
+            kp = kp.set(csdl.slice[3, 3], G * J / L)
+            kp = kp.set(csdl.slice[4, 4], 4 * E * Iy / L)
+            kp = kp.set(csdl.slice[5, 5], 4 * E * Iz / L)
+
+            # print(kp.value)
 
             # the upper right block
-            kp = kp.set([0, 6], -A * E / L)
-            kp = kp.set([1, 7], -12 * E * Iz / L**3)
-            kp = kp.set([1, 11], -6 * E * Iz / L**2)
-            kp = kp.set([2, 8], -12 * E * Iy / L**3)
-            kp = kp.set([2, 10], 6 * E * Iy / L**2)
-            kp = kp.set([3, 9], -G * J / L)
-            kp = kp.set([4, 8], 6 * E * Iy / L**2)
-            kp = kp.set([5, 11], 2 * E * Iz / L)
+            print('before', kp[0,0].value)
+            kp = kp.set(csdl.slice[0, 6], -A * E / L)
+            kp = kp.set(csdl.slice[0, 6], -A * E / L)
+            print('after', kp[0,0].value)
+            kp = kp.set(csdl.slice[1, 7], -12 * E * Iz / L**3)
+            kp = kp.set(csdl.slice[1, 11], 6 * E * Iz / L**2)
+            kp = kp.set(csdl.slice[2, 8], -12 * E * Iy / L**3)
+            kp = kp.set(csdl.slice[2, 10], -6 * E * Iy / L**2)
+            kp = kp.set(csdl.slice[3, 9], -G * J / L)
+            kp = kp.set(csdl.slice[4, 8], 6 * E * Iy / L**2)
+            kp = kp.set(csdl.slice[4, 10], 2 * E * Iy / L)
+            kp = kp.set(csdl.slice[5, 7], -6 * E * Iz / L**2)
+            kp = kp.set(csdl.slice[5, 11], 2 * E * Iz / L)
 
             # the lower left block
-            kp = kp.set([6, 0], -A * E / L)
-            kp = kp.set([7, 1], -12 * E * Iz / L**3)
-            kp = kp.set([7, 5], -6 * E * Iz / L**2)
-            kp = kp.set([8, 2], -12 * E * Iy / L**3)
-            kp = kp.set([8, 4], 6 * E * Iy / L**2)
-            kp = kp.set([9, 3], -G * J / L)
-            kp = kp.set([10, 2], -6 * E * Iy / L**2)
-            kp = kp.set([10, 4], 2 * E * Iy / L)
-            kp = kp.set([11, 1], 6 * E * Iz / L**2)
-            kp = kp.set([11, 5], 2 * E * Iz / L)
+            kp = kp.set(csdl.slice[6, 0], -A * E / L)
+            kp = kp.set(csdl.slice[7, 1], -12 * E * Iz / L**3)
+            kp = kp.set(csdl.slice[7, 5], -6 * E * Iz / L**2)
+            kp = kp.set(csdl.slice[8, 2], -12 * E * Iy / L**3)
+            kp = kp.set(csdl.slice[8, 4], 6 * E * Iy / L**2)
+            kp = kp.set(csdl.slice[9, 3], -G * J / L)
+            kp = kp.set(csdl.slice[10, 2], -6 * E * Iy / L**2)
+            kp = kp.set(csdl.slice[10, 4], 2 * E * Iy / L)
+            kp = kp.set(csdl.slice[11, 1], 6 * E * Iz / L**2)
+            kp = kp.set(csdl.slice[11, 5], 2 * E * Iz / L)
 
             # the lower right block
-            kp = kp.set([6, 6], A * E / L)
-            kp = kp.set([7, 7], 12 * E * Iz / L**3)
-            kp = kp.set([7, 11], -6 * E * Iz / L**2)
-            kp = kp.set([11, 7], -6 * E * Iz / L**2)
-            kp = kp.set([8, 8], 12 * E * Iy / L**3)
-            kp = kp.set([8, 10], 6 * E * Iy / L**2)
-            kp = kp.set([10, 8], 6 * E * Iy / L**2)
-            kp = kp.set([9, 9], G * J / L)
-            kp = kp.set([10, 10], 4 * E * Iy / L)
-            kp = kp.set([11, 11], 4 * E * Iz / L)
+            kp = kp.set(csdl.slice[6, 6], A * E / L)
+            kp = kp.set(csdl.slice[7, 7], 12 * E * Iz / L**3)
+            kp = kp.set(csdl.slice[7, 11], -6 * E * Iz / L**2)
+            kp = kp.set(csdl.slice[11, 7], -6 * E * Iz / L**2)
+            kp = kp.set(csdl.slice[8, 8], 12 * E * Iy / L**3)
+            kp = kp.set(csdl.slice[8, 10], 6 * E * Iy / L**2)
+            kp = kp.set(csdl.slice[10, 8], 6 * E * Iy / L**2)
+            kp = kp.set(csdl.slice[9, 9], G * J / L)
+            kp = kp.set(csdl.slice[10, 10], 4 * E * Iy / L)
+            kp = kp.set(csdl.slice[11, 11], 4 * E * Iz / L)
 
             local_stiffness = local_stiffness.set(csdl.slice[i, :, :], kp)
+            # print(kp.value)
 
-            cp = (beam.mesh[i + 1, :] - beam.mesh[i, :]) / L
+            cp = (mesh[i + 1, :] - mesh[i, :]) / L
             ll, mm, nn = cp[0], cp[1], cp[2]
             D = (ll**2 + mm**2)**0.5
 
@@ -137,6 +157,10 @@ class Frame:
 
             beam_stiffness = beam_stiffness + k
 
+        # print(beam_stiffness[0, 0].value)
+        # print(tkt_storage[0, 0, 0].value)
+        print(local_stiffness[0, :, :].value)
+        # print(A.value, E, L.value, Iy.value, Iz.value, J.value)
 
         return beam_stiffness, local_stiffness, transformations
 
@@ -158,9 +182,9 @@ class Frame:
         num_bc = 0
         boundary_conditions = []
         for beam in self.beams: 
-            num_bc += len(beam.boundary_conditions)
-            for i in range(len(beam.boundary_conditions)):
-                boundary_conditions.append(beam.boundary_conditions[i])
+            num_bc += len(beam.bc)
+            for i in range(len(beam.bc)):
+                boundary_conditions.append(beam.bc[i])
 
         # check for boundary conditions    
         if num_bc == 0: 
@@ -198,7 +222,7 @@ class Frame:
 
         # construct the global stiffness matrix
         global_stiffness_matrix = 0
-        transformations_storage, local_stiffness_storage = [], [], [], []
+        transformations_storage, local_stiffness_storage = [], []
         for beam in self.beams:
 
             beam_stiffness, local_stiffness, transformations = self._stiffness_matrix(beam, dimension, index, node_dictionary)
@@ -213,19 +237,46 @@ class Frame:
             # mass = mass + beam_mass
             # rmvec = rmvec + beam_rmvec
 
-
+        # print(global_stiffness_matrix.value)
 
         # deal with the boundary conditions
         bound_node_index_list = []
-        for bound in boundary_conditions:
-            bound_node, dof = bound.node, bound.dof
-            bound_node_index = index[node_dictionary[bound.beam.name][bound_node]]
+        for bc_dict in boundary_conditions:
+            bound_node, dof = bc_dict['node'], bc_dict['dof']
+            bound_node_index = index[node_dictionary[bc_dict['name']][bound_node]]
+
             # add the constrained dof index to the bound_node_index_list
             for i, degree in enumerate(dof):
                 if degree: bound_node_index_list.append(bound_node_index*6 + i)
 
-        mask, mask_eye = self.create_output('mask', shape=(dimension, dimension), val=np.eye(dimension)), self.create_output('mask_eye', shape=(dimension, dimension), val=0)
-        zero, one = self.create_input('zero', shape=(1, 1), val=0), self.create_input('one', shape=(1, 1), val=1)
-        [(mask.__setitem__((i, i), 1*zero), mask_eye.__setitem__((i, i), 1*one)) for i in range(dimension) if i in bound_node_index_list]
+        mask = csdl.Variable(value=np.eye(dimension))
+        mask_eye = csdl.Variable(value=np.zeros((dimension, dimension)))
+        for i in range(dimension):
+            if i in bound_node_index_list:
+                mask = mask.set([i, i], 0)
+                mask_eye = mask_eye.set([i, i], 1)
+
+        # modify the global stiffness matrix with boundary conditions
+        # first remove the row/column with a boundary condition, then add a 1
+        K = csdl.matmat(csdl.matmat(mask, global_stiffness_matrix), mask) + mask_eye
+        # print(K[0,0].value)
+
+        # create the global loads vector
+        loads = csdl.Variable(value=np.zeros((len(self.beams), num_unique_nodes, 6)))
+        for i, beam in enumerate(self.beams):
+            beam_loads = beam.loads
+            for j, node in enumerate(node_dictionary[beam.name]):
+                loads = loads.set(csdl.slice[i, index[node], :], beam_loads[j, :])
+
+                # I changed this bit for new csdl ********************************************
+                for k in range(6):
+                    if (index[node]*6 + k) in bound_node_index_list:
+                        loads = loads.set(csdl.slice[i, index[node], k], 0)
+
+        # F = csdl.reshape(loads, new_shape=(6*num_unique_nodes)) # flatten loads to a vector
+        F = csdl.sum(loads, axes=(0, )).flatten() # changed for new csdl ******************
+        # print(F.value)
+        # solve the linear system
+        # U = csdl.solve_linear(K, F)
 
            

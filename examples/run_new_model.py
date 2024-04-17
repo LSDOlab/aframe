@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 plt.rcParams.update(plt.rcParamsDefault)
 
-
+np.set_printoptions(edgeitems=30, linewidth=1000,)
 
 num_nodes = 21
 aluminum = Material(name='aluminum', E=69E9, G=26E9, rho=2700, v=0.33)
@@ -35,11 +35,13 @@ class Run(csdl.Model):
         self.create_input('wing_forces', shape=(num_nodes, 3), val=wing_forces)
 
         fuse_forces = np.zeros((num_nodes, 3))
-        fuse_forces[:, 2] = 1000
+        fuse_forces[:, 2] = 20000
         self.create_input('fuselage_forces', shape=(num_nodes, 3), val=fuse_forces)
 
         self.create_input('wing_radius', shape=(wing.num_elements), val=0.5)
         self.create_input('wing_thickness', shape=(wing.num_elements), val=0.001)
+        self.create_input('fuselage_radius', shape=(fuselage.num_elements), val=0.5)
+        self.create_input('fuselage_thickness', shape=(fuselage.num_elements), val=0.001)
 
         self.add(BeamModel(beams=[wing, fuselage],
                            boundary_conditions=[boundary_condition_1],
@@ -88,12 +90,12 @@ if __name__ == '__main__':
         ax.add_collection3d(Poly3DCollection(deformed_vertices[i], facecolors='cyan', linewidths=1, edgecolors='red', alpha=0.4))
 
 
-    ax.axis('equal')
-    plt.axis('off')
-    plt.show()
+    # ax.axis('equal')
+    # plt.axis('off')
+    # plt.show()
 
-    plt.plot(wing_stress)
-    plt.show()
+    # plt.plot(wing_stress)
+    # plt.show()
 
-    np.set_printoptions(edgeitems=30, linewidth=100000,)
-    print(sim['global_mass_matrix'])
+    # np.set_printoptions(edgeitems=30, linewidth=100000,)
+    # print(sim['global_mass_matrix'])

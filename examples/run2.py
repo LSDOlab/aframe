@@ -2,6 +2,7 @@ import csdl_alpha as csdl
 import numpy as np
 import aframe as af
 
+np.set_printoptions(edgeitems=30, linewidth=1000,)
 
 # start recorder
 recorder = csdl.Recorder(inline=True)
@@ -74,6 +75,8 @@ solution = frame.evaluate()
 # # etc.
 
 # finish up
+csdl.save_all_variables()
+csdl.inline_csv_save('michael')
 recorder.stop()
-recorder.visualize_graph()
+# recorder.visualize_graph()
 # print(beam_1_displacement.value)
