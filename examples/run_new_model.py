@@ -102,4 +102,4 @@ if __name__ == '__main__':
     # print(sim['global_mass_matrix'])
 
     with open('matrix1.pkl', 'wb') as f:
-            pickle.dump(sim['global_stiffness_matrix_pre'], f)
+            pickle.dump(sim['global_stiffness_matrix'], f)

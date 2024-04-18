@@ -229,8 +229,8 @@ class Frame:
             
         F = F.flatten()
 
-        with open('matrix2.pkl', 'wb') as f:
-            pickle.dump(K.value, f)
+        # with open('matrix2.pkl', 'wb') as f:
+        #     pickle.dump(K.value, f)
         
 
         # new bc code (doesn't work)***********************************************************************
@@ -239,23 +239,20 @@ class Frame:
                 node, dof = bc['node'], bc['dof']
                 node_index = index[node_dictionary[beam.name][node]]
 
-                for i, degree in enumerate(dof):
-                    if degree:
+                for i in range(6):
+                    if dof[i] == 1:
                         # zero the row/column then put a 1 in the diagonal
-                        K = K.set(csdl.slice[node_index + i, :], 0) # row
-                        K = K.set(csdl.slice[:, node_index + i], 0) # column
-                        K = K.set(csdl.slice[node_index + i, node_index + i], 1)
+                        K = K.set(csdl.slice[node_index*6 + i, :], 0) # row
+                        K = K.set(csdl.slice[:, node_index*6 + i], 0) # column
+                        K = K.set(csdl.slice[node_index*6 + i, node_index*6 + i], 1)
                         # zero the corresponding load index as well
                         F = F.set(csdl.slice[node_index*6 + i], 0)
 
-        # print(F.value)
-        # print(K[0, 11].value)
         # with open('matrix2.pkl', 'wb') as f:
         #     pickle.dump(K.value, f)
 
         # solve the linear system
         U = csdl.solve_linear(K, F)
-        # print(U.value)
 
 
         # create the beam displacements dictionary
