@@ -16,16 +16,23 @@ class Frame:
 
     def _stiffness_matrix(self, beam, dimension, index, node_dictionary):
 
-        local_stiffness = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
+        element_stiffness = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
         tkt_storage = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
         transformations = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
 
         mesh = beam.mesh
-        area = beam.cs.area
+        area = A = beam.cs.area
         iy, iz, ix = beam.cs.iy, beam.cs.iz, beam.cs.ix
         E, G = beam.material.E, beam.material.G
 
-        for i in range(beam.num_elements):
+        L = csdl.Variable(value=np.zeros(beam.num_elements))
+        for i in csdl.frange(beam.num_elements):
+            L = L.set(csdl.slice[i], csdl.norm(mesh[i + 1, :] - mesh[i, :]))
+        
+        kpp = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
+        values = [A * E / L]
+
+        for i in csdl.frange(beam.num_elements):
             L = csdl.norm(mesh[i + 1, :] - mesh[i, :])
             A, Iy, Iz, J = area[i], iy[i], iz[i], ix[i]
 
@@ -79,7 +86,7 @@ class Frame:
             kp = kp.set(csdl.slice[10, 10], 4 * E * Iy / L)
             kp = kp.set(csdl.slice[11, 11], 4 * E * Iz / L)
 
-            local_stiffness = local_stiffness.set(csdl.slice[i, :, :], kp)
+            element_stiffness = element_stiffness.set(csdl.slice[i, :, :], kp)
 
             cp = (mesh[i + 1, :] - mesh[i, :]) / L
             ll, mm, nn = cp[0], cp[1], cp[2]
@@ -144,12 +151,45 @@ class Frame:
 
             beam_stiffness = beam_stiffness + k
 
-        return beam_stiffness, local_stiffness, transformations
+        return beam_stiffness, element_stiffness, transformations
 
 
 
-    def _mass_matrix(self):
-        pass
+    def _mass_matrix(self, beam, dimension, index, node_dictionary):
+        
+        E, G, rho = beam.material.E, beam.material.G, beam.material.rho
+        area = beam.cs.area
+        iy, iz, ix = beam.cs.iy, beam.cs.iz, beam.cs.ix
+        mesh = beam.mesh
+
+        for i in csdl.frange(beam.num_elements):
+            L = csdl.norm(mesh[i + 1, :] - mesh[i, :])
+            A, Iy, Iz, J = area[i], iy[i], iz[i], ix[i]
+
+            a = L / 2
+            coef = rho * A * a / 105
+            rx2 = J / A
+
+            mp = csdl.Variable(value=np.zeros((12, 12)))
+            mp = mp.set(csdl.slice[0, 0], coef * 70)
+            mp = mp.set(csdl.slice[1, 1], coef * 78)
+            mp = mp.set(csdl.slice[2, 2], coef * 78)
+            mp = mp.set(csdl.slice[3, 3], coef * 78 * rx2)
+            mp = mp.set(csdl.slice[2, 4], coef * -22 * a)
+            mp = mp.set(csdl.slice[4, 2], coef * -22 * a)
+            mp = mp.set(csdl.slice[4, 4], coef * 8 * a**2)
+            mp = mp.set(csdl.slice[1, 5], coef * 22 * a)
+            mp = mp.set(csdl.slice[5, 1], coef * 22 * a)
+            mp = mp.set(csdl.slice[5, 5], coef * 8 * a**2)
+            mp = mp.set(csdl.slice[0, 6], coef * 35)
+            mp = mp.set(csdl.slice[6, 0], coef * 35)
+            mp = mp.set(csdl.slice[6, 6], coef * 70)
+            mp = mp.set(csdl.slice[1, 7], coef * 27)
+            mp = mp.set(csdl.slice[7, 1], coef * 27)
+            mp = mp.set(csdl.slice[5, 7], coef * 13 * a)
+            mp = mp.set(csdl.slice[7, 5], coef * 13 * a)
+            mp = mp.set(csdl.slice[7, 7], coef * 78)
+            mp = mp.set(csdl.slice[2, 8], coef * 27)
 
     def _mass_properties(self):
         pass
@@ -203,9 +243,9 @@ class Frame:
         transformations_storage, local_stiffness_storage = [], []
         for beam in self.beams:
 
-            beam_stiffness, local_stiffness, transformations = self._stiffness_matrix(beam, dimension, index, node_dictionary)
+            beam_stiffness, element_stiffness, transformations = self._stiffness_matrix(beam, dimension, index, node_dictionary)
             K = K + beam_stiffness
-            local_stiffness_storage.append(local_stiffness)
+            local_stiffness_storage.append(element_stiffness)
             transformations_storage.append(transformations)
 
             # beam_mass_matrix = self.mass_matrix(beam=beam, dimension=dimension, node_dictionary=node_dictionary, index=index)
@@ -228,25 +268,22 @@ class Frame:
             F = F + loads
             
         F = F.flatten()
-
-        # with open('matrix2.pkl', 'wb') as f:
-        #     pickle.dump(K.value, f)
         
 
-        # new bc code (doesn't work)***********************************************************************
+        # boundary conditions
         for beam in self.beams:
             for bc in beam.bc:
                 node, dof = bc['node'], bc['dof']
-                node_index = index[node_dictionary[beam.name][node]]
+                node_index = index[node_dictionary[beam.name][node]] * 6
 
                 for i in range(6):
                     if dof[i] == 1:
                         # zero the row/column then put a 1 in the diagonal
-                        K = K.set(csdl.slice[node_index*6 + i, :], 0) # row
-                        K = K.set(csdl.slice[:, node_index*6 + i], 0) # column
-                        K = K.set(csdl.slice[node_index*6 + i, node_index*6 + i], 1)
+                        K = K.set(csdl.slice[node_index + i, :], 0) # row
+                        K = K.set(csdl.slice[:, node_index + i], 0) # column
+                        K = K.set(csdl.slice[node_index + i, node_index + i], 1)
                         # zero the corresponding load index as well
-                        F = F.set(csdl.slice[node_index*6 + i], 0)
+                        F = F.set(csdl.slice[node_index + i], 0)
 
         # with open('matrix2.pkl', 'wb') as f:
         #     pickle.dump(K.value, f)
@@ -263,10 +300,44 @@ class Frame:
             mesh = beam.mesh
             def_mesh = csdl.Variable(value=np.zeros((beam.num_nodes, 3)))
             for i in range(beam.num_nodes):
-                node = index[node_dictionary[beam.name][i]]
-                def_mesh = def_mesh.set(csdl.slice[i, :], mesh[i, :] + U[node*6:node*6 + 3])
+                node_index = index[node_dictionary[beam.name][i]] * 6
+                def_mesh = def_mesh.set(csdl.slice[i, :], mesh[i, :] + U[node_index:node_index + 3])
 
             displacement[beam.name] = def_mesh
+
+
+        # recover the elemental loads
+        element_loads_storage = []
+        for j, beam in enumerate(self.beams):
+            local_stiffness, transformations = local_stiffness_storage[j], transformations_storage[j]
+
+            element_beam_loads = csdl.Variable(value=np.zeros((beam.num_elements, 12)))
+            for i in range(beam.num_elements):
+                node_a_index = index[node_dictionary[beam.name][i]] * 6
+                node_b_index = index[node_dictionary[beam.name][i + 1]] * 6
+
+                element_disp = csdl.Variable(value=np.zeros((12)))
+                element_disp = element_disp.set(csdl.slice[0:6], U[node_a_index:node_a_index + 6])
+                element_disp = element_disp.set(csdl.slice[6:12], U[node_b_index:node_b_index + 6])
+
+                kp = local_stiffness[i, :, :]
+                T = transformations[i, :, :]
+
+                element_loads = csdl.matvec(kp, csdl.matvec(T, element_disp))
+                element_beam_loads = element_beam_loads.set(csdl.slice[i, :], element_loads)
+
+            element_loads_storage.append(element_beam_loads)
+           
+
+
+
+
+
+
+
+
+
+
 
 
            

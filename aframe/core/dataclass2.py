@@ -1,7 +1,7 @@
 import numpy as np
 import csdl_alpha as csdl
 from dataclasses import dataclass
-
+# import aframe as af
 
 @dataclass
 class Material:
@@ -87,6 +87,9 @@ class Beam:
 
         if type(self.mesh) != csdl.Variable:
             print('mesh type is not csdl.Variable')
+
+        if cs.area.shape != (self.num_elements,):
+            raise ValueError('CS shape does not match number of elements')
 
     def add_boundary_condition(self, node, dof):
         bc_dict = {'node': node, 'dof': dof, 'beam_name': self.name}

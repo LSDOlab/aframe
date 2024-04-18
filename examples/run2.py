@@ -35,13 +35,13 @@ beam_2_loads = csdl.Variable(value=beam_2_loads)
 aluminum = af.Material(name='aluminum', E=69E9, G=26E9, rho=2700, v=0.33)
 
 # create cs properties for beam 1
-beam_1_radius = csdl.Variable(value=np.ones(num_nodes_1) * 0.5)
-beam_1_thickness = csdl.Variable(value=np.ones(num_nodes_1) * 0.001)
+beam_1_radius = csdl.Variable(value=np.ones(num_nodes_1 - 1) * 0.5)
+beam_1_thickness = csdl.Variable(value=np.ones(num_nodes_1 - 1) * 0.001)
 beam_1_cs = af.CSTube(radius=beam_1_radius, thickness=beam_1_thickness)
 
 # create cs properties for beam 2
-beam_2_radius = csdl.Variable(value=np.ones(num_nodes_2) * 0.5)
-beam_2_thickness = csdl.Variable(value=np.ones(num_nodes_2) * 0.001)
+beam_2_radius = csdl.Variable(value=np.ones(num_nodes_2 - 1) * 0.5)
+beam_2_thickness = csdl.Variable(value=np.ones(num_nodes_2 - 1) * 0.001)
 beam_2_cs = af.CSTube(radius=beam_2_radius, thickness=beam_2_thickness)
 
 # create beam 1 with boundary conditions and loads
@@ -78,5 +78,5 @@ beam_1_displacement = solution.get_displacement(beam_1)
 # csdl.save_all_variables()
 # csdl.inline_csv_save('michael')
 recorder.stop()
-# recorder.visualize_graph()
-# print(beam_1_displacement.value)
+recorder.visualize_graph(trim_loops=True)
+print(beam_1_displacement.value)
