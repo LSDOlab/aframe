@@ -29,8 +29,9 @@ class Frame:
         for i in csdl.frange(beam.num_elements):
             L = L.set(csdl.slice[i], csdl.norm(mesh[i + 1, :] - mesh[i, :]))
         
-        kpp = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
-        values = [A * E / L]
+        # kpp = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
+        # values = [A * E / L, , , , ,]
+        # indices = [, , , , ]
 
         for i in csdl.frange(beam.num_elements):
             L = csdl.norm(mesh[i + 1, :] - mesh[i, :])
