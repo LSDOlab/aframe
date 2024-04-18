@@ -129,9 +129,7 @@ class BeamModel(csdl.Model):
 
             beam_stiffness = beam_stiffness + k
 
-        # self.print_var(beam_stiffness[0,0])
-        # self.print_var(tkt_storage[0,0,0])
-        self.print_var(local_stiffness[0,:,:])
+        # self.print_var(local_stiffness[0,:,:])
         return beam_stiffness, local_stiffness, transformations
     
 
@@ -368,7 +366,7 @@ class BeamModel(csdl.Model):
         # self.print_var(global_stiffness_matrix)
         undeformed_cg = self.register_output('undeformed_cg', rmvec / csdl.expand(mass, (1, 3)))
 
-
+        self.register_output('global_stiffness_matrix_pre', global_stiffness_matrix)
                 
         # deal with the boundary conditions
         bound_node_index_list = []
@@ -419,11 +417,15 @@ class BeamModel(csdl.Model):
         # self.print_var(F)
         self.register_output('global_loads_vector', F) # for Jiayao and Andrew
 
+        self.print_var(K[0, 11])
+
 
 
 
         # solve the linear system
         U = csdl.solve(K, F)
+
+        self.print_var(U)
 
 
 

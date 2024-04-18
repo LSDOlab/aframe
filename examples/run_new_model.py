@@ -7,8 +7,9 @@ from aframe.utils.plot import plot_box, plot_circle
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 plt.rcParams.update(plt.rcParamsDefault)
+import pickle
 
-np.set_printoptions(edgeitems=30, linewidth=1000,)
+np.set_printoptions(edgeitems=30, linewidth=100,)
 
 num_nodes = 21
 aluminum = Material(name='aluminum', E=69E9, G=26E9, rho=2700, v=0.33)
@@ -99,3 +100,6 @@ if __name__ == '__main__':
 
     # np.set_printoptions(edgeitems=30, linewidth=100000,)
     # print(sim['global_mass_matrix'])
+
+    with open('matrix1.pkl', 'wb') as f:
+            pickle.dump(sim['global_stiffness_matrix_pre'], f)

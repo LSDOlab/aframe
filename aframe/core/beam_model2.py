@@ -1,6 +1,7 @@
 import numpy as np
 import csdl_alpha as csdl
 import aframe as af
+import pickle
 
 class Frame:
     def __init__(self):
@@ -227,9 +228,12 @@ class Frame:
             F = F + loads
             
         F = F.flatten()
+
+        with open('matrix2.pkl', 'wb') as f:
+            pickle.dump(K.value, f)
         
-        
-        # new bc code
+
+        # new bc code (doesn't work)***********************************************************************
         for beam in self.beams:
             for bc in beam.bc:
                 node, dof = bc['node'], bc['dof']
@@ -242,15 +246,20 @@ class Frame:
                         K = K.set(csdl.slice[:, node_index + i], 0) # column
                         K = K.set(csdl.slice[node_index + i, node_index + i], 1)
                         # zero the corresponding load index as well
-                        F = F.set(csdl.slice[node_index + i], 0)
+                        F = F.set(csdl.slice[node_index*6 + i], 0)
 
+        # print(F.value)
+        # print(K[0, 11].value)
+        # with open('matrix2.pkl', 'wb') as f:
+        #     pickle.dump(K.value, f)
 
         # solve the linear system
         U = csdl.solve_linear(K, F)
+        # print(U.value)
 
 
         # create the beam displacements dictionary
-        displacements = {}
+        displacement = {}
 
         # parse the displacements to get the deformed mesh for each beam
         for j, beam in enumerate(self.beams):
@@ -260,7 +269,9 @@ class Frame:
                 node = index[node_dictionary[beam.name][i]]
                 def_mesh = def_mesh.set(csdl.slice[i, :], mesh[i, :] + U[node*6:node*6 + 3])
 
-            displacements[beam.name] = def_mesh
+            displacement[beam.name] = def_mesh
 
 
            
+        
+        return af.Solution(displacement=displacement)

@@ -2,7 +2,7 @@ import csdl_alpha as csdl
 import numpy as np
 import aframe as af
 
-np.set_printoptions(edgeitems=30, linewidth=1000,)
+np.set_printoptions(edgeitems=30, linewidth=100,)
 
 # start recorder
 recorder = csdl.Recorder(inline=True)
@@ -65,7 +65,7 @@ frame.add_joint(beams=[beam_1, beam_2], nodes=[10, 10])
 solution = frame.evaluate()
 
 # # displacement
-# beam_1_displacement = solution.displacement['beam_1']
+beam_1_displacement = solution.get_displacement(beam_1)
 # beam_2_displacement = solution.displacement['beam_2']
 
 # # stress

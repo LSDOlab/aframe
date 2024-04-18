@@ -98,15 +98,11 @@ class Beam:
 
 
 
-@dataclass
-class Solution:
-    displacements: dict
-    stresses: dict
 
-    @property
-    def displacement(self, beam):
+class Solution:
+    def __init__(self, displacement):
+
+        self.displacement = displacement
+
+    def get_displacement(self, beam):
         return self.displacement[beam.name]
-    
-    @property
-    def stress(self, beam):
-        return self.stress[beam.name]
