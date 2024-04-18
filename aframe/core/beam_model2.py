@@ -1,6 +1,6 @@
 import numpy as np
 import csdl_alpha as csdl
-
+import aframe as af
 
 class Frame:
     def __init__(self):
@@ -161,11 +161,7 @@ class Frame:
         
         # create boundary conditions dictionary
         num_bc = 0
-        # boundary_conditions = []
-        for beam in self.beams: 
-            num_bc += len(beam.bc)
-            # for i in range(len(beam.bc)):
-            #     boundary_conditions.append(beam.bc[i])
+        for beam in self.beams: num_bc += len(beam.bc)
 
         # check for boundary conditions    
         if num_bc == 0: 
@@ -218,26 +214,21 @@ class Frame:
             # mass = mass + beam_mass
             # rmvec = rmvec + beam_rmvec
 
-        # print(global_stiffness_matrix.value)
 
-        # deal with the boundary conditions
-        # bound_node_index_list = []
-        # for bc_dict in boundary_conditions:
-        #     bound_node, dof = bc_dict['node'], bc_dict['dof']
-        #     bound_node_index = index[node_dictionary[bc_dict['beam_name']][bound_node]]
+        # construct the global loads vector
+        F = 0
+        for i, beam in enumerate(self.beams):
+            beam_loads = beam.loads
+            loads = csdl.Variable(value=np.zeros((num_unique_nodes, 6)))
 
-        #     # add the constrained dof index to the bound_node_index_list
-        #     for i, degree in enumerate(dof):
-        #         if degree: bound_node_index_list.append(bound_node_index*6 + i)
+            for j, node in enumerate(node_dictionary[beam.name]):
+                loads = loads.set(csdl.slice[index[node], :], beam_loads[j, :])
 
-        # mask = csdl.Variable(value=np.eye(dimension))
-        # mask_eye = csdl.Variable(value=np.zeros((dimension, dimension)))
-        # for i in range(dimension):
-        #     if i in bound_node_index_list:
-        #         mask = mask.set([i, i], 0)
-        #         mask_eye = mask_eye.set([i, i], 1)
-
-
+            F = F + loads
+            
+        F = F.flatten()
+        
+        
         # new bc code
         for beam in self.beams:
             for bc in beam.bc:
@@ -250,29 +241,26 @@ class Frame:
                         K = K.set(csdl.slice[node_index + i, :], 0) # row
                         K = K.set(csdl.slice[:, node_index + i], 0) # column
                         K = K.set(csdl.slice[node_index + i, node_index + i], 1)
+                        # zero the corresponding load index as well
+                        F = F.set(csdl.slice[node_index + i], 0)
 
 
-        # modify the global stiffness matrix with boundary conditions
-        # first remove the row/column with a boundary condition, then add a 1
-        # K = csdl.matmat(csdl.matmat(mask, global_stiffness_matrix), mask) + mask_eye
-        # print(K[0,0].value)
+        # solve the linear system
+        U = csdl.solve_linear(K, F)
 
-        # create the global loads vector
-        # loads = csdl.Variable(value=np.zeros((len(self.beams), num_unique_nodes, 6)))
-        # for i, beam in enumerate(self.beams):
-        #     beam_loads = beam.loads
-        #     for j, node in enumerate(node_dictionary[beam.name]):
-        #         loads = loads.set(csdl.slice[i, index[node], :], beam_loads[j, :])
 
-        #         # I changed this bit for new csdl ********************************************
-        #         for k in range(6):
-        #             if (index[node]*6 + k) in bound_node_index_list:
-        #                 loads = loads.set(csdl.slice[i, index[node], k], 0)
+        # create the beam displacements dictionary
+        displacements = {}
 
-        # # F = csdl.reshape(loads, new_shape=(6*num_unique_nodes)) # flatten loads to a vector
-        # F = csdl.sum(loads, axes=(0, )).flatten() # changed for new csdl ******************
-        # # print(F.value)
-        # # solve the linear system
-        # # U = csdl.solve_linear(K, F)
+        # parse the displacements to get the deformed mesh for each beam
+        for j, beam in enumerate(self.beams):
+            mesh = beam.mesh
+            def_mesh = csdl.Variable(value=np.zeros((beam.num_nodes, 3)))
+            for i in range(beam.num_nodes):
+                node = index[node_dictionary[beam.name][i]]
+                def_mesh = def_mesh.set(csdl.slice[i, :], mesh[i, :] + U[node*6:node*6 + 3])
+
+            displacements[beam.name] = def_mesh
+
 
            

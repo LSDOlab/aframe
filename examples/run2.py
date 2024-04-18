@@ -75,8 +75,8 @@ solution = frame.evaluate()
 # # etc.
 
 # finish up
-csdl.save_all_variables()
-csdl.inline_csv_save('michael')
+# csdl.save_all_variables()
+# csdl.inline_csv_save('michael')
 recorder.stop()
 # recorder.visualize_graph()
 # print(beam_1_displacement.value)
