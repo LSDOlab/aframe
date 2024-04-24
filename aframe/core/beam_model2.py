@@ -25,14 +25,6 @@ class Frame:
         iy, iz, ix = beam.cs.iy, beam.cs.iz, beam.cs.ix
         E, G = beam.material.E, beam.material.G
 
-        L = csdl.Variable(value=np.zeros(beam.num_elements))
-        for i in csdl.frange(beam.num_elements):
-            L = L.set(csdl.slice[i], csdl.norm(mesh[i + 1, :] - mesh[i, :]))
-        
-        # kpp = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
-        # values = [A * E / L, , , , ,]
-        # indices = [, , , , ]
-
         for i in csdl.frange(beam.num_elements):
             L = csdl.norm(mesh[i + 1, :] - mesh[i, :])
             A, Iy, Iz, J = area[i], iy[i], iz[i], ix[i]
@@ -123,32 +115,13 @@ class Frame:
             k = csdl.Variable(value=np.zeros((dimension, dimension)))
 
             # assign the four block matrices to their respective positions in k
-            node_a_index = index[node_dictionary[beam.name][i]]
-            node_b_index = index[node_dictionary[beam.name][i + 1]]
+            a_ind = index[node_dictionary[beam.name][i]] * 6
+            b_ind = index[node_dictionary[beam.name][i + 1]] * 6
 
-            row_i = node_a_index * 6
-            row_f = node_a_index * 6 + 6
-            col_i = node_a_index * 6
-            col_f = node_a_index * 6 + 6
-            k = k.set(csdl.slice[row_i:row_f, col_i:col_f], k11)
-
-            row_i = node_a_index*6
-            row_f = node_a_index*6 + 6
-            col_i = node_b_index*6
-            col_f = node_b_index*6 + 6
-            k = k.set(csdl.slice[row_i:row_f, col_i:col_f], k12)
-
-            row_i = node_b_index*6
-            row_f = node_b_index*6 + 6
-            col_i = node_a_index*6
-            col_f = node_a_index*6 + 6
-            k = k.set(csdl.slice[row_i:row_f, col_i:col_f], k21)
-
-            row_i = node_b_index*6
-            row_f = node_b_index*6 + 6
-            col_i = node_b_index*6
-            col_f = node_b_index*6 + 6
-            k = k.set(csdl.slice[row_i:row_f, col_i:col_f], k22)
+            k = k.set(csdl.slice[a_ind:a_ind + 6, a_ind:a_ind + 6], k11)
+            k = k.set(csdl.slice[a_ind:a_ind + 6, b_ind:b_ind + 6], k12)
+            k = k.set(csdl.slice[b_ind:b_ind + 6, a_ind:a_ind + 6], k21)
+            k = k.set(csdl.slice[b_ind:b_ind + 6, b_ind:b_ind + 6], k22)
 
             beam_stiffness = beam_stiffness + k
 
