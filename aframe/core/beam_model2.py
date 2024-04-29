@@ -131,14 +131,16 @@ class Frame:
 
     def _mass_matrix(self, beam, dimension, index, node_dictionary):
         
-        E, G, rho = beam.material.E, beam.material.G, beam.material.rho
+        rho = beam.material.rho
         area = beam.cs.area
-        iy, iz, ix = beam.cs.iy, beam.cs.iz, beam.cs.ix
+        ix = beam.cs.ix
         mesh = beam.mesh
+
+        tmt_storage = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
 
         for i in csdl.frange(beam.num_elements):
             L = csdl.norm(mesh[i + 1, :] - mesh[i, :])
-            A, Iy, Iz, J = area[i], iy[i], iz[i], ix[i]
+            A, J = area[i], ix[i]
 
             a = L / 2
             coef = rho * A * a / 105
@@ -164,6 +166,73 @@ class Frame:
             mp = mp.set(csdl.slice[7, 5], coef * 13 * a)
             mp = mp.set(csdl.slice[7, 7], coef * 78)
             mp = mp.set(csdl.slice[2, 8], coef * 27)
+            mp = mp.set(csdl.slice[8, 2], coef * 27)
+            mp = mp.set(csdl.slice[4, 8], coef * -13 * a)
+            mp = mp.set(csdl.slice[8, 4], coef * -13 * a)
+            mp = mp.set(csdl.slice[8, 8], coef * 78)
+            mp = mp.set(csdl.slice[3, 9], coef * -35 * rx2)
+            mp = mp.set(csdl.slice[9, 3], coef * -35 * rx2)
+            mp = mp.set(csdl.slice[9, 9], coef * 70 * rx2)
+            mp = mp.set(csdl.slice[2, 10], coef * 13 * a)
+            mp = mp.set(csdl.slice[10, 2], coef * 13 * a)
+            mp = mp.set(csdl.slice[4, 10], coef * -6 * a**2)
+            mp = mp.set(csdl.slice[10, 4], coef * -6 * a**2)
+            mp = mp.set(csdl.slice[8, 10], coef * 22 * a)
+            mp = mp.set(csdl.slice[10, 8], coef * 22 * a)
+            mp = mp.set(csdl.slice[10, 10], coef * 8 * a**2)
+            mp = mp.set(csdl.slice[1, 11], coef * -13 * a)
+            mp = mp.set(csdl.slice[11, 1], coef * -13 * a)
+            mp = mp.set(csdl.slice[5, 11], coef * -6 * a**2)
+            mp = mp.set(csdl.slice[11, 5], coef * -6 * a**2)
+            mp = mp.set(csdl.slice[7, 11], coef * -22 * a)
+            mp = mp.set(csdl.slice[11, 7], coef * -22 * a)
+            mp = mp.set(csdl.slice[11, 11], coef * 8 * a**2)
+
+            cp = (mesh[i + 1, :] - mesh[i, :]) / L
+            ll, mm, nn = cp[0], cp[1], cp[2]
+            D = (ll**2 + mm**2)**0.5
+
+            block = csdl.Variable(value=np.zeros((3, 3)))
+            block = block.set(csdl.slice[0, 0], ll)
+            block = block.set(csdl.slice[0, 1], mm)
+            block = block.set(csdl.slice[0, 2], nn)
+            block = block.set(csdl.slice[1, 0], -mm / D)
+            block = block.set(csdl.slice[1, 1], ll / D)
+            block = block.set(csdl.slice[2, 0], -ll * nn / D)
+            block = block.set(csdl.slice[2, 1], -mm * nn / D)
+            block = block.set(csdl.slice[2, 2], D)
+
+            T = csdl.Variable(value=np.zeros((12, 12)))
+            T = T.set(csdl.slice[0:3, 0:3], block)
+            T = T.set(csdl.slice[3:6, 3:6], block)
+            T = T.set(csdl.slice[6:9, 6:9], block)
+            T = T.set(csdl.slice[9:12, 9:12], block)
+
+            tmt = csdl.matmat(csdl.transpose(T), csdl.matmat(mp, T))
+            tmt_storage = tmt_storage.set(csdl.slice[i, :, :], tmt)
+
+
+        beam_mass = 0
+        for i in range(beam.num_elements):
+            tmt = tmt_storage[i, :, :]
+            m11, m12, m21, m22 = tmt[0:6,0:6], tmt[0:6,6:12], tmt[6:12,0:6], tmt[6:12,6:12]
+
+            # expand the transformed mass matrix to the global dimensions
+            m = csdl.Variable(value=np.zeros((dimension, dimension)))
+
+            # assign the four block matrices to their respective positions in m
+            a_ind = index[node_dictionary[beam.name][i]] * 6
+            b_ind = index[node_dictionary[beam.name][i + 1]] * 6
+
+            m = m.set(csdl.slice[a_ind:a_ind + 6, a_ind:a_ind + 6], m11)
+            m = m.set(csdl.slice[a_ind:a_ind + 6, b_ind:b_ind + 6], m12)
+            m = m.set(csdl.slice[b_ind:b_ind + 6, a_ind:a_ind + 6], m21)
+            m = m.set(csdl.slice[b_ind:b_ind + 6, b_ind:b_ind + 6], m22)
+
+            beam_mass = beam_mass + m
+
+        return beam_mass
+
 
     def _mass_properties(self):
         pass
@@ -213,7 +282,7 @@ class Frame:
         index = {list(node_set)[i]: i for i in range(num_unique_nodes)}
 
         # construct the global stiffness matrix
-        K = 0
+        K, M = 0, 0
         transformations_storage, local_stiffness_storage = [], []
         for beam in self.beams:
 
@@ -222,8 +291,8 @@ class Frame:
             local_stiffness_storage.append(element_stiffness)
             transformations_storage.append(transformations)
 
-            # beam_mass_matrix = self.mass_matrix(beam=beam, dimension=dimension, node_dictionary=node_dictionary, index=index)
-            # global_mass_matrix = global_mass_matrix + csdl.reshape(beam_mass_matrix, (dimension, dimension))
+            beam_mass_matrix = self._mass_matrix(beam=beam, dimension=dimension, node_dictionary=node_dictionary, index=index)
+            M = M + beam_mass_matrix
 
             # beam_mass, beam_rmvec = self.mass_properties(beam)
             # mass = mass + beam_mass
@@ -258,6 +327,10 @@ class Frame:
                         K = K.set(csdl.slice[node_index + i, node_index + i], 1)
                         # zero the corresponding load index as well
                         F = F.set(csdl.slice[node_index + i], 0)
+                        # and mask the mass matrix also
+                        M = M.set(csdl.slice[node_index + i, :], 0) # row
+                        M = M.set(csdl.slice[:, node_index + i], 0) # column
+                        M = M.set(csdl.slice[node_index + i, node_index + i], 1)
 
         # with open('matrix2.pkl', 'wb') as f:
         #     pickle.dump(K.value, f)
@@ -338,119 +411,61 @@ class Frame:
                 tweb = beam.cs.tweb
                 ttop = beam.cs.ttop
                 tbot = beam.cs.tbot
-                
 
+                # the stress evaluation point coordinates
+                coordinate_list = []
+                coordinate_list.append((-width / 2, height / 2)) # point 0
+                coordinate_list.append((width / 2, height / 2)) # point 1
+                coordinate_list.append((width / 2, -height / 2)) # point 2
+                coordinate_list.append((-width / 2, -height / 2)) # point 3
+                coordinate_list.append((-width / 2, 0)) # point 4
 
-        # # stress recovery
-        # for i, beam in enumerate(beams):
-        #     beam_element_loads, cs = element_loads_storage[i], cs_storage[i]
+                # first moment of area (Q) at point 4
+                Q = width * ttop * (height / 2) + 2 * (height / 2) * tweb * (height / 4)
 
-        #     # average the opposite loads at each end of the elements (odd but it works)
-        #     F_x = (beam_element_loads[:, 0] - beam_element_loads[:, 6]) / 2
-        #     F_y = (beam_element_loads[:, 1] - beam_element_loads[:, 7]) / 2
-        #     F_z = (beam_element_loads[:, 2] - beam_element_loads[:, 8]) / 2
-        #     M_x = (beam_element_loads[:, 3] - beam_element_loads[:, 9]) / 2
-        #     M_y = (beam_element_loads[:, 4] - beam_element_loads[:, 10]) / 2
-        #     M_z = (beam_element_loads[:, 5] - beam_element_loads[:, 11]) / 2
+                # box beam signum function for buckling computations
+                my_delta = M_y / ((M_y**2 + 1E-6)**0.5) # signum function
 
-        #     if beam.cs == 'tube':
-        #         # beam cs properties
-        #         radius = csdl.reshape(cs.radius, (beam.num_elements, 1))
-        #         A = csdl.reshape(cs.A, (beam.num_elements, 1))
-        #         Iy = csdl.reshape(cs.Iy, (beam.num_elements, 1))
-        #         J = csdl.reshape(cs.J, (beam.num_elements, 1))
+                beam_stress = self.create_output(beam.name + '_stress', shape=(beam.num_elements, 5), val=0)
+                s4bkl_top, s4bkl_bot = 0, 0
+                for i in range(5):
+                    coordinate = coordinate_list[i]
+                    z, y = coordinate[0], coordinate[1]
+                    p = (z**2 + y**2)**0.5
 
-        #         axial_stress = F_x / A
-        #         # torsional_stress = M_x / A
-        #         torsional_stress = M_x * radius / J
-        #         MAX_MOMENT = (M_y**2 + M_z**2 + 1E-12)**0.5
-        #         bending_stress = MAX_MOMENT * radius / Iy
+                    normal_stress = F_x / beam.cs.area
+                    torsional_stress = M_x * p / beam.cs.ix
+                    bending_stress_y = M_y * y / beam.cs.iy
+                    bending_stress_z = M_z * z / beam.cs.iz
 
-        #         tensile_stress = axial_stress + bending_stress
-        #         shear_stress = torsional_stress
+                    axial_stress = normal_stress + bending_stress_y + bending_stress_z
 
-        #         von_mises = (tensile_stress**2 + 3*shear_stress**2 + 1E-12)**0.5
-        #         beam_stress = self.register_output(beam.name + '_stress', von_mises)
+                    # ********************** shear stress stuff for point 4 *******************
+                    if i == 4: shear_stress = F_z * Q / (beam.cs.iy * 2 * tweb)
+                    else: shear_stress = 0
 
-        #     elif beam.cs == 'box':
-        #         """ the stress for box beams is evaluated at four points:
-        #             0 ------------------------------------- 1
-        #               -                y                  -
-        #               -                |                  -
-        #               4                -->  z             -
-        #               -                                   -
-        #               -                                   -
-        #             3 ------------------------------------- 2
-        #         """
-        #         # beam cs properties
-        #         A = csdl.reshape(cs.A, (beam.num_elements, 1))
-        #         J = csdl.reshape(cs.J, (beam.num_elements, 1))
-        #         Iy = csdl.reshape(cs.Iy, (beam.num_elements, 1))
-        #         Iz = csdl.reshape(cs.Iz, (beam.num_elements, 1))
-        #         width = csdl.reshape(cs.width, (beam.num_elements, 1))
-        #         height = csdl.reshape(cs.height, (beam.num_elements, 1))
-        #         tweb = csdl.reshape(cs.tweb, (beam.num_elements, 1))
-        #         ttop = csdl.reshape(cs.ttop, (beam.num_elements, 1))
-        #         tbot = csdl.reshape(cs.tbot, (beam.num_elements, 1))
+                    tau = torsional_stress + shear_stress
 
-        #         # the stress evaluation point coordinates
-        #         zero = self.create_input(beam.name + '_zero', shape=(beam.num_elements, 1), val=0)
-        #         coordinate_list = []
-        #         coordinate_list.append((-width / 2, height / 2)) # point 0
-        #         coordinate_list.append((width / 2, height / 2)) # point 1
-        #         coordinate_list.append((width / 2, -height / 2)) # point 2
-        #         coordinate_list.append((-width / 2, -height / 2)) # point 3
-        #         coordinate_list.append((-width / 2, zero)) # point 4
+                    von_mises = (axial_stress**2 + 3*tau**2 + 1E-12)**0.5
+                    beam_stress[:, i] = von_mises
 
-        #         # first moment of area (Q) at point 4
-        #         Q = csdl.reshape(width * ttop * (height / 2) + 2 * (height / 2) * tweb * (height / 4), (beam.num_elements, 1))
+                    # ************ signed buckling stress calculation *******************
+                    if i == 0 or i == 1: # average across the top two eval points
+                        s4bkl_top = s4bkl_top + 0.5 * (my_delta * ((axial_stress + bending_stress_y + bending_stress_z)**2)**0.5)
 
-        #         # box beam signum function for buckling computations
-        #         my_delta = M_y / ((M_y**2 + 1E-6)**0.5) # signum function
+                    if i == 2 or i == 3: # average across the bottom two eval points
+                        s4bkl_bot = s4bkl_bot + 0.5 * (-1 * my_delta * ((axial_stress + bending_stress_y + bending_stress_z)**2)**0.5)
 
+                # Roark's simply-supported panel buckling
+                k = 6.3
+                critical_stress_top = k * beam.material.E * (ttop / width)**2 / (1 - beam.material.v**2)
+                critical_stress_bot = k * beam.material.E * (tbot / width)**2 / (1 - beam.material.v**2)
 
-        #         beam_stress = self.create_output(beam.name + '_stress', shape=(beam.num_elements, 5), val=0)
-        #         s4bkl_top, s4bkl_bot = 0, 0
-        #         for i in range(5):
-        #             coordinate = coordinate_list[i]
-        #             z, y = coordinate[0], coordinate[1]
-        #             p = (z**2 + y**2)**0.5
+                top_bkl = s4bkl_top / critical_stress_top # greater than 1 means the beam buckles
+                self.register_output(beam.name + '_top_buckle', top_bkl)
 
-        #             normal_stress = F_x / A
-        #             torsional_stress = M_x * p / J
-        #             bending_stress_y = M_y * y / Iy
-        #             bending_stress_z = M_z * z / Iz
-
-        #             axial_stress = normal_stress + bending_stress_y + bending_stress_z
-
-        #             # ********************** shear stress stuff for point 4 *******************
-        #             if i == 4: shear_stress = F_z * Q / (Iy * 2 * tweb)
-        #             else: shear_stress = 0
-
-        #             tau = torsional_stress + shear_stress
-
-        #             von_mises = (axial_stress**2 + 3*tau**2 + 1E-12)**0.5
-        #             beam_stress[:, i] = von_mises
-
-        #             # ************ signed buckling stress calculation *******************
-        #             if i == 0 or i == 1: # average across the top two eval points
-        #                 s4bkl_top = s4bkl_top + 0.5 * (my_delta * ((axial_stress + bending_stress_y + bending_stress_z)**2)**0.5)
-
-        #             if i == 2 or i == 3: # average across the bottom two eval points
-        #                 s4bkl_bot = s4bkl_bot + 0.5 * (-1 * my_delta * ((axial_stress + bending_stress_y + bending_stress_z)**2)**0.5)
-
-        #         # self.print_var(beam_stress)
-
-        #         # Roark's simply-supported panel buckling
-        #         k = 6.3
-        #         critical_stress_top = k * beam.material.E * (ttop / width)**2 / (1 - beam.material.v**2)
-        #         critical_stress_bot = k * beam.material.E * (tbot / width)**2 / (1 - beam.material.v**2)
-
-        #         top_bkl = s4bkl_top / critical_stress_top # greater than 1 means the beam buckles
-        #         self.register_output(beam.name + '_top_buckle', top_bkl)
-
-        #         bot_bkl = s4bkl_bot / critical_stress_bot # greater than 1 means the beam buckles
-        #         self.register_output(beam.name + '_bot_buckle', bot_bkl)
+                bot_bkl = s4bkl_bot / critical_stress_bot # greater than 1 means the beam buckles
+                self.register_output(beam.name + '_bot_buckle', bot_bkl)
            
 
 
