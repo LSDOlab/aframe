@@ -21,6 +21,10 @@ class CSTube:
     thickness: csdl.Variable
 
     @property
+    def type(self):
+        return 'tube'
+
+    @property
     def area(self):
         inner_radius, outer_radius = self.radius - self.thickness, self.radius
         return np.pi * (outer_radius**2 - inner_radius**2)
@@ -103,9 +107,13 @@ class Beam:
 
 
 class Solution:
-    def __init__(self, displacement):
+    def __init__(self, displacement, stress):
 
         self.displacement = displacement
+        self.stress = stress
 
     def get_displacement(self, beam):
         return self.displacement[beam.name]
+    
+    def get_stress(self, beam):
+        return self.stress[beam.name]

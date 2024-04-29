@@ -301,6 +301,156 @@ class Frame:
                 element_beam_loads = element_beam_loads.set(csdl.slice[i, :], element_loads)
 
             element_loads_storage.append(element_beam_loads)
+
+
+        # stress recovery
+        # create the beam stress dictionary
+        stress = {}
+        
+        for i, beam in enumerate(self.beams):
+            beam_element_loads = element_loads_storage[i]
+
+            # average the opposite loads at each end of the elements (odd but it works)
+            F_x = (beam_element_loads[:, 0] - beam_element_loads[:, 6]) / 2
+            F_y = (beam_element_loads[:, 1] - beam_element_loads[:, 7]) / 2
+            F_z = (beam_element_loads[:, 2] - beam_element_loads[:, 8]) / 2
+            M_x = (beam_element_loads[:, 3] - beam_element_loads[:, 9]) / 2
+            M_y = (beam_element_loads[:, 4] - beam_element_loads[:, 10]) / 2
+            M_z = (beam_element_loads[:, 5] - beam_element_loads[:, 11]) / 2
+
+            if beam.cs.type == 'tube':
+                radius = beam.cs.radius
+                axial_stress = F_x / beam.cs.area
+                torsional_stress = M_x / beam.cs.area
+                torsional_stress = M_x * radius / beam.cs.ix
+                MAX_MOMENT = (M_y**2 + M_z**2 + 1E-12)**0.5
+                bending_stress = MAX_MOMENT * radius / beam.cs.iy
+
+                tensile_stress = axial_stress + bending_stress
+                shear_stress = torsional_stress
+
+                von_mises = (tensile_stress**2 + 3*shear_stress**2 + 1E-12)**0.5
+                stress[beam.name] = von_mises
+
+            elif beam.cs.type == 'box':
+                width = beam.cs.width
+                height = beam.cs.height
+                tweb = beam.cs.tweb
+                ttop = beam.cs.ttop
+                tbot = beam.cs.tbot
+                
+
+
+        # # stress recovery
+        # for i, beam in enumerate(beams):
+        #     beam_element_loads, cs = element_loads_storage[i], cs_storage[i]
+
+        #     # average the opposite loads at each end of the elements (odd but it works)
+        #     F_x = (beam_element_loads[:, 0] - beam_element_loads[:, 6]) / 2
+        #     F_y = (beam_element_loads[:, 1] - beam_element_loads[:, 7]) / 2
+        #     F_z = (beam_element_loads[:, 2] - beam_element_loads[:, 8]) / 2
+        #     M_x = (beam_element_loads[:, 3] - beam_element_loads[:, 9]) / 2
+        #     M_y = (beam_element_loads[:, 4] - beam_element_loads[:, 10]) / 2
+        #     M_z = (beam_element_loads[:, 5] - beam_element_loads[:, 11]) / 2
+
+        #     if beam.cs == 'tube':
+        #         # beam cs properties
+        #         radius = csdl.reshape(cs.radius, (beam.num_elements, 1))
+        #         A = csdl.reshape(cs.A, (beam.num_elements, 1))
+        #         Iy = csdl.reshape(cs.Iy, (beam.num_elements, 1))
+        #         J = csdl.reshape(cs.J, (beam.num_elements, 1))
+
+        #         axial_stress = F_x / A
+        #         # torsional_stress = M_x / A
+        #         torsional_stress = M_x * radius / J
+        #         MAX_MOMENT = (M_y**2 + M_z**2 + 1E-12)**0.5
+        #         bending_stress = MAX_MOMENT * radius / Iy
+
+        #         tensile_stress = axial_stress + bending_stress
+        #         shear_stress = torsional_stress
+
+        #         von_mises = (tensile_stress**2 + 3*shear_stress**2 + 1E-12)**0.5
+        #         beam_stress = self.register_output(beam.name + '_stress', von_mises)
+
+        #     elif beam.cs == 'box':
+        #         """ the stress for box beams is evaluated at four points:
+        #             0 ------------------------------------- 1
+        #               -                y                  -
+        #               -                |                  -
+        #               4                -->  z             -
+        #               -                                   -
+        #               -                                   -
+        #             3 ------------------------------------- 2
+        #         """
+        #         # beam cs properties
+        #         A = csdl.reshape(cs.A, (beam.num_elements, 1))
+        #         J = csdl.reshape(cs.J, (beam.num_elements, 1))
+        #         Iy = csdl.reshape(cs.Iy, (beam.num_elements, 1))
+        #         Iz = csdl.reshape(cs.Iz, (beam.num_elements, 1))
+        #         width = csdl.reshape(cs.width, (beam.num_elements, 1))
+        #         height = csdl.reshape(cs.height, (beam.num_elements, 1))
+        #         tweb = csdl.reshape(cs.tweb, (beam.num_elements, 1))
+        #         ttop = csdl.reshape(cs.ttop, (beam.num_elements, 1))
+        #         tbot = csdl.reshape(cs.tbot, (beam.num_elements, 1))
+
+        #         # the stress evaluation point coordinates
+        #         zero = self.create_input(beam.name + '_zero', shape=(beam.num_elements, 1), val=0)
+        #         coordinate_list = []
+        #         coordinate_list.append((-width / 2, height / 2)) # point 0
+        #         coordinate_list.append((width / 2, height / 2)) # point 1
+        #         coordinate_list.append((width / 2, -height / 2)) # point 2
+        #         coordinate_list.append((-width / 2, -height / 2)) # point 3
+        #         coordinate_list.append((-width / 2, zero)) # point 4
+
+        #         # first moment of area (Q) at point 4
+        #         Q = csdl.reshape(width * ttop * (height / 2) + 2 * (height / 2) * tweb * (height / 4), (beam.num_elements, 1))
+
+        #         # box beam signum function for buckling computations
+        #         my_delta = M_y / ((M_y**2 + 1E-6)**0.5) # signum function
+
+
+        #         beam_stress = self.create_output(beam.name + '_stress', shape=(beam.num_elements, 5), val=0)
+        #         s4bkl_top, s4bkl_bot = 0, 0
+        #         for i in range(5):
+        #             coordinate = coordinate_list[i]
+        #             z, y = coordinate[0], coordinate[1]
+        #             p = (z**2 + y**2)**0.5
+
+        #             normal_stress = F_x / A
+        #             torsional_stress = M_x * p / J
+        #             bending_stress_y = M_y * y / Iy
+        #             bending_stress_z = M_z * z / Iz
+
+        #             axial_stress = normal_stress + bending_stress_y + bending_stress_z
+
+        #             # ********************** shear stress stuff for point 4 *******************
+        #             if i == 4: shear_stress = F_z * Q / (Iy * 2 * tweb)
+        #             else: shear_stress = 0
+
+        #             tau = torsional_stress + shear_stress
+
+        #             von_mises = (axial_stress**2 + 3*tau**2 + 1E-12)**0.5
+        #             beam_stress[:, i] = von_mises
+
+        #             # ************ signed buckling stress calculation *******************
+        #             if i == 0 or i == 1: # average across the top two eval points
+        #                 s4bkl_top = s4bkl_top + 0.5 * (my_delta * ((axial_stress + bending_stress_y + bending_stress_z)**2)**0.5)
+
+        #             if i == 2 or i == 3: # average across the bottom two eval points
+        #                 s4bkl_bot = s4bkl_bot + 0.5 * (-1 * my_delta * ((axial_stress + bending_stress_y + bending_stress_z)**2)**0.5)
+
+        #         # self.print_var(beam_stress)
+
+        #         # Roark's simply-supported panel buckling
+        #         k = 6.3
+        #         critical_stress_top = k * beam.material.E * (ttop / width)**2 / (1 - beam.material.v**2)
+        #         critical_stress_bot = k * beam.material.E * (tbot / width)**2 / (1 - beam.material.v**2)
+
+        #         top_bkl = s4bkl_top / critical_stress_top # greater than 1 means the beam buckles
+        #         self.register_output(beam.name + '_top_buckle', top_bkl)
+
+        #         bot_bkl = s4bkl_bot / critical_stress_bot # greater than 1 means the beam buckles
+        #         self.register_output(beam.name + '_bot_buckle', bot_bkl)
            
 
 
@@ -316,4 +466,4 @@ class Frame:
 
            
         
-        return af.Solution(displacement=displacement)
+        return af.Solution(displacement=displacement, stress=stress)
