@@ -239,11 +239,11 @@ class Frame:
         return beam_mass
 
 
-    def _mass_properties(self, beam):
+    def _mass_properties(self, beam, mesh):
 
         rho = beam.material.rho
         area = beam.cs.area
-        mesh = beam.mesh
+        # mesh = beam.mesh
 
         beam_mass, beam_rmvec = 0, 0
         for i in range(beam.num_elements):
@@ -320,7 +320,7 @@ class Frame:
             beam_mass_matrix = self._mass_matrix(beam=beam, dimension=dimension, node_dictionary=node_dictionary, index=index)
             M = M + beam_mass_matrix
 
-            beam_mass, beam_rmvec = self._mass_properties(beam)
+            beam_mass, beam_rmvec = self._mass_properties(beam, beam.mesh)
             mass = mass + beam_mass
             rmvec = rmvec + beam_rmvec
 
@@ -381,6 +381,16 @@ class Frame:
                 def_mesh = def_mesh.set(csdl.slice[i, :], mesh[i, :] + U[node_index:node_index + 3])
 
             displacement[beam.name] = def_mesh
+
+
+        # compute the deformed cg for the frame
+        def_rmvec = 0
+        for i, beam in enumerate(self.beams):
+            _, def_beam_rmvec = self._mass_properties(beam, displacement[beam.name])
+            def_rmvec = def_rmvec + def_beam_rmvec
+        
+        # get the deformed cg
+        dcg = def_rmvec / mass
 
 
         # recover the elemental loads
@@ -523,4 +533,5 @@ class Frame:
         return af.Solution(displacement=displacement, 
                            stress=stress,
                            bkl=bkl, 
-                           cg=cg)
+                           cg=cg,
+                           dcg=dcg)

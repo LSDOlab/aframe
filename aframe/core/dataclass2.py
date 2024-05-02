@@ -171,11 +171,12 @@ class Beam:
 
 
 class Solution:
-    def __init__(self, displacement, stress, bkl, cg):
+    def __init__(self, displacement, stress, bkl, cg, dcg):
 
         self.displacement = displacement
         self.stress = stress
         self.cg = cg
+        self.dcg = dcg
         self.bkl = bkl
 
     def get_displacement(self, beam):

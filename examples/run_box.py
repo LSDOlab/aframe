@@ -49,9 +49,11 @@ beam_1_displacement = solution.get_displacement(beam_1)
 beam_1_stress = solution.get_stress(beam_1)
 
 cg = solution.cg
+dcg = solution.dcg
 
 # finish up
 recorder.stop()
 # recorder.visualize_graph(trim_loops=True)
 print(beam_1_displacement.value)
 print('cg: ', cg.value)
+print('deformed cg: ', dcg.value)
