@@ -458,7 +458,7 @@ class Frame:
                 # box beam signum function for buckling computations
                 my_delta = M_y / ((M_y**2 + 1E-6)**0.5) # signum function
 
-                beam_stress = csdl.Variable(val=np.zeros((beam.num_elements, 5)))
+                beam_stress = csdl.Variable(value=np.zeros((beam.num_elements, 5)))
                 s4bkl_top, s4bkl_bot = 0, 0
                 for i in range(5):
                     coordinate = coordinate_list[i]
@@ -481,7 +481,8 @@ class Frame:
                     tau = torsional_stress + shear_stress
 
                     von_mises = (axial_stress**2 + 3*tau**2 + 1E-12)**0.5
-                    beam_stress[:, i] = von_mises
+                    # beam_stress[:, i] = von_mises
+                    beam_stress = beam_stress.set(csdl.slice[:, i], von_mises)
 
                     # ************ signed buckling stress calculation *******************
                     if i == 0 or i == 1: # average across the top two eval points
