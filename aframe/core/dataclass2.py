@@ -146,6 +146,16 @@ class Beam:
             raise ValueError('CS shape does not match the number of elements')
 
     def add_boundary_condition(self, node, dof):
+
+        if len(dof) != 6:
+            raise ValueError('dof should have length 6 e.g., [1, 1, 1, 1, 1, 1]')
+        
+        if not isinstance(node, int):
+            raise ValueError('BC node should be an integer')
+        
+        if node > self.num_nodes - 1 or node < 0:
+            raise ValueError('BC node out of range for ', self.name)
+
         bc_dict = {'node': node, 'dof': dof, 'beam_name': self.name}
         self.bc.append(bc_dict)
 

@@ -57,7 +57,7 @@ beam_2.add_load(beam_2_loads)
 frame = af.Frame()
 frame.add_beam(beam_1)
 frame.add_beam(beam_2)
-frame.add_joint(beams=[beam_1, beam_2], nodes=[10, 10])
+frame.add_joint(joint_beams=[beam_1, beam_2], joint_nodes=[10, 10])
 
 # evaluating the frame model returns a solution dataclass
 solution = frame.evaluate()

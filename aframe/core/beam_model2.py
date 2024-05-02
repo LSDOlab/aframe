@@ -11,8 +11,13 @@ class Frame:
     def add_beam(self, beam):
         self.beams.append(beam)
 
-    def add_joint(self, beams, nodes):
-        self.joints.append({'beams': beams, 'nodes': nodes})
+    def add_joint(self, joint_beams, joint_nodes):
+
+        for i, beam in enumerate(joint_beams):
+            if joint_nodes[i] > beam.num_nodes - 1:
+                raise Exception(f'joint node index {joint_nodes[i]} is out of range for {beam.name}')
+
+        self.joints.append({'beams': joint_beams, 'nodes': joint_nodes})
 
     def _stiffness_matrix(self, beam, dimension, index, node_dictionary):
 
