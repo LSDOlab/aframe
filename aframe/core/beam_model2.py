@@ -234,8 +234,27 @@ class Frame:
         return beam_mass
 
 
-    def _mass_properties(self):
-        pass
+    def _mass_properties(self, beam):
+
+        rho = beam.material.rho
+        area = beam.cs.area
+        mesh = beam.mesh
+
+        beam_mass, beam_rmvec = 0, 0
+        for i in range(beam.num_elements):
+
+            L = csdl.norm(mesh[i + 1, :] - mesh[i, :])
+            element_mass = area[i] * L * rho
+
+            # element cg is the nodal average
+            element_cg = (mesh[i + 1, :] + mesh[i, :]) / 2
+
+            beam_mass = beam_mass + element_mass
+            beam_rmvec = beam_rmvec + element_cg * element_mass
+
+        return beam_mass, beam_rmvec
+    
+
 
     def evaluate(self):
         
@@ -283,7 +302,9 @@ class Frame:
 
         # construct the global stiffness matrix
         K, M = 0, 0
+        mass, rmvec = 0, 0
         transformations_storage, local_stiffness_storage = [], []
+
         for beam in self.beams:
 
             beam_stiffness, element_stiffness, transformations = self._stiffness_matrix(beam, dimension, index, node_dictionary)
@@ -294,9 +315,13 @@ class Frame:
             beam_mass_matrix = self._mass_matrix(beam=beam, dimension=dimension, node_dictionary=node_dictionary, index=index)
             M = M + beam_mass_matrix
 
-            # beam_mass, beam_rmvec = self.mass_properties(beam)
-            # mass = mass + beam_mass
-            # rmvec = rmvec + beam_rmvec
+            beam_mass, beam_rmvec = self._mass_properties(beam)
+            mass = mass + beam_mass
+            rmvec = rmvec + beam_rmvec
+
+        # compute the undeformed cg for the frame
+        cg = rmvec / mass
+
 
 
         # construct the global loads vector
@@ -376,10 +401,12 @@ class Frame:
             element_loads_storage.append(element_beam_loads)
 
 
-        # stress recovery
-        # create the beam stress dictionary
+
+        # create the beam stress & buckle dicts
         stress = {}
+        bkl = {}
         
+        # stress recovery
         for i, beam in enumerate(self.beams):
             beam_element_loads = element_loads_storage[i]
 
@@ -426,7 +453,7 @@ class Frame:
                 # box beam signum function for buckling computations
                 my_delta = M_y / ((M_y**2 + 1E-6)**0.5) # signum function
 
-                beam_stress = self.create_output(beam.name + '_stress', shape=(beam.num_elements, 5), val=0)
+                beam_stress = csdl.Variable(val=np.zeros((beam.num_elements, 5)))
                 s4bkl_top, s4bkl_bot = 0, 0
                 for i in range(5):
                     coordinate = coordinate_list[i]
@@ -441,8 +468,10 @@ class Frame:
                     axial_stress = normal_stress + bending_stress_y + bending_stress_z
 
                     # ********************** shear stress stuff for point 4 *******************
-                    if i == 4: shear_stress = F_z * Q / (beam.cs.iy * 2 * tweb)
-                    else: shear_stress = 0
+                    if i == 4: 
+                        shear_stress = F_z * Q / (beam.cs.iy * 2 * tweb)
+                    else: 
+                        shear_stress = 0
 
                     tau = torsional_stress + shear_stress
 
@@ -456,16 +485,20 @@ class Frame:
                     if i == 2 or i == 3: # average across the bottom two eval points
                         s4bkl_bot = s4bkl_bot + 0.5 * (-1 * my_delta * ((axial_stress + bending_stress_y + bending_stress_z)**2)**0.5)
 
+                # add the beam stress to the stress dictionary
+                stress[beam.name] = beam_stress
+
                 # Roark's simply-supported panel buckling
                 k = 6.3
                 critical_stress_top = k * beam.material.E * (ttop / width)**2 / (1 - beam.material.v**2)
                 critical_stress_bot = k * beam.material.E * (tbot / width)**2 / (1 - beam.material.v**2)
 
                 top_bkl = s4bkl_top / critical_stress_top # greater than 1 means the beam buckles
-                self.register_output(beam.name + '_top_buckle', top_bkl)
 
                 bot_bkl = s4bkl_bot / critical_stress_bot # greater than 1 means the beam buckles
-                self.register_output(beam.name + '_bot_buckle', bot_bkl)
+
+                # add the box-beam buckling to the buckle dictionary
+                bkl[beam.name] = {'top': top_bkl, 'bot': bot_bkl}
            
 
 
@@ -481,4 +514,7 @@ class Frame:
 
            
         
-        return af.Solution(displacement=displacement, stress=stress)
+        return af.Solution(displacement=displacement, 
+                           stress=stress,
+                           bkl=bkl, 
+                           cg=cg)

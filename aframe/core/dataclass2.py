@@ -139,14 +139,21 @@ class Beam:
         if type(self.mesh) != csdl.Variable:
             print('mesh type is not csdl.Variable')
 
+        if self.mesh.shape != (self.num_nodes, 3):
+            raise ValueError('incorrect mesh shape (should be num_nodes by 3)')
+
         if cs.area.shape != (self.num_elements,):
-            raise ValueError('CS shape does not match number of elements')
+            raise ValueError('CS shape does not match the number of elements')
 
     def add_boundary_condition(self, node, dof):
         bc_dict = {'node': node, 'dof': dof, 'beam_name': self.name}
         self.bc.append(bc_dict)
 
     def add_load(self, loads):
+
+        if loads.shape != (self.num_nodes, 6):
+            raise ValueError('incorrect loads shape (should be num_nodes by 6)')
+        
         self.loads += loads
 
 
@@ -154,13 +161,22 @@ class Beam:
 
 
 class Solution:
-    def __init__(self, displacement, stress):
+    def __init__(self, displacement, stress, bkl, cg):
 
         self.displacement = displacement
         self.stress = stress
+        self.cg = cg
+        self.bkl = bkl
 
     def get_displacement(self, beam):
         return self.displacement[beam.name]
     
     def get_stress(self, beam):
         return self.stress[beam.name]
+    
+    def get_bkl(self, beam):
+
+        if beam.cs.type == 'tube':
+            raise NotImplementedError('bkl not available for tubes')
+        
+        return self.bkl[beam.name]

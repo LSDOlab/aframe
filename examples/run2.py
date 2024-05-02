@@ -6,7 +6,6 @@ np.set_printoptions(edgeitems=30, linewidth=100,)
 
 # start recorder
 recorder = csdl.Recorder(inline=True)
-# recorder = csdl.Recorder()
 recorder.start()
 
 # create a 1D beam 1 mesh
@@ -61,22 +60,27 @@ frame.add_beam(beam_2)
 frame.add_joint(beams=[beam_1, beam_2], nodes=[10, 10])
 
 # evaluating the frame model returns a solution dataclass
-# solution contains dictionaries with beam names as keys
 solution = frame.evaluate()
 
-# # displacement
+# displacement
 beam_1_displacement = solution.get_displacement(beam_1)
-# beam_2_displacement = solution.displacement['beam_2']
+beam_2_displacement = solution.get_displacement(beam_2)
 
-# # stress
-# beam_1_stress = solution.stress['beam_1']
-# beam_2_stress = solution.stress['beam_2']
+# stress
+beam_1_stress = solution.get_stress(beam_1)
+beam_2_stress = solution.get_stress(beam_2)
 
-# # etc.
+cg = solution.cg
 
 # finish up
 # csdl.save_all_variables()
 # csdl.inline_csv_save('michael')
 recorder.stop()
-recorder.visualize_graph(trim_loops=True)
+# recorder.visualize_graph(trim_loops=True)
 print(beam_1_displacement.value)
+print('cg: ', cg.value)
+
+
+# import matplotlib.pyplot as plt
+# plt.plot(beam_1_stress.value)
+# plt.show()
