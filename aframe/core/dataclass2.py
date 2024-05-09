@@ -11,8 +11,30 @@ class Material:
     rho: float
     v: float
 
-    def __str__(self):
-        return f'{self.name}: E={self.E} Pa, G={self.G} Pa, rho={self.rho} kg/m^3'
+    @property
+    def type(self):
+        return 'isotropic'
+
+    # def __str__(self):
+    #     return f'{self.name}: E={self.E} Pa, G={self.G} Pa, rho={self.rho} kg/m^3'
+    
+@dataclass
+class AnisotropicMaterial:
+    name: str
+    Exx: float
+    Eyy: float
+    Ezz: float
+    Exy: float
+    Exx: float
+    Exx: float
+    G: float
+    rho: float
+    v: float
+
+    @property
+    def type(self):
+        return 'anisotropic'
+
 
     
 @dataclass
