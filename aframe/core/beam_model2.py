@@ -1,7 +1,7 @@
 import numpy as np
 import csdl_alpha as csdl
 import aframe as af
-import pickle
+# import pickle
 
 class Frame:
     def __init__(self):
