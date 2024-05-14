@@ -1,5 +1,6 @@
 import numpy as np
 import csdl_alpha as csdl
+from typing import Union
 from dataclasses import dataclass
 # import aframe as af
 
@@ -142,8 +143,29 @@ class CSBox:
 #             print('material is not a Material dataclass')
 
 class Beam:
-    def __init__(self, name, mesh, material, cs):
+    def __init__(self, name:str, mesh:csdl.Variable, material:Material, cs:Union[CSBox, CSTube]):
+        """Initialize a new instance of the DataClass2.
 
+        Parameters
+        ----------
+        name : str
+            The name of the instance.
+        mesh : csdl.Variable
+            The mesh variable representing the geometry.
+        material : Material
+            The material of the instance.
+        cs : Union[CSBox, CSTube]
+            The cross-section of the instance.
+
+        Raises
+        ------
+        ValueError
+            If the mesh type is not csdl.Variable.
+        ValueError
+            If the mesh shape is incorrect (should be num_nodes by 3).
+        ValueError
+            If the CS shape does not match the number of elements.
+        """
         # required
         self.name = name
         self.mesh = mesh
