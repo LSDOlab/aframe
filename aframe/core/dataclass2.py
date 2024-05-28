@@ -144,7 +144,7 @@ class CSBox:
 
 class Beam:
     def __init__(self, name:str, mesh:csdl.Variable, material:Material, cs:Union[CSBox, CSTube]):
-        """Initialize a new instance of the DataClass2.
+        """Initialize a beam.
 
         Parameters
         ----------
