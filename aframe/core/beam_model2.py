@@ -371,16 +371,21 @@ class Frame:
 
         # create the beam displacements dictionary
         displacement = {}
+        deformed_mesh = {}
 
         # parse the displacements to get the deformed mesh for each beam
         for j, beam in enumerate(self.beams):
             mesh = beam.mesh
+
             def_mesh = csdl.Variable(value=np.zeros((beam.num_nodes, 3)))
+            disp = csdl.Variable(value=np.zeros((beam.num_nodes, 3)))
             for i in range(beam.num_nodes):
                 node_index = index[node_dictionary[beam.name][i]] * 6
                 def_mesh = def_mesh.set(csdl.slice[i, :], mesh[i, :] + U[node_index:node_index + 3])
+                disp = disp.set(csdl.slice[i, :], U[node_index:node_index + 3])
 
-            displacement[beam.name] = def_mesh
+            displacement[beam.name] = disp
+            deformed_mesh[beam.name] = def_mesh
 
 
         # compute the deformed cg for the frame
@@ -530,7 +535,8 @@ class Frame:
 
            
         
-        return af.Solution(displacement=displacement, 
+        return af.Solution(displacement=displacement,
+                           mesh=deformed_mesh,
                            stress=stress,
                            bkl=bkl, 
                            cg=cg,

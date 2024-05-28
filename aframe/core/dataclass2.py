@@ -213,21 +213,26 @@ class Beam:
 
 
 class Solution:
-    def __init__(self, displacement, stress, bkl, cg, dcg):
+    def __init__(self, displacement: dict, mesh: dict, stress: dict, 
+                 bkl: dict, cg: dict, dcg: dict):
 
         self.displacement = displacement
+        self.mesh = mesh
         self.stress = stress
         self.cg = cg
         self.dcg = dcg
         self.bkl = bkl
 
-    def get_displacement(self, beam):
+    def get_displacement(self, beam: Beam):
         return self.displacement[beam.name]
     
-    def get_stress(self, beam):
+    def get_stress(self, beam: Beam):
         return self.stress[beam.name]
     
-    def get_bkl(self, beam):
+    def get_mesh(self, beam: Beam):
+        return self.mesh[beam.name]
+    
+    def get_bkl(self, beam: Beam):
 
         if beam.cs.type == 'tube':
             raise NotImplementedError('bkl not available for tubes')
