@@ -17,24 +17,6 @@ class Material:
         return 'isotropic'
 
 
-@dataclass
-class AnisotropicMaterial:
-    name: str
-    Exx: float
-    Eyy: float
-    Ezz: float
-    Exy: float
-    Exx: float
-    Exx: float
-    G: float
-    rho: float
-    v: float
-
-    @property
-    def type(self):
-        return 'anisotropic'
-
-
 
 @dataclass
 class CSTube:
