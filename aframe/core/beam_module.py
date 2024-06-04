@@ -112,15 +112,15 @@ class EBBeam(m3l.ExplicitOperation):
             self.arguments = {}
             self.arguments[f'{beam_name}_width'] = beam_width
             self.arguments[f'{beam_name}_height'] = beam_height
-            self.arguments[f'{beam_name}_ttop'] = t_top
-            self.arguments[f'{beam_name}_tbot'] = t_bot
-            self.arguments[f'{beam_name}_tweb'] = t_web
+            self.arguments[f'{beam_name}_ttop'] = t_top[i]
+            self.arguments[f'{beam_name}_tbot'] = t_bot[i]
+            self.arguments[f'{beam_name}_tweb'] = t_web[i]
             self.arguments[f'{beam_name}_mesh'] = mesh
 
             if forces is not None:
-                self.arguments[f'{beam_name}_forces'] = forces
+                self.arguments[f'{beam_name}_forces'] = forces[i]
             if moments is not None:
-                self.arguments[f'{beam_name}_moments'] = moments
+                self.arguments[f'{beam_name}_moments'] = moments[i]
 
             displacements = m3l.Variable(name=f'{beam_name}_displacement', shape=mesh.shape, operation=self)
             rotations = m3l.Variable(name=f'{beam_name}_rotation', shape=mesh.shape, operation=self)
