@@ -28,7 +28,9 @@ class Frame:
         mesh = beam.mesh
         area = A = beam.cs.area
         iy, iz, ix = beam.cs.iy, beam.cs.iz, beam.cs.ix
-        E, G = beam.material.E, beam.material.G
+        # E, G = beam.material.E, beam.material.G
+        E = 1 / beam.material.compliance[0, 0].flatten()
+        G = 1 / (2 * beam.material.compliance[3, 3].flatten())
 
         for i in csdl.frange(beam.num_elements):
             L = csdl.norm(mesh[i + 1, :] - mesh[i, :])
@@ -136,7 +138,8 @@ class Frame:
 
     def _mass_matrix(self, beam, dimension, index, node_dictionary):
         
-        rho = beam.material.rho
+        # rho = beam.material.rho
+        rho = beam.material.density
         area = beam.cs.area
         ix = beam.cs.ix
         mesh = beam.mesh
@@ -241,7 +244,8 @@ class Frame:
 
     def _mass_properties(self, beam, mesh):
 
-        rho = beam.material.rho
+        # rho = beam.material.rho
+        rho = beam.material.density
         area = beam.cs.area
         # mesh = beam.mesh
 
@@ -511,8 +515,12 @@ class Frame:
 
                 # Roark's simply-supported panel buckling
                 k = 6.3
-                critical_stress_top = k * beam.material.E * (ttop / width)**2 / (1 - beam.material.v**2)
-                critical_stress_bot = k * beam.material.E * (tbot / width)**2 / (1 - beam.material.v**2)
+                E = 1 / beam.material.compliance[0, 0].flatten()
+                nu = beam.material.compliance[3, 3].flatten() * E - 1
+                critical_stress_top = k * E * (ttop / width)**2 / (1 - nu**2)
+                critical_stress_bot = k * E * (tbot / width)**2 / (1 - nu**2)
+                # critical_stress_top = k * beam.material.E * (ttop / width)**2 / (1 - beam.material.v**2)
+                # critical_stress_bot = k * beam.material.E * (tbot / width)**2 / (1 - beam.material.v**2)
 
                 top_bkl = s4bkl_top / critical_stress_top # greater than 1 means the beam buckles
 

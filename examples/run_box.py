@@ -20,7 +20,7 @@ beam_1_loads[:, 2] = 20000
 beam_1_loads = csdl.Variable(value=beam_1_loads)
 
 # create a material
-aluminum = af.Material(name='aluminum', E=69E9, G=26E9, rho=2700, v=0.33)
+aluminum = af.IsotropicMaterial(name='aluminum', E=69E9, G=26E9, density=2700, nu=0.33)
 
 # create cs properties for beam 1
 height = csdl.Variable(value=np.ones(num_nodes_1 - 1) * 0.5)

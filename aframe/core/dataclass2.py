@@ -2,19 +2,23 @@ import numpy as np
 import csdl_alpha as csdl
 from typing import Union
 from dataclasses import dataclass
-# import aframe as af
+import aframe as af
+from aframe.core.materials import Material
 
-@dataclass
-class Material:
-    name: str
-    E: float
-    G: float
-    rho: float
-    v: float
 
-    @property
-    def type(self):
-        return 'isotropic'
+
+# no longer used
+# @dataclass
+# class Material:
+#     name: str
+#     E: float
+#     G: float
+#     density: float
+#     nu: float
+
+#     @property
+#     def type(self):
+#         return 'isotropic'
 
 
 
@@ -103,26 +107,7 @@ class CSBox:
             print('height/width type is not csdl.Variable')
 
 
-# @dataclass
-# class Beam:
-#     name: str
-#     mesh: csdl.Variable
-#     material: Material
-#     cs: CSTube
 
-#     def add_boundary_condition(self, node):
-#         self.bc_node = node
-
-#     def add_load(self, loads):
-#         self.loads = loads
-
-#     def __post_init__(self):
-
-#         if type(self.mesh) != csdl.Variable:
-#             print('mesh is not a csdl.Variable')
-        
-#         if type(self.material) != Material:
-#             print('material is not a Material dataclass')
 
 class Beam:
     def __init__(self, name:str, mesh:csdl.Variable, material:Material, cs:Union[CSBox, CSTube]):
