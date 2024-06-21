@@ -109,6 +109,44 @@ class CSBox:
 
 
 
+@dataclass
+class CSEllipse:
+    semi_major_axis: csdl.Variable
+    semi_minor_axis: csdl.Variable
+
+    @property
+    def type(self):
+        return 'ellipse'
+
+    @property
+    def area(self):
+        return np.pi * self.semi_major_axis * self.semi_minor_axis
+    
+    @property
+    def ix(self):
+        beta = 1 / ((1 + (self.semi_minor_axis / self.semi_major_axis)**2)**0.5)
+        return (np.pi / 2) * self.semi_major_axis * self.semi_minor_axis**3 * beta
+
+    @property
+    def iy(self):
+        return np.pi / 4 * self.semi_major_axis * self.semi_minor_axis**3
+    
+    @property
+    def iz(self):
+        return np.pi / 4 * self.semi_major_axis**3 * self.semi_minor_axis
+    
+    def __post_init__(self):
+
+        if type(self.semi_major_axis) != csdl.Variable:
+            print('semi_major_axis type is not csdl.Variable')
+        
+        if type(self.semi_minor_axis) != csdl.Variable:
+            print('semi_minor_axis type is not csdl.Variable')
+
+
+
+
+
 class Beam:
     def __init__(self, name:str, mesh:csdl.Variable, material:Material, cs:Union[CSBox, CSTube]):
         """Initialize a beam.
@@ -181,7 +219,8 @@ class Beam:
 
 class Solution:
     def __init__(self, displacement: dict, mesh: dict, stress: dict, 
-                 bkl: dict, cg: dict, dcg: dict):
+                 bkl: dict, cg: dict, dcg: dict, M: csdl.Variable,
+                 K: csdl.Variable, F: csdl.Variable):
 
         self.displacement = displacement
         self.mesh = mesh
@@ -189,6 +228,9 @@ class Solution:
         self.cg = cg
         self.dcg = dcg
         self.bkl = bkl
+        self.M = M
+        self.K = K
+        self.F = F
 
     def get_displacement(self, beam: Beam):
         return self.displacement[beam.name]

@@ -309,7 +309,7 @@ class Frame:
         dimension = num_unique_nodes * 6
         index = {list(node_set)[i]: i for i in range(num_unique_nodes)}
 
-        # construct the global stiffness matrix
+        # construct the global stiffness and mass matrices
         K, M = 0, 0
         mass, rmvec = 0, 0
         transformations_storage, local_stiffness_storage = [], []
@@ -548,4 +548,7 @@ class Frame:
                            stress=stress,
                            bkl=bkl, 
                            cg=cg,
-                           dcg=dcg)
+                           dcg=dcg,
+                           M=M,
+                           K=K,
+                           F=F,)

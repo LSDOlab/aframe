@@ -77,7 +77,7 @@ cg = solution.cg
 # csdl.save_all_variables()
 # csdl.inline_csv_save('michael')
 recorder.stop()
-recorder.visualize_graph(trim_loops=True)
+# recorder.visualize_graph(trim_loops=True)
 print(beam_1_displacement.value)
 print('cg: ', cg.value)
 
