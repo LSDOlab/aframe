@@ -38,63 +38,17 @@ frame.add_beam(beam_1)
 # evaluating the frame model returns a solution dataclass
 solution = frame.evaluate()
 
-# displacement
-beam_1_displacement = solution.get_displacement(beam_1)
-
-# displaced mesh
-beam_1_def_mesh = solution.get_mesh(beam_1)
-
-# stress
-beam_1_stress = solution.get_stress(beam_1)
-
-M = solution.M
-K = solution.K
-F = solution.F
-u0 = solution.u0
-node_dictionary = solution.node_dictionary
-index = solution.index
-
 # finish up
 recorder.stop()
 
 
-from scipy.integrate import solve_ivp
-
-# Define the matrices M, K, and the vector F
-M = M.value
-K = K.value
-F = F.value
-y0 = u0.value
-
-nu = len(y0)
-
-def ode(t, y, nu):
-    u = y[0:nu]
-    u_dot = y[nu:-1]
-    u_ddot = np.linalg.solve(M, F - K @ u)
-    return np.concatenate((u_dot, u_ddot))
-
+start = 0
+stop = 0.01
 nt = 100
-t_span = (0, 0.01)  # start and end time
-t_eval = np.linspace(t_span[0], t_span[1], nt)  # times at which to store the computed solution
+sim = af.Simulation(solution, start, stop, nt)
+t, u = sim.solve()
+beam_1_def_mesh = sim.parse_u(u, beam_1)
 
-# Solve the system of ODEs
-sol = solve_ivp(ode, t_span, y0, t_eval=t_eval, args=(nu,), method='Radau') # 'LSODA' works well also
-
-t = sol.t
-u = sol.y # 66 x 10
-
-mesh = beam_1.mesh.value
-
-def_mesh = np.zeros((beam_1.num_nodes, 3, nt))
-
-for i in range(nt):
-    for j in range(beam_1.num_nodes):
-        node_index = index[node_dictionary[beam_1.name][j]] * 6
-        def_mesh[j, :, i] = mesh[j, :] + u[node_index:node_index + 3, i]
-
-from matplotlib import pyplot as plt
-
-plt.scatter(def_mesh[:, 1, :], def_mesh[:, 2, :])
-plt.show()
+sim.create_frames([beam_1_def_mesh], xlim=[0, 10], ylim=[0, 2])
+sim.gif(filename='beam.gif')
 
