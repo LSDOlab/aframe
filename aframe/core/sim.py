@@ -24,7 +24,7 @@ class Simulation:
     def _ode(self, t, y):
         u = y[0:self.nu]
         u_dot = y[self.nu:-1]
-        u_ddot = np.linalg.solve(self.M, self.F*np.cos(1000*t) - self.K @ u)
+        u_ddot = np.linalg.solve(self.M, self.F*np.cos(900*t) - self.K @ u)
         # u_ddot = np.linalg.solve(self.M, self.F - self.K @ u)
         return np.concatenate((u_dot, u_ddot))
 
@@ -88,10 +88,27 @@ class Simulation:
             plt.savefig(f'img/img_{i}.png', transparent=True, dpi=100, facecolor='white', bbox_inches="tight")
 
             plt.close()
+
+    def create_frames_3d(self, mesh_list, figsize, dpi):
         
-            # plt.title(title, fontsize=fontsize)
-            # plt.xticks(fontsize=fontsize - 2)
-            # plt.yticks(fontsize=fontsize - 2)
+        for i in range(self.nt):
+
+            fig = plt.figure(figsize=figsize)
+            ax = fig.add_subplot(projection='3d')
+            ax.view_init(elev=20, azim=210)
+
+            for j in range(len(mesh_list)):
+                mesh = mesh_list[j]
+
+                ax.scatter(mesh[:, 0, i], mesh[:, 1, i], mesh[:, 2, i], color='purple', edgecolor='black', s=15, alpha=1, linewidth=0.5)
+                ax.plot(mesh[:, 0, i], mesh[:, 1, i], mesh[:, 2, i], color='black', linewidth=1)
+
+            ax.axis('equal')
+            plt.axis('off')
+
+            plt.savefig(f'img/img_{i}.png', transparent=True, dpi=dpi, facecolor='white', bbox_inches="tight")
+
+            plt.close()
 
     def gif(self, filename, fps):
 
