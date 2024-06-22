@@ -345,7 +345,8 @@ class Frame:
             F = F + loads
             
         F = F.flatten()
-        
+
+       
 
         # boundary conditions
         for beam in self.beams:
@@ -371,6 +372,10 @@ class Frame:
 
         # solve the linear system
         U = csdl.solve_linear(K, F)
+
+        # initial conditions for dynamic sim
+        no_loads = csdl.Variable(value=np.zeros((dimension)))
+        u0 = csdl.solve_linear(M, no_loads)
 
 
         # create the beam displacements dictionary
@@ -551,4 +556,7 @@ class Frame:
                            dcg=dcg,
                            M=M,
                            K=K,
-                           F=F,)
+                           F=F,
+                           u0=u0,
+                           node_dictionary=node_dictionary,
+                           index=index,)
