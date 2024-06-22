@@ -44,11 +44,11 @@ recorder.stop()
 
 start = 0
 stop = 0.01
-nt = 100
+nt = 200
 sim = af.Simulation(solution, start, stop, nt)
 t, u = sim.solve()
 beam_1_def_mesh = sim.parse_u(u, beam_1)
 
-sim.create_frames([beam_1_def_mesh], xlim=[0, 10], ylim=[0, 2])
-sim.gif(filename='beam.gif')
+sim.create_frames([beam_1_def_mesh], xlim=[-1, 11], ylim=[-1.5, 1.5], figsize=(6, 3))
+sim.gif(filename='beam.gif', fps=10)
 
