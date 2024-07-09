@@ -504,7 +504,7 @@ class Frame:
 
                     tau = torsional_stress + shear_stress
 
-                    von_mises = (axial_stress**2 + 3*tau**2 + 1E-12)**0.5
+                    von_mises = (axial_stress**2 + 3*tau**2 + 1E-8)**0.5
                     # beam_stress[:, i] = von_mises
                     beam_stress = beam_stress.set(csdl.slice[:, i], von_mises)
 

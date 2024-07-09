@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import aframe as af
 from scipy.integrate import solve_ivp
 import csdl_alpha as csdl
-import imageio
 
 
 class Simulation:
@@ -111,6 +110,7 @@ class Simulation:
             plt.close()
 
     def gif(self, filename, fps):
+        import imageio
 
         frames = []
         for i in range(self.nt):

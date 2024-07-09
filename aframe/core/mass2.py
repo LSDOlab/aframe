@@ -9,13 +9,13 @@ class MassProperties:
     mass: csdl.Variable
     cg: csdl.Variable
 
-    @property
-    def cg(self):
-        return self.cg
+    # @property
+    # def cg(self):
+    #     return self.cg
     
-    @property
-    def mass(self):
-        return self.mass
+    # @property
+    # def mass(self):
+    #     return self.mass
 
 
 
@@ -32,7 +32,7 @@ class FrameMass():
 
         mass, rmvec = 0, 0
         for beam in self.beams:
-            rho = beam.material.rho
+            rho = beam.material.density
             area = beam.cs.area
             mesh = beam.mesh
 

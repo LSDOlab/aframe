@@ -16,7 +16,7 @@ beam_1_mesh = csdl.Variable(value=beam_1_mesh)
 
 # create beam 1 loads
 beam_1_loads = np.zeros((num_nodes_1, 6))
-beam_1_loads[:, 2] = 20000
+beam_1_loads[:, 2] = -20000
 beam_1_loads = csdl.Variable(value=beam_1_loads)
 
 # create a material
@@ -47,6 +47,14 @@ beam_1_displacement = solution.get_displacement(beam_1)
 
 # stress
 beam_1_stress = solution.get_stress(beam_1)
+
+# buckling
+bot_bkl = solution.get_bkl(beam_1)["bot"].value
+top_bkl = solution.get_bkl(beam_1)["top"].value
+
+print(bot_bkl)
+print(top_bkl)
+exit()
 
 cg = solution.cg
 dcg = solution.dcg
