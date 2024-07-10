@@ -176,7 +176,8 @@ class Beam:
         self.mesh = mesh
         self.material = material
         self.cs = cs
-        self.num_nodes = len(mesh.value)
+        self.num_nodes = mesh.shape[0]
+        # self.num_nodes = len(mesh.value)
         self.num_elements = self.num_nodes - 1
 
         # optional
