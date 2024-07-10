@@ -461,6 +461,17 @@ class Frame:
                 von_mises = (tensile_stress**2 + 3*shear_stress**2 + 1E-12)**0.5
                 stress[beam.name] = von_mises
 
+                # basic Euler buckling for tubes
+                mesh = beam.mesh
+
+                tot_length = 0
+                for i in csdl.frange(beam.num_elements):
+                    tot_length = tot_length + csdl.norm(mesh[i + 1, :] - mesh[i, :])
+
+                E = 1 / beam.material.compliance[0, 0].flatten()
+                KB = 1
+                P_cr = np.pi**2 * E * beam.cs.ix / (KB * tot_length)**2
+
             elif beam.cs.type == 'box':
                 width = beam.cs.width
                 height = beam.cs.height
@@ -505,7 +516,6 @@ class Frame:
                     tau = torsional_stress + shear_stress
 
                     von_mises = (axial_stress**2 + 3*tau**2 + 1E-8)**0.5
-                    # beam_stress[:, i] = von_mises
                     beam_stress = beam_stress.set(csdl.slice[:, i], von_mises)
 
                     # ************ signed buckling stress calculation *******************
@@ -524,11 +534,8 @@ class Frame:
                 nu = beam.material.compliance[3, 3].flatten() * E - 1
                 critical_stress_top = k * E * (ttop / width)**2 / (1 - nu**2)
                 critical_stress_bot = k * E * (tbot / width)**2 / (1 - nu**2)
-                # critical_stress_top = k * beam.material.E * (ttop / width)**2 / (1 - beam.material.v**2)
-                # critical_stress_bot = k * beam.material.E * (tbot / width)**2 / (1 - beam.material.v**2)
 
                 top_bkl = s4bkl_top / critical_stress_top # greater than 1 means the beam buckles
-
                 bot_bkl = s4bkl_bot / critical_stress_bot # greater than 1 means the beam buckles
 
                 # add the box-beam buckling to the buckle dictionary
