@@ -265,7 +265,11 @@ class Frame:
     
 
 
-    def evaluate(self):
+    def evaluate(
+            self,
+            sigma_cr_bkl_top=None,
+            sigma_cr_bkl_bot=None,
+        ):
         
         # check for beams
         if not self.beams: 
@@ -508,14 +512,14 @@ class Frame:
                     axial_stress = normal_stress + bending_stress_y + bending_stress_z
 
                     # ********************** shear stress stuff for point 4 *******************
-                    if i == 4: 
-                        shear_stress = F_z * Q / (beam.cs.iy * 2 * tweb)
+                    if i == 4:
+                        shear_stress = F_z * Q / (beam.cs.iy * 2 * tweb + 1e-8)
                     else: 
                         shear_stress = 0
 
                     tau = torsional_stress + shear_stress
 
-                    von_mises = (axial_stress**2 + 3*tau**2 + 1E-8)**0.5
+                    von_mises = ((axial_stress)**2 + 3*(tau)**2 + 1E-8)**0.5
                     beam_stress = beam_stress.set(csdl.slice[:, i], von_mises)
 
                     # ************ signed buckling stress calculation *******************
@@ -532,8 +536,14 @@ class Frame:
                 k = 6.3
                 E = 1 / beam.material.compliance[0, 0].flatten()
                 nu = beam.material.compliance[3, 3].flatten() * E - 1
-                critical_stress_top = k * E * (ttop / width)**2 / (1 - nu**2)
-                critical_stress_bot = k * E * (tbot / width)**2 / (1 - nu**2)
+                if sigma_cr_bkl_top is not None:
+                    critical_stress_top = sigma_cr_bkl_top
+                else:
+                    critical_stress_top = k * E * (ttop / width)**2 / (1 - nu**2)
+                if sigma_cr_bkl_bot is not None:
+                    critical_stress_bot = sigma_cr_bkl_bot
+                else:
+                    critical_stress_bot = k * E * (tbot / width)**2 / (1 - nu**2)
 
                 top_bkl = s4bkl_top / critical_stress_top # greater than 1 means the beam buckles
                 bot_bkl = s4bkl_bot / critical_stress_bot # greater than 1 means the beam buckles
