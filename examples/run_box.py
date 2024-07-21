@@ -49,12 +49,20 @@ beam_1_displacement = solution.get_displacement(beam_1)
 beam_1_stress = solution.get_stress(beam_1)
 
 # buckling
-bot_bkl = solution.get_bkl(beam_1)["bot"].value
+bot_bkl = solution.get_bkl(beam_1)["bot"]
 top_bkl = solution.get_bkl(beam_1)["top"].value
+
+from csdl_alpha.experimental import PySimulator
+
+py_sim = PySimulator(recorder=recorder)
+
+py_sim.compute_totals(ofs=[beam_1_stress, bot_bkl], wrts=[beam_1_loads])
 
 print(bot_bkl)
 print(top_bkl)
 exit()
+
+
 
 cg = solution.cg
 dcg = solution.dcg
