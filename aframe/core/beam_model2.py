@@ -4,9 +4,10 @@ import aframe as af
 # import pickle
 
 class Frame:
-    def __init__(self):
+    def __init__(self, acc=None):
         self.beams = []
         self.joints = []
+        self.acc = acc
 
     def add_beam(self, beam):
         self.beams.append(beam)
@@ -349,6 +350,20 @@ class Frame:
             F = F + loads
             
         F = F.flatten()
+
+
+
+        # testing inertial loads
+        if self.acc is not None:
+            expanded_acc = csdl.Variable(value=np.zeros((dimension)))
+            for i in range(num_unique_nodes):
+                expanded_acc = expanded_acc.set(csdl.slice[i * 6:i * 6 + 6], self.acc)
+            # expanded_acc = np.tile(self.acc, num_unique_nodes)
+            inertial_loads = csdl.matvec(M, expanded_acc)
+
+            # print(inertial_loads.value)
+
+            F = F + inertial_loads
 
        
 
