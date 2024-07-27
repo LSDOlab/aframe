@@ -16,15 +16,67 @@ class Frame:
 
         for i, beam in enumerate(joint_beams):
             if joint_nodes[i] > beam.num_nodes - 1:
-                raise Exception(f'joint node index {joint_nodes[i]} is out of range for {beam.name}')
+                raise Exception(f'joint node index {joint_nodes[i]} out of range for {beam.name}')
 
         self.joints.append({'beams': joint_beams, 'nodes': joint_nodes})
 
-    def _stiffness_matrix(self, beam, dimension, index, node_dictionary):
+    def _transforms(self, beam):
+
+        transforms = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
+        
+        for i in csdl.frange(beam.num_elements):
+            
+            mesh = beam.mesh
+            L = csdl.norm(mesh[i + 1, :] - mesh[i, :])
+            cp = (mesh[i + 1, :] - mesh[i, :]) / L
+            ll, mm, nn = cp[0], cp[1], cp[2]
+            D = (ll**2 + mm**2)**0.5
+
+            block = csdl.Variable(value=np.zeros((3, 3)))
+
+            block = block.set(csdl.slice[0, 0], ll)
+            block = block.set(csdl.slice[0, 1], mm)
+            block = block.set(csdl.slice[0, 2], nn)
+            block = block.set(csdl.slice[1, 0], -mm / D)
+            block = block.set(csdl.slice[1, 1], ll / D)
+            block = block.set(csdl.slice[2, 0], -ll * nn / D)
+            block = block.set(csdl.slice[2, 1], -mm * nn / D)
+            block = block.set(csdl.slice[2, 2], D)
+
+            # if D.value != 0:  # General case
+            #     block = block.set(csdl.slice[0, 0], ll)
+            #     block = block.set(csdl.slice[0, 1], mm)
+            #     block = block.set(csdl.slice[0, 2], nn)
+            #     block = block.set(csdl.slice[1, 0], -mm / D)
+            #     block = block.set(csdl.slice[1, 1], ll / D)
+            #     block = block.set(csdl.slice[2, 0], -ll * nn / D)
+            #     block = block.set(csdl.slice[2, 1], -mm * nn / D)
+            #     block = block.set(csdl.slice[2, 2], D)
+            # else:  # Special case for vertical beams
+            #     block = block.set(csdl.slice[0, 0], 0)
+            #     block = block.set(csdl.slice[0, 1], 0)
+            #     block = block.set(csdl.slice[0, 2], 1)
+            #     block = block.set(csdl.slice[1, 0], 0)
+            #     block = block.set(csdl.slice[1, 1], 1)
+            #     block = block.set(csdl.slice[1, 2], 0)
+            #     block = block.set(csdl.slice[2, 0], -1)
+            #     block = block.set(csdl.slice[2, 1], 0)
+            #     block = block.set(csdl.slice[2, 2], 0)
+
+
+            T = csdl.Variable(value=np.zeros((12, 12)))
+            T = T.set(csdl.slice[0:3, 0:3], block)
+            T = T.set(csdl.slice[3:6, 3:6], block)
+            T = T.set(csdl.slice[6:9, 6:9], block)
+            T = T.set(csdl.slice[9:12, 9:12], block)
+            transforms = transforms.set(csdl.slice[i, :, :], T)
+
+        return transforms
+
+    def _stiffness_matrix(self, beam, beam_transforms, dimension, index, node_dictionary):
 
         element_stiffness = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
         tkt_storage = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
-        transformations = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
 
         mesh = beam.mesh
         area = A = beam.cs.area
@@ -89,27 +141,7 @@ class Frame:
 
             element_stiffness = element_stiffness.set(csdl.slice[i, :, :], kp)
 
-            cp = (mesh[i + 1, :] - mesh[i, :]) / L
-            ll, mm, nn = cp[0], cp[1], cp[2]
-            D = (ll**2 + mm**2)**0.5
-
-            block = csdl.Variable(value=np.zeros((3, 3)))
-            block = block.set(csdl.slice[0, 0], ll)
-            block = block.set(csdl.slice[0, 1], mm)
-            block = block.set(csdl.slice[0, 2], nn)
-            block = block.set(csdl.slice[1, 0], -mm / D)
-            block = block.set(csdl.slice[1, 1], ll / D)
-            block = block.set(csdl.slice[2, 0], -ll * nn / D)
-            block = block.set(csdl.slice[2, 1], -mm * nn / D)
-            block = block.set(csdl.slice[2, 2], D)
-
-            T = csdl.Variable(value=np.zeros((12, 12)))
-            T = T.set(csdl.slice[0:3, 0:3], block)
-            T = T.set(csdl.slice[3:6, 3:6], block)
-            T = T.set(csdl.slice[6:9, 6:9], block)
-            T = T.set(csdl.slice[9:12, 9:12], block)
-            transformations = transformations.set(csdl.slice[i, :, :], T)
-
+            T = beam_transforms[i, :, :]
             tkt = csdl.matmat(csdl.transpose(T), csdl.matmat(kp, T))
             tkt_storage = tkt_storage.set(csdl.slice[i, :, :], tkt)
 
@@ -133,11 +165,11 @@ class Frame:
 
             beam_stiffness = beam_stiffness + k
 
-        return beam_stiffness, element_stiffness, transformations
+        return beam_stiffness, element_stiffness
 
 
 
-    def _mass_matrix(self, beam, dimension, index, node_dictionary):
+    def _mass_matrix(self, beam, beam_transforms, dimension, index, node_dictionary):
         
         # rho = beam.material.rho
         rho = beam.material.density
@@ -197,26 +229,7 @@ class Frame:
             mp = mp.set(csdl.slice[11, 7], coef * -22 * a)
             mp = mp.set(csdl.slice[11, 11], coef * 8 * a**2)
 
-            cp = (mesh[i + 1, :] - mesh[i, :]) / L
-            ll, mm, nn = cp[0], cp[1], cp[2]
-            D = (ll**2 + mm**2)**0.5
-
-            block = csdl.Variable(value=np.zeros((3, 3)))
-            block = block.set(csdl.slice[0, 0], ll)
-            block = block.set(csdl.slice[0, 1], mm)
-            block = block.set(csdl.slice[0, 2], nn)
-            block = block.set(csdl.slice[1, 0], -mm / D)
-            block = block.set(csdl.slice[1, 1], ll / D)
-            block = block.set(csdl.slice[2, 0], -ll * nn / D)
-            block = block.set(csdl.slice[2, 1], -mm * nn / D)
-            block = block.set(csdl.slice[2, 2], D)
-
-            T = csdl.Variable(value=np.zeros((12, 12)))
-            T = T.set(csdl.slice[0:3, 0:3], block)
-            T = T.set(csdl.slice[3:6, 3:6], block)
-            T = T.set(csdl.slice[6:9, 6:9], block)
-            T = T.set(csdl.slice[9:12, 9:12], block)
-
+            T = beam_transforms[i, :, :]
             tmt = csdl.matmat(csdl.transpose(T), csdl.matmat(mp, T))
             tmt_storage = tmt_storage.set(csdl.slice[i, :, :], tmt)
 
@@ -321,12 +334,22 @@ class Frame:
 
         for beam in self.beams:
 
-            beam_stiffness, element_stiffness, transformations = self._stiffness_matrix(beam, dimension, index, node_dictionary)
+            beam_transforms = self._transforms(beam)
+            transformations_storage.append(beam_transforms)
+
+            beam_stiffness, element_stiffness = self._stiffness_matrix(beam,
+                                                                    beam_transforms, 
+                                                                    dimension, 
+                                                                    index, 
+                                                                    node_dictionary)
             K = K + beam_stiffness
             local_stiffness_storage.append(element_stiffness)
-            transformations_storage.append(transformations)
 
-            beam_mass_matrix = self._mass_matrix(beam=beam, dimension=dimension, node_dictionary=node_dictionary, index=index)
+            beam_mass_matrix = self._mass_matrix(beam,
+                                                 beam_transforms,
+                                                 dimension,
+                                                 index,
+                                                 node_dictionary)
             M = M + beam_mass_matrix
 
             beam_mass, beam_rmvec = self._mass_properties(beam, beam.mesh)
@@ -360,8 +383,6 @@ class Frame:
                 expanded_acc = expanded_acc.set(csdl.slice[i * 6:i * 6 + 6], self.acc)
             # expanded_acc = np.tile(self.acc, num_unique_nodes)
             inertial_loads = csdl.matvec(M, expanded_acc)
-
-            # print(inertial_loads.value)
 
             F = F + inertial_loads
 
