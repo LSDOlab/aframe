@@ -20,7 +20,7 @@ beam_1_mesh = csdl.Variable(value=beam_1_mesh)
 
 # create beam 1 loads
 beam_1_loads = np.zeros((num_nodes_1, 6))
-beam_1_loads[:, 2] = 0
+beam_1_loads[:, 1] = 0
 beam_1_loads = csdl.Variable(value=beam_1_loads)
 
 # create a material
