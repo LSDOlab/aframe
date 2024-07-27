@@ -16,7 +16,7 @@ class Frame:
 
         for i, beam in enumerate(joint_beams):
             if joint_nodes[i] > beam.num_nodes - 1:
-                raise Exception(f'joint node index {joint_nodes[i]} out of range for {beam.name}')
+                raise Exception(f'joint node {joint_nodes[i]} out of range for {beam.name}')
 
         self.joints.append({'beams': joint_beams, 'nodes': joint_nodes})
 
@@ -44,7 +44,8 @@ class Frame:
             # block = block.set(csdl.slice[2, 1], -mm * nn / D)
             # block = block.set(csdl.slice[2, 2], D)
 
-            if beam.z:  # special case for vertical beams
+            # special case for vertical beams
+            if beam.z:
                 block = block.set(csdl.slice[0, 0], 0)
                 block = block.set(csdl.slice[0, 1], 0)
                 block = block.set(csdl.slice[0, 2], 1)
@@ -150,19 +151,16 @@ class Frame:
         beam_stiffness = 0
         for i in range(beam.num_elements):
             tkt = tkt_storage[i, :, :]
-            k11, k12, k21, k22 = tkt[0:6,0:6], tkt[0:6,6:12], tkt[6:12,0:6], tkt[6:12,6:12]
 
-            # expand the transformed stiffness matrix to the global dimensions
             k = csdl.Variable(value=np.zeros((dimension, dimension)))
 
-            # assign the four block matrices to their respective positions in k
             a_ind = index[node_dictionary[beam.name][i]] * 6
             b_ind = index[node_dictionary[beam.name][i + 1]] * 6
 
-            k = k.set(csdl.slice[a_ind:a_ind + 6, a_ind:a_ind + 6], k11)
-            k = k.set(csdl.slice[a_ind:a_ind + 6, b_ind:b_ind + 6], k12)
-            k = k.set(csdl.slice[b_ind:b_ind + 6, a_ind:a_ind + 6], k21)
-            k = k.set(csdl.slice[b_ind:b_ind + 6, b_ind:b_ind + 6], k22)
+            k = k.set(csdl.slice[a_ind:a_ind + 6, a_ind:a_ind + 6], tkt[0:6,0:6])
+            k = k.set(csdl.slice[a_ind:a_ind + 6, b_ind:b_ind + 6], tkt[0:6,6:12])
+            k = k.set(csdl.slice[b_ind:b_ind + 6, a_ind:a_ind + 6], tkt[6:12,0:6])
+            k = k.set(csdl.slice[b_ind:b_ind + 6, b_ind:b_ind + 6], tkt[6:12,6:12])
 
             beam_stiffness = beam_stiffness + k
 
@@ -243,7 +241,6 @@ class Frame:
             # expand the transformed mass matrix to the global dimensions
             m = csdl.Variable(value=np.zeros((dimension, dimension)))
 
-            # assign the four block matrices to their respective positions in m
             a_ind = index[node_dictionary[beam.name][i]] * 6
             b_ind = index[node_dictionary[beam.name][i + 1]] * 6
 
@@ -262,7 +259,6 @@ class Frame:
         # rho = beam.material.rho
         rho = beam.material.density
         area = beam.cs.area
-        # mesh = beam.mesh
 
         beam_mass, beam_rmvec = 0, 0
         for i in range(beam.num_elements):
@@ -277,6 +273,21 @@ class Frame:
             beam_rmvec = beam_rmvec + element_cg * element_mass
 
         return beam_mass, beam_rmvec
+
+
+    def _errors(self):
+
+        if not self.beams: # check for beams
+            raise Exception('Error: beam(s) must be added to the frame')
+        
+        num_bc = 0 # compute the number of boundary conditions
+        for beam in self.beams: num_bc += len(beam.bc)
+           
+        if num_bc == 0: # check for boundary conditions 
+            raise Exception('Error: no boundary conditions')
+        
+        if len(self.beams) - num_bc > len(self.joints): # check kinematic constraints
+            raise Exception('Error: not enough kinematic constraints')
     
 
 
@@ -285,22 +296,9 @@ class Frame:
             sigma_cr_bkl_top=None,
             sigma_cr_bkl_bot=None,
         ):
-        
-        # check for beams
-        if not self.beams: 
-            raise Exception('Error: beam(s) must be added to the frame')
-        
-        # create boundary conditions dictionary
-        num_bc = 0
-        for beam in self.beams: num_bc += len(beam.bc)
 
-        # check for boundary conditions    
-        if num_bc == 0: 
-            raise Exception('Error: no boundary conditions')
-
-        # check for kinematic constraints
-        if len(self.beams) - num_bc > len(self.joints):
-            raise Exception('Error: not enough kinematic constraints')
+        # check for input errors
+        self._errors()
         
         # automated beam node assignment
         node_dictionary = {}
@@ -377,14 +375,11 @@ class Frame:
 
 
 
-        # testing inertial loads
+        # inertial loads are added to the applied loads
         if self.acc is not None:
-            expanded_acc = csdl.Variable(value=np.zeros((dimension)))
-            for i in range(num_unique_nodes):
-                expanded_acc = expanded_acc.set(csdl.slice[i * 6:i * 6 + 6], self.acc)
             # expanded_acc = np.tile(self.acc, num_unique_nodes)
-            inertial_loads = csdl.matvec(M, expanded_acc)
-
+            ex_acc = csdl.expand(self.acc, (num_unique_nodes, 6), action='i->ji').flatten()
+            inertial_loads = csdl.matvec(M, ex_acc)
             F = F + inertial_loads
 
        
