@@ -31,37 +31,38 @@ class Frame:
             cp = (mesh[i + 1, :] - mesh[i, :]) / L
             ll, mm, nn = cp[0], cp[1], cp[2]
             D = (ll**2 + mm**2)**0.5
+            D = D + 1E-12
 
             block = csdl.Variable(value=np.zeros((3, 3)))
 
-            block = block.set(csdl.slice[0, 0], ll)
-            block = block.set(csdl.slice[0, 1], mm)
-            block = block.set(csdl.slice[0, 2], nn)
-            block = block.set(csdl.slice[1, 0], -mm / D)
-            block = block.set(csdl.slice[1, 1], ll / D)
-            block = block.set(csdl.slice[2, 0], -ll * nn / D)
-            block = block.set(csdl.slice[2, 1], -mm * nn / D)
-            block = block.set(csdl.slice[2, 2], D)
+            # block = block.set(csdl.slice[0, 0], ll)
+            # block = block.set(csdl.slice[0, 1], mm)
+            # block = block.set(csdl.slice[0, 2], nn)
+            # block = block.set(csdl.slice[1, 0], -mm / D)
+            # block = block.set(csdl.slice[1, 1], ll / D)
+            # block = block.set(csdl.slice[2, 0], -ll * nn / D)
+            # block = block.set(csdl.slice[2, 1], -mm * nn / D)
+            # block = block.set(csdl.slice[2, 2], D)
 
-            # if D.value != 0:  # General case
-            #     block = block.set(csdl.slice[0, 0], ll)
-            #     block = block.set(csdl.slice[0, 1], mm)
-            #     block = block.set(csdl.slice[0, 2], nn)
-            #     block = block.set(csdl.slice[1, 0], -mm / D)
-            #     block = block.set(csdl.slice[1, 1], ll / D)
-            #     block = block.set(csdl.slice[2, 0], -ll * nn / D)
-            #     block = block.set(csdl.slice[2, 1], -mm * nn / D)
-            #     block = block.set(csdl.slice[2, 2], D)
-            # else:  # Special case for vertical beams
-            #     block = block.set(csdl.slice[0, 0], 0)
-            #     block = block.set(csdl.slice[0, 1], 0)
-            #     block = block.set(csdl.slice[0, 2], 1)
-            #     block = block.set(csdl.slice[1, 0], 0)
-            #     block = block.set(csdl.slice[1, 1], 1)
-            #     block = block.set(csdl.slice[1, 2], 0)
-            #     block = block.set(csdl.slice[2, 0], -1)
-            #     block = block.set(csdl.slice[2, 1], 0)
-            #     block = block.set(csdl.slice[2, 2], 0)
+            if beam.z:  # special case for vertical beams
+                block = block.set(csdl.slice[0, 0], 0)
+                block = block.set(csdl.slice[0, 1], 0)
+                block = block.set(csdl.slice[0, 2], 1)
+                block = block.set(csdl.slice[1, 0], 0)
+                block = block.set(csdl.slice[1, 1], 1)
+                block = block.set(csdl.slice[1, 2], 0)
+                block = block.set(csdl.slice[2, 0], -1)
+                block = block.set(csdl.slice[2, 1], 0)
+                block = block.set(csdl.slice[2, 2], 0)
+            else:
+                block = block.set(csdl.slice[0, 0], ll)
+                block = block.set(csdl.slice[0, 1], mm)
+                block = block.set(csdl.slice[0, 2], nn)
+                block = block.set(csdl.slice[1, 0], -mm / D)
+                block = block.set(csdl.slice[1, 1], ll / D)
+                block = block.set(csdl.slice[2, 0], -ll * nn / D)
+                block = block.set(csdl.slice[2, 1], -mm * nn / D)
+                block = block.set(csdl.slice[2, 2], D)
 
 
             T = csdl.Variable(value=np.zeros((12, 12)))

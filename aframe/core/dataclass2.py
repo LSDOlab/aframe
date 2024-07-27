@@ -230,7 +230,7 @@ class CSEllipse:
 
 
 class Beam:
-    def __init__(self, name:str, mesh:csdl.Variable, material:Material, cs:Union[CSBox, CSTube]):
+    def __init__(self, name:str, mesh:csdl.Variable, material:Material, cs:Union[CSBox, CSTube], z:bool=False):
         """Initialize a beam.
 
         Parameters
@@ -243,6 +243,8 @@ class Beam:
             The material of the instance.
         cs : Union[CSBox, CSTube]
             The cross-section of the instance.
+        z : bool, optional
+            Whether the beam is vertical along the z axis, by default False.
 
         Raises
         ------
@@ -265,6 +267,7 @@ class Beam:
         # optional
         self.bc = []
         self.loads = np.zeros((self.num_nodes, 6))
+        self.z = z
 
         if type(self.mesh) != csdl.Variable:
             print('mesh type is not csdl.Variable')
