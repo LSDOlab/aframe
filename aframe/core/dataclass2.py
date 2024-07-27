@@ -267,6 +267,7 @@ class Beam:
         # optional
         self.bc = []
         self.loads = np.zeros((self.num_nodes, 6))
+        self.added_mass = []
         self.z = z
 
         if type(self.mesh) != csdl.Variable:
@@ -298,6 +299,17 @@ class Beam:
             raise ValueError('incorrect loads shape (should be num_nodes by 6)')
         
         self.loads += loads
+
+    def add_mass(self, mass, node):
+
+        if not isinstance(node, int):
+            raise ValueError('mass node should be an integer')
+        
+        if node > self.num_nodes - 1 or node < 0:
+            raise ValueError('mass node out of range for ', self.name)
+
+        mass_dict = {'node': node, 'mass': mass, 'beam_name': self.name}
+        self.added_mass.append(mass_dict)
 
 
 
