@@ -389,8 +389,8 @@ class Frame:
 
                 MF = MF + loads
 
-        MF = MF.flatten()
-        F = F + MF
+            MF = MF.flatten()
+            F = F + MF
 
 
 
