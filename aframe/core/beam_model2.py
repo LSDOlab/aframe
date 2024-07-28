@@ -373,14 +373,33 @@ class Frame:
             
         F = F.flatten()
 
+        
+        # added masses are loads iff the acc is not None
+        MF = 0
+        if self.acc is not None:
+            for i, beam in enumerate(self.beams):
+
+                added_mass = beam.added_mass
+                added_inertial_loads = csdl.outer(added_mass, self.acc)
+
+                loads = csdl.Variable(value=np.zeros((num_unique_nodes, 6)))
+
+                for j, node in enumerate(node_dictionary[beam.name]):
+                    loads = loads.set(csdl.slice[index[node], :], added_inertial_loads[j, :])
+
+                MF = MF + loads
+
+        MF = MF.flatten()
+        F = F + MF
+
 
 
         # inertial loads are added to the applied loads
         if self.acc is not None:
             # expanded_acc = np.tile(self.acc, num_unique_nodes)
             ex_acc = csdl.expand(self.acc, (num_unique_nodes, 6), action='i->ji').flatten()
-            inertial_loads = csdl.matvec(M, ex_acc)
-            F = F + inertial_loads
+            primary_inertial_loads = csdl.matvec(M, ex_acc)
+            F = F + primary_inertial_loads
 
        
 

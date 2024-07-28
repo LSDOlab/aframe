@@ -35,6 +35,7 @@ beam_1_cs = af.CSTube(radius=beam_1_radius, thickness=beam_1_thickness)
 beam_1 = af.Beam(name='beam_1', mesh=beam_1_mesh, material=aluminum, cs=beam_1_cs, z=True)
 beam_1.add_boundary_condition(node=0, dof=[1, 1, 1, 1, 1, 1])
 beam_1.add_load(beam_1_loads)
+beam_1.add_mass(10, 4)
 
 # define the accelerations
 # a_x, a_y, a_z, alpha_x, alpha_y, alpha_z

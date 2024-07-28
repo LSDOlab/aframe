@@ -267,7 +267,7 @@ class Beam:
         # optional
         self.bc = []
         self.loads = np.zeros((self.num_nodes, 6))
-        self.added_mass = []
+        self.added_mass = np.zeros((self.num_nodes))
         self.z = z
 
         if type(self.mesh) != csdl.Variable:
@@ -308,8 +308,9 @@ class Beam:
         if node > self.num_nodes - 1 or node < 0:
             raise ValueError('mass node out of range for ', self.name)
 
-        mass_dict = {'node': node, 'mass': mass, 'beam_name': self.name}
-        self.added_mass.append(mass_dict)
+        added_mass = csdl.Variable(value=np.zeros((self.num_nodes)))
+        added_mass = added_mass.set(csdl.slice[node], mass)
+        self.added_mass += added_mass
 
 
 
