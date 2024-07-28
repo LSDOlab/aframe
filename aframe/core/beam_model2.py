@@ -374,7 +374,7 @@ class Frame:
         F = F.flatten()
 
         
-        # added masses are loads iff the acc is not None
+        # added masses are loads iff acc is not None
         MF = 0
         if self.acc is not None:
             for i, beam in enumerate(self.beams):
