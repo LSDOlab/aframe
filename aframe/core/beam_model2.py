@@ -434,13 +434,14 @@ class Frame:
         deformed_mesh = {}
 
         # parse the displacements to get the deformed mesh for each beam
-        for j, beam in enumerate(self.beams):
+        for beam in self.beams:
             mesh = beam.mesh
 
             def_mesh = csdl.Variable(value=np.zeros((beam.num_nodes, 3)))
             disp = csdl.Variable(value=np.zeros((beam.num_nodes, 3)))
-            for i in range(beam.num_nodes):
-                node_index = index[node_dictionary[beam.name][i]] * 6
+
+            for i, node in enumerate(node_dictionary[beam.name]):
+                node_index = index[node] * 6
                 def_mesh = def_mesh.set(csdl.slice[i, :], mesh[i, :] + U[node_index:node_index + 3])
                 disp = disp.set(csdl.slice[i, :], U[node_index:node_index + 3])
 
