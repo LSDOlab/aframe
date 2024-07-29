@@ -362,26 +362,23 @@ class Frame:
 
         # construct the global loads vector
         F = 0
-        for i, beam in enumerate(self.beams):
+        for beam in self.beams:
             beam_loads = beam.loads
             loads = csdl.Variable(value=np.zeros((num_unique_nodes, 6)))
 
             for j, node in enumerate(node_dictionary[beam.name]):
                 loads = loads.set(csdl.slice[index[node], :], beam_loads[j, :])
 
-            F = F + loads
-            
-        F = F.flatten()
+            F = F + loads.flatten()
 
         
         # added masses are loads iff acc is not None
         MF = 0
         if self.acc is not None:
-            for i, beam in enumerate(self.beams):
+            for beam in self.beams:
 
                 added_mass = beam.added_mass
                 added_inertial_loads = csdl.outer(added_mass, self.acc)
-
                 loads = csdl.Variable(value=np.zeros((num_unique_nodes, 6)))
 
                 for j, node in enumerate(node_dictionary[beam.name]):
@@ -389,8 +386,7 @@ class Frame:
 
                 MF = MF + loads
 
-            MF = MF.flatten()
-            F = F + MF
+            F = F + MF.flatten()
 
 
 
