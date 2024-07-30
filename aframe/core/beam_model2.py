@@ -327,7 +327,9 @@ class Frame:
         index = {list(node_set)[i]: i for i in range(num_unique_nodes)}
 
         # construct the global stiffness and mass matrices
-        K, M = 0, 0
+        # K, M = 0, 0
+        K = csdl.Variable(value=np.zeros((dimension, dimension)))
+        M = csdl.Variable(value=np.zeros((dimension, dimension)))
         mass, rmvec = 0, 0
         transformations_storage, local_stiffness_storage = [], []
 
@@ -513,16 +515,16 @@ class Frame:
                 von_mises = (tensile_stress**2 + 3*shear_stress**2 + 1E-12)**0.5
                 stress[beam.name] = von_mises
 
-                # basic Euler buckling for tubes
-                mesh = beam.mesh
+                # # basic Euler buckling for tubes
+                # mesh = beam.mesh
 
-                tot_length = 0
-                for i in csdl.frange(beam.num_elements):
-                    tot_length = tot_length + csdl.norm(mesh[i + 1, :] - mesh[i, :])
+                # tot_length = 0
+                # for i in csdl.frange(beam.num_elements):
+                #     tot_length = tot_length + csdl.norm(mesh[i + 1, :] - mesh[i, :])
 
-                E = 1 / beam.material.compliance[0, 0].flatten()
-                KB = 1
-                P_cr = np.pi**2 * E * beam.cs.ix / (KB * tot_length)**2
+                # E = 1 / beam.material.compliance[0, 0].flatten()
+                # KB = 1
+                # P_cr = np.pi**2 * E * beam.cs.ix / (KB * tot_length)**2
 
             elif beam.cs.type == 'box':
                 width = beam.cs.width
