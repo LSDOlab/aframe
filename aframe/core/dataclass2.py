@@ -320,7 +320,7 @@ class Solution:
     def __init__(self, displacement: dict, mesh: dict, stress: dict, 
                  bkl: dict, cg: dict, dcg: dict, M: csdl.Variable,
                  K: csdl.Variable, F: csdl.Variable, u0:csdl.Variable,
-                 node_dictionary: dict, index: dict):
+                 node_dictionary: dict, index: dict, mass: csdl.Variable):
 
         self.displacement = displacement
         self.mesh = mesh
@@ -334,6 +334,7 @@ class Solution:
         self.u0 = u0
         self.node_dictionary = node_dictionary
         self.index = index
+        self.mass = mass
 
     def get_displacement(self, beam: Beam):
         return self.displacement[beam.name]

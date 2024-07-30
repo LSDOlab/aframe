@@ -286,8 +286,8 @@ class Frame:
         if num_bc == 0: # check for boundary conditions 
             raise Exception('Error: no boundary conditions')
         
-        if len(self.beams) - num_bc > len(self.joints): # check kinematic constraints
-            raise Exception('Error: not enough kinematic constraints')
+        # if len(self.beams) - num_bc > len(self.joints): # check kinematic constraints
+        #     raise Exception('Error: not enough kinematic constraints')
     
 
 
@@ -624,4 +624,5 @@ class Frame:
                            F=F,
                            u0=u0,
                            node_dictionary=node_dictionary,
-                           index=index,)
+                           index=index,
+                           mass=mass,)
