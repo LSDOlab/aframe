@@ -2,7 +2,7 @@ import csdl_alpha as csdl
 import numpy as np
 import aframe as af
 import pyvista as pv
-
+import pickle
 
 # feet
 s = 4
@@ -70,7 +70,6 @@ edges = np.array([[0, 4],
                   ])
 
 
-joints = np.array()
 
 
 nodes_per_edge = 5
@@ -147,6 +146,31 @@ for i in range(meshes.shape[0]):
     beam.add_boundary_condition(node=num_nodes - 1)
 
     frame.add_beam(beam)
+
+beams = frame.beams
+n = nodes_per_edge - 1
+# foot joints
+frame.add_joint(joint_beams=[beams[0], beams[1], beams[2]], joint_nodes=[0, 0, 0])
+frame.add_joint(joint_beams=[beams[3], beams[4], beams[5]], joint_nodes=[0, 0, 0])
+frame.add_joint(joint_beams=[beams[6], beams[7], beams[8]], joint_nodes=[0, 0, 0])
+frame.add_joint(joint_beams=[beams[9], beams[10], beams[11]], joint_nodes=[0, 0, 0])
+# middle outside joints
+frame.add_joint(joint_beams=[beams[1], beams[3], beams[13], beams[14], beams[20], beams[21]], joint_nodes=[n, n, 0, 0, n, 0])
+"""
+frame.add_joint(joint_beams=[beams[4], beams[6], beams[15], beams[16], beams[21], beams[22]], joint_nodes=[])
+frame.add_joint(joint_beams=[beams[7], beams[9], beams[16], beams[18], beams[22], beams[23]], joint_nodes=[])
+frame.add_joint(joint_beams=[beams[10], beams[0], beams[12], beams[19], beams[20], beams[23]], joint_nodes=[])
+# leg strut attach joints
+frame.add_joint(joint_beams=[beams[2], beams[12], beams[13], beams[34], beams[35]], joint_nodes=[])
+frame.add_joint(joint_beams=[beams[5], beams[14], beams[15], beams[32], beams[33]], joint_nodes=[])
+frame.add_joint(joint_beams=[beams[8], beams[16], beams[17], beams[30], beams[31]], joint_nodes=[])
+frame.add_joint(joint_beams=[beams[11], beams[18], beams[19], beams[28], beams[29]], joint_nodes=[])
+# top frame joints
+frame.add_joint(joint_beams=[beams[35], beams[33], beams[24], beams[25]], joint_nodes=[])
+frame.add_joint(joint_beams=[beams[32], beams[30], beams[25], beams[26]], joint_nodes=[])
+frame.add_joint(joint_beams=[beams[31], beams[29], beams[26], beams[27]], joint_nodes=[])
+frame.add_joint(joint_beams=[beams[28], beams[34], beams[27], beams[24]], joint_nodes=[])
+"""
 
 
 solution = frame.evaluate()
