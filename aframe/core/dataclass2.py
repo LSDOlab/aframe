@@ -279,7 +279,7 @@ class Beam:
         if cs.area.shape != (self.num_elements,):
             raise ValueError('CS shape does not match the number of elements')
 
-    def add_boundary_condition(self, node, dof):
+    def add_boundary_condition(self, node, dof=[1, 1, 1, 1, 1, 1]):
 
         if len(dof) != 6:
             raise ValueError('dof should have length 6 e.g., [1, 1, 1, 1, 1, 1]')

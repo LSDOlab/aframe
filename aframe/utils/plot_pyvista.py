@@ -4,7 +4,7 @@ import matplotlib as mpl
 
 
 
-def _colorize(cell_data, cmap, color):
+def _colorize(cell_data, cmap, color, n):
 
     if cell_data is not None:
         top = cell_data - cell_data.min()
@@ -15,7 +15,7 @@ def _colorize(cell_data, cmap, color):
 
         colors = colormap(n_cell_data)
     else:
-        colors = [color] * len(cell_data)
+        colors = [color] * n
 
     return colors
 
@@ -31,7 +31,7 @@ def plot_box(plotter,
     
     n = mesh.shape[0]
 
-    colors = _colorize(cell_data, cmap, color)
+    colors = _colorize(cell_data, cmap, color, n)
 
     for i in range(n - 1):
         start = mesh[i, :]
@@ -67,7 +67,7 @@ def plot_cyl(plotter,
     
     n = mesh.shape[0]
 
-    colors = _colorize(cell_data, cmap, color)
+    colors = _colorize(cell_data, cmap, color, n)
 
     for i in range(n - 1):
         start = mesh[i, :]

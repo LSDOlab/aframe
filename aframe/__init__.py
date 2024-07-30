@@ -4,3 +4,4 @@ from aframe.core.materials import *
 from aframe.core.sim import *
 from aframe.core.mass2 import *
 from aframe.utils.plot_pyvista import *
+from aframe.utils.meshing import *
