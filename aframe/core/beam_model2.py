@@ -158,22 +158,19 @@ class Frame:
             tkt = csdl.matmat(csdl.transpose(T), csdl.matmat(kp, T))
             tkt_storage = tkt_storage.set(csdl.slice[i, :, :], tkt)
 
-
-        beam_stiffness = 0
+        # saved a lot of memory here!
+        beam_stiffness = csdl.Variable(value=np.zeros((dimension, dimension)))
         for i in range(beam.num_elements):
             tkt = tkt_storage[i, :, :]
+            ax = index[node_dictionary[beam.name][i]] * 6
+            bx = index[node_dictionary[beam.name][i + 1]] * 6
 
-            k = csdl.Variable(value=np.zeros((dimension, dimension)))
+            beam_stiffness = beam_stiffness.set(csdl.slice[ax:ax + 6, ax:ax + 6], beam_stiffness[ax:ax + 6, ax:ax + 6] + tkt[0:6, 0:6])
+            beam_stiffness = beam_stiffness.set(csdl.slice[ax:ax + 6, bx:bx + 6], beam_stiffness[ax:ax + 6, bx:bx + 6] + tkt[0:6, 6:12])
+            beam_stiffness = beam_stiffness.set(csdl.slice[bx:bx + 6, ax:ax + 6], beam_stiffness[bx:bx + 6, ax:ax + 6] + tkt[6:12, 0:6])
+            beam_stiffness = beam_stiffness.set(csdl.slice[bx:bx + 6, bx:bx + 6], beam_stiffness[bx:bx + 6, bx:bx + 6] + tkt[6:12, 6:12])
 
-            a_ind = index[node_dictionary[beam.name][i]] * 6
-            b_ind = index[node_dictionary[beam.name][i + 1]] * 6
 
-            k = k.set(csdl.slice[a_ind:a_ind + 6, a_ind:a_ind + 6], tkt[0:6,0:6])
-            k = k.set(csdl.slice[a_ind:a_ind + 6, b_ind:b_ind + 6], tkt[0:6,6:12])
-            k = k.set(csdl.slice[b_ind:b_ind + 6, a_ind:a_ind + 6], tkt[6:12,0:6])
-            k = k.set(csdl.slice[b_ind:b_ind + 6, b_ind:b_ind + 6], tkt[6:12,6:12])
-
-            beam_stiffness = beam_stiffness + k
 
         return beam_stiffness, element_stiffness
 
@@ -243,23 +240,20 @@ class Frame:
             tmt_storage = tmt_storage.set(csdl.slice[i, :, :], tmt)
 
 
-        beam_mass = 0
+        # saved a lot of memory here also!
+        beam_mass = csdl.Variable(value=np.zeros((dimension, dimension)))
         for i in range(beam.num_elements):
             tmt = tmt_storage[i, :, :]
             m11, m12, m21, m22 = tmt[0:6,0:6], tmt[0:6,6:12], tmt[6:12,0:6], tmt[6:12,6:12]
 
-            # expand the transformed mass matrix to the global dimensions
-            m = csdl.Variable(value=np.zeros((dimension, dimension)))
+            ax = index[node_dictionary[beam.name][i]] * 6
+            bx = index[node_dictionary[beam.name][i + 1]] * 6
 
-            a_ind = index[node_dictionary[beam.name][i]] * 6
-            b_ind = index[node_dictionary[beam.name][i + 1]] * 6
+            beam_mass = beam_mass.set(csdl.slice[ax:ax + 6, ax:ax + 6], beam_mass[ax:ax + 6, ax:ax + 6] + m11)
+            beam_mass = beam_mass.set(csdl.slice[ax:ax + 6, bx:bx + 6], beam_mass[ax:ax + 6, bx:bx + 6] + m12)
+            beam_mass = beam_mass.set(csdl.slice[bx:bx + 6, ax:ax + 6], beam_mass[bx:bx + 6, ax:ax + 6] + m21)
+            beam_mass = beam_mass.set(csdl.slice[bx:bx + 6, bx:bx + 6], beam_mass[bx:bx + 6, bx:bx + 6] + m22)
 
-            m = m.set(csdl.slice[a_ind:a_ind + 6, a_ind:a_ind + 6], m11)
-            m = m.set(csdl.slice[a_ind:a_ind + 6, b_ind:b_ind + 6], m12)
-            m = m.set(csdl.slice[b_ind:b_ind + 6, a_ind:a_ind + 6], m21)
-            m = m.set(csdl.slice[b_ind:b_ind + 6, b_ind:b_ind + 6], m22)
-
-            beam_mass = beam_mass + m
 
         return beam_mass
 
@@ -342,7 +336,9 @@ class Frame:
         # construct the global stiffness and mass matrices
         K = csdl.Variable(value=np.zeros((dimension, dimension)))
         M = csdl.Variable(value=np.zeros((dimension, dimension)))
-        mass, rmvec = 0, 0
+        mass = csdl.Variable(value=0)
+        rmvec = csdl.Variable(value=np.zeros((3)))
+
         transformations_storage, local_stiffness_storage = [], []
 
         for beam in self.beams:
@@ -379,7 +375,7 @@ class Frame:
 
 
         # construct the global loads vector
-        F = 0
+        F = csdl.Variable(value=np.zeros((dimension)))
         for beam in self.beams:
             beam_loads = beam.loads
             loads = csdl.Variable(value=np.zeros((num_unique_nodes, 6)))
@@ -387,24 +383,23 @@ class Frame:
             for j, node in enumerate(node_dictionary[beam.name]):
                 loads = loads.set(csdl.slice[index[node], :], beam_loads[j, :])
 
-            F = F + loads.flatten()
+            F += loads.flatten()
 
         
         # added masses are loads iff acc is not None
-        MF = 0
+        MF = csdl.Variable(value=np.zeros((dimension)))
         if self.acc is not None:
             for beam in self.beams:
 
                 added_mass = beam.added_mass
                 added_inertial_loads = csdl.outer(added_mass, self.acc)
-                loads = csdl.Variable(value=np.zeros((num_unique_nodes, 6)))
 
                 for j, node in enumerate(node_dictionary[beam.name]):
-                    loads = loads.set(csdl.slice[index[node], :], added_inertial_loads[j, :])
+                    a_idx = index[node] * 6
+                    b_idx = index[node] * 6 + 6
+                    MF = MF.set(csdl.slice[a_idx:b_idx], MF[a_idx:b_idx] + added_inertial_loads[j, :].flatten())
 
-                MF = MF + loads
-
-            F = F + MF.flatten()
+            F += MF
 
 
 
@@ -413,7 +408,7 @@ class Frame:
             # expanded_acc = np.tile(self.acc, num_unique_nodes)
             ex_acc = csdl.expand(self.acc, (num_unique_nodes, 6), action='i->ji').flatten()
             primary_inertial_loads = csdl.matvec(M, ex_acc)
-            F = F + primary_inertial_loads
+            F += primary_inertial_loads
 
        
 
@@ -435,6 +430,7 @@ class Frame:
                         M = M.set(csdl.slice[node_index + i, :], 0) # row
                         M = M.set(csdl.slice[:, node_index + i], 0) # column
                         M = M.set(csdl.slice[node_index + i, node_index + i], 1)
+
 
         # with open('matrix2.pkl', 'wb') as f:
         #     pickle.dump(K.value, f)
@@ -472,7 +468,7 @@ class Frame:
         for i, beam in enumerate(self.beams):
             lengths = self._utils(beam)
             _, def_beam_rmvec = self._mass_properties(beam, displacement[beam.name], lengths)
-            def_rmvec = def_rmvec + def_beam_rmvec
+            def_rmvec += def_beam_rmvec
         
         # get the deformed cg
         dcg = def_rmvec / mass
@@ -484,11 +480,13 @@ class Frame:
             local_stiffness, transformations = local_stiffness_storage[j], transformations_storage[j]
 
             element_beam_loads = csdl.Variable(value=np.zeros((beam.num_elements, 12)))
+            element_disp = csdl.Variable(value=np.zeros((12)))
+
             for i in range(beam.num_elements):
                 node_a_index = index[node_dictionary[beam.name][i]] * 6
                 node_b_index = index[node_dictionary[beam.name][i + 1]] * 6
 
-                element_disp = csdl.Variable(value=np.zeros((12)))
+                # element_disp = csdl.Variable(value=np.zeros((12))) # save some memory by moving this upwards
                 element_disp = element_disp.set(csdl.slice[0:6], U[node_a_index:node_a_index + 6])
                 element_disp = element_disp.set(csdl.slice[6:12], U[node_b_index:node_b_index + 6])
 
