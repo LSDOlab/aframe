@@ -4,7 +4,7 @@ import aframe as af
 
 
 # start recorder
-recorder = csdl.Recorder(inline=True)
+recorder = csdl.Recorder(inline=False)
 recorder.start()
 
 # create a 1D beam 1 mesh
@@ -52,6 +52,20 @@ recorder.stop()
 # recorder.visualize_graph(trim_loops=True)
 # print(beam_1_displacement.value)
 
+
+import tracemalloc
+tracemalloc.start()
+
+sim = csdl.experimental.PySimulator(recorder)
+# sim = csdl.experimental.JaxSimulator(recorder=recorder)
+sim.run()
+
+print(tracemalloc.get_traced_memory())
+
+tracemalloc.stop()
+
+print(solution.mass.value)
+print(solution.cg.value)
 
 import matplotlib.pyplot as plt
 plt.grid()

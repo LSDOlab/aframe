@@ -20,14 +20,26 @@ class Frame:
 
         self.joints.append({'beams': joint_beams, 'nodes': joint_nodes})
 
-    def _transforms(self, beam):
 
+    def _utils(self, beam):
+
+        mesh = beam.mesh
+        lengths = csdl.Variable(value=np.zeros((beam.num_elements)))
+        for i in csdl.frange(beam.num_elements):
+            L = csdl.norm(mesh[i + 1, :] - mesh[i, :])
+            lengths = lengths.set(csdl.slice[i], L)
+
+        return lengths
+
+
+    def _transforms(self, beam, lengths):
+
+        mesh = beam.mesh
         transforms = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
         
         for i in csdl.frange(beam.num_elements):
             
-            mesh = beam.mesh
-            L = csdl.norm(mesh[i + 1, :] - mesh[i, :])
+            L = lengths[i]
             cp = (mesh[i + 1, :] - mesh[i, :]) / L
             ll, mm, nn = cp[0], cp[1], cp[2]
             D = (ll**2 + mm**2)**0.5
@@ -75,12 +87,11 @@ class Frame:
 
         return transforms
 
-    def _stiffness_matrix(self, beam, beam_transforms, dimension, index, node_dictionary):
+    def _stiffness_matrix(self, beam, beam_transforms, dimension, index, node_dictionary, lengths):
 
         element_stiffness = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
         tkt_storage = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
 
-        mesh = beam.mesh
         area = A = beam.cs.area
         iy, iz, ix = beam.cs.iy, beam.cs.iz, beam.cs.ix
         # E, G = beam.material.E, beam.material.G
@@ -88,7 +99,7 @@ class Frame:
         G = 1 / (2 * beam.material.compliance[3, 3].flatten())
 
         for i in csdl.frange(beam.num_elements):
-            L = csdl.norm(mesh[i + 1, :] - mesh[i, :])
+            L = lengths[i]
             A, Iy, Iz, J = area[i], iy[i], iz[i], ix[i]
 
             kp = csdl.Variable(value=np.zeros((12, 12)))
@@ -168,18 +179,17 @@ class Frame:
 
 
 
-    def _mass_matrix(self, beam, beam_transforms, dimension, index, node_dictionary):
+    def _mass_matrix(self, beam, beam_transforms, dimension, index, node_dictionary, lengths):
         
         # rho = beam.material.rho
         rho = beam.material.density
         area = beam.cs.area
         ix = beam.cs.ix
-        mesh = beam.mesh
 
         tmt_storage = csdl.Variable(value=np.zeros((beam.num_elements, 12, 12)))
 
         for i in csdl.frange(beam.num_elements):
-            L = csdl.norm(mesh[i + 1, :] - mesh[i, :])
+            L = lengths[i]
             A, J = area[i], ix[i]
 
             a = L / 2
@@ -254,23 +264,26 @@ class Frame:
         return beam_mass
 
 
-    def _mass_properties(self, beam, mesh):
+    def _mass_properties(self, beam, mesh, lengths):
 
         # rho = beam.material.rho
         rho = beam.material.density
         area = beam.cs.area
 
-        beam_mass, beam_rmvec = 0, 0
+        element_cgs = csdl.Variable(value=np.zeros((beam.num_elements, 3)))
+
+        for i in csdl.frange(beam.num_elements):
+            cg = (mesh[i + 1, :] + mesh[i, :]) / 2
+            element_cgs = element_cgs.set(csdl.slice[i, :], cg)
+
+        
+        element_masses = area * lengths * rho
+        beam_mass = csdl.sum(element_masses)
+
+        beam_rmvec = 0
         for i in range(beam.num_elements):
+            beam_rmvec += element_cgs[i, :] * element_masses[i]
 
-            L = csdl.norm(mesh[i + 1, :] - mesh[i, :])
-            element_mass = area[i] * L * rho
-
-            # element cg is the nodal average
-            element_cg = (mesh[i + 1, :] + mesh[i, :]) / 2
-
-            beam_mass = beam_mass + element_mass
-            beam_rmvec = beam_rmvec + element_cg * element_mass
 
         return beam_mass, beam_rmvec
 
@@ -327,7 +340,6 @@ class Frame:
         index = {list(node_set)[i]: i for i in range(num_unique_nodes)}
 
         # construct the global stiffness and mass matrices
-        # K, M = 0, 0
         K = csdl.Variable(value=np.zeros((dimension, dimension)))
         M = csdl.Variable(value=np.zeros((dimension, dimension)))
         mass, rmvec = 0, 0
@@ -335,27 +347,31 @@ class Frame:
 
         for beam in self.beams:
 
-            beam_transforms = self._transforms(beam)
+            lengths = self._utils(beam)
+
+            beam_transforms = self._transforms(beam, lengths)
             transformations_storage.append(beam_transforms)
 
             beam_stiffness, element_stiffness = self._stiffness_matrix(beam,
                                                                     beam_transforms, 
                                                                     dimension, 
                                                                     index, 
-                                                                    node_dictionary)
-            K = K + beam_stiffness
+                                                                    node_dictionary,
+                                                                    lengths)
+            K += beam_stiffness
             local_stiffness_storage.append(element_stiffness)
 
             beam_mass_matrix = self._mass_matrix(beam,
                                                  beam_transforms,
                                                  dimension,
                                                  index,
-                                                 node_dictionary)
-            M = M + beam_mass_matrix
+                                                 node_dictionary, 
+                                                 lengths)
+            M += beam_mass_matrix
 
-            beam_mass, beam_rmvec = self._mass_properties(beam, beam.mesh)
-            mass = mass + beam_mass
-            rmvec = rmvec + beam_rmvec
+            beam_mass, beam_rmvec = self._mass_properties(beam, beam.mesh, lengths)
+            mass += beam_mass
+            rmvec += beam_rmvec
 
         # compute the undeformed cg for the frame
         cg = rmvec / mass
@@ -427,8 +443,8 @@ class Frame:
         U = csdl.solve_linear(K, F)
 
         # initial conditions for dynamic sim
-        no_loads = csdl.Variable(value=np.zeros((dimension)))
-        u0 = csdl.solve_linear(M, no_loads)
+        # no_loads = csdl.Variable(value=np.zeros((dimension)))
+        # u0 = csdl.solve_linear(M, no_loads)
 
 
         # create the beam displacements dictionary
@@ -454,7 +470,8 @@ class Frame:
         # compute the deformed cg for the frame
         def_rmvec = 0
         for i, beam in enumerate(self.beams):
-            _, def_beam_rmvec = self._mass_properties(beam, displacement[beam.name])
+            lengths = self._utils(beam)
+            _, def_beam_rmvec = self._mass_properties(beam, displacement[beam.name], lengths)
             def_rmvec = def_rmvec + def_beam_rmvec
         
         # get the deformed cg
@@ -624,7 +641,7 @@ class Frame:
                            M=M,
                            K=K,
                            F=F,
-                           u0=u0,
+                        #    u0=u0,
                            node_dictionary=node_dictionary,
                            index=index,
                            mass=mass,)
