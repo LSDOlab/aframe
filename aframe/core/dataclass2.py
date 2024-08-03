@@ -258,7 +258,10 @@ class Beam:
         self.mesh = mesh
         self.material = material
         self.cs = cs
-        self.num_nodes = mesh.shape[0]
+        if mesh.shape[0] == 1:
+            self.num_nodes = mesh.shape[1]
+        else:
+            self.num_nodes = mesh.shape[0]
         # self.num_nodes = len(mesh.value)
         self.num_elements = self.num_nodes - 1
 
@@ -270,7 +273,10 @@ class Beam:
             print('mesh type is not csdl.Variable')
 
         if self.mesh.shape != (self.num_nodes, 3):
-            raise ValueError('incorrect mesh shape (should be num_nodes by 3)')
+            try:
+                self.mesh = self.mesh.reshape((self.num_nodes, 3))
+            except:
+                raise ValueError('incorrect mesh shape (should be num_nodes by 3)')
 
         if cs.area.shape != (self.num_elements,):
             raise ValueError('CS shape does not match the number of elements')
