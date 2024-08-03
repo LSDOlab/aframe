@@ -230,7 +230,7 @@ class CSEllipse:
 
 
 class Beam:
-    def __init__(self, name:str, mesh:csdl.Variable, material:Material, cs:Union[CSBox, CSTube]):
+    def __init__(self, name:str, mesh:csdl.Variable, material:Material, cs:Union[CSBox, CSTube], z:bool=False):
         """Initialize a beam.
 
         Parameters
@@ -243,6 +243,8 @@ class Beam:
             The material of the instance.
         cs : Union[CSBox, CSTube]
             The cross-section of the instance.
+        z : bool, optional
+            Whether the beam is vertical along the z axis, by default False.
 
         Raises
         ------
@@ -268,6 +270,8 @@ class Beam:
         # optional
         self.bc = []
         self.loads = np.zeros((self.num_nodes, 6))
+        self.added_mass = np.zeros((self.num_nodes))
+        self.z = z
 
         if type(self.mesh) != csdl.Variable:
             print('mesh type is not csdl.Variable')
@@ -281,7 +285,7 @@ class Beam:
         if cs.area.shape != (self.num_elements,):
             raise ValueError('CS shape does not match the number of elements')
 
-    def add_boundary_condition(self, node, dof):
+    def add_boundary_condition(self, node, dof=[1, 1, 1, 1, 1, 1]):
 
         if len(dof) != 6:
             raise ValueError('dof should have length 6 e.g., [1, 1, 1, 1, 1, 1]')
@@ -302,6 +306,18 @@ class Beam:
         
         self.loads += loads
 
+    def add_mass(self, mass, node):
+
+        if not isinstance(node, int):
+            raise ValueError('mass node should be an integer')
+        
+        if node > self.num_nodes - 1 or node < 0:
+            raise ValueError('mass node out of range for ', self.name)
+
+        added_mass = csdl.Variable(value=np.zeros((self.num_nodes)))
+        added_mass = added_mass.set(csdl.slice[node], mass)
+        self.added_mass += added_mass
+
 
 
 
@@ -309,8 +325,9 @@ class Beam:
 class Solution:
     def __init__(self, displacement: dict, mesh: dict, stress: dict, 
                  bkl: dict, cg: dict, dcg: dict, M: csdl.Variable,
-                 K: csdl.Variable, F: csdl.Variable, u0:csdl.Variable,
-                 node_dictionary: dict, index: dict):
+                 K: csdl.Variable, F: csdl.Variable, 
+                #  u0:csdl.Variable,
+                 node_dictionary: dict, index: dict, mass: csdl.Variable):
 
         self.displacement = displacement
         self.mesh = mesh
@@ -321,9 +338,10 @@ class Solution:
         self.M = M
         self.K = K
         self.F = F
-        self.u0 = u0
+        # self.u0 = u0
         self.node_dictionary = node_dictionary
         self.index = index
+        self.mass = mass
 
     def get_displacement(self, beam: Beam):
         return self.displacement[beam.name]

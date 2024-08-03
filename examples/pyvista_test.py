@@ -3,8 +3,8 @@ import numpy as np
 import aframe as af
 
 
-# start recorder
-recorder = csdl.Recorder(inline=False)
+recorder = csdl.Recorder(inline=True)
+# recorder = csdl.Recorder()
 recorder.start()
 
 # create a 1D beam 1 mesh
@@ -38,40 +38,31 @@ frame.add_beam(beam_1)
 # evaluating the frame model returns a solution dataclass
 solution = frame.evaluate()
 
-# displacement
 beam_1_displacement = solution.get_displacement(beam_1)
-
-# displaced mesh
 beam_1_def_mesh = solution.get_mesh(beam_1)
-
-# stress
 beam_1_stress = solution.get_stress(beam_1)
 
-# finish up
 recorder.stop()
-# recorder.visualize_graph(trim_loops=True)
-# print(beam_1_displacement.value)
 
 
-import tracemalloc
-tracemalloc.start()
+import pyvista as pv
 
-sim = csdl.experimental.PySimulator(recorder)
-# sim = csdl.experimental.JaxSimulator(recorder=recorder)
-sim.run()
+plotter = pv.Plotter()
 
-print(tracemalloc.get_traced_memory())
+for beam in frame.beams:
+    mesh0 = beam.mesh.value
+    mesh1 = solution.get_mesh(beam).value
 
-tracemalloc.stop()
+    stress = beam_1_stress.value
 
-print(solution.mass.value)
-print(solution.cg.value)
+    af.plot_mesh(plotter, mesh0, color='lightblue', line_width=10)
+    # plot_mesh(plotter, mesh1, cell_data=stress, cmap='viridis', line_width=20)
+    # plot_points(plotter, mesh1, color='blue', point_size=30)
 
-# import matplotlib.pyplot as plt
-# plt.grid()
-# plt.plot(beam_1_def_mesh.value[:, 1], beam_1_def_mesh.value[:, 2], color='black', linewidth=2)
-# plt.scatter(beam_1_def_mesh.value[:, 1], beam_1_def_mesh.value[:, 2], zorder=10, edgecolor='black', s=50, color='green')
-# plt.xlabel('Dr. Wang')
-# plt.ylabel('Dr. Wang')
-# plt.title('Dr. Bingran Wang, PhD, MD, MBA')
-# plt.show()
+    # plot_cyl(plotter, mesh1, cell_data=stress, cs_data=beam_1_cs.radius.value)
+
+    height = np.ones((beam.num_elements)) * 0.2
+    width = np.ones((beam.num_elements)) * 0.2
+    af.plot_box(plotter, mesh1, height, width, cell_data=stress)
+
+plotter.show()
