@@ -66,12 +66,13 @@ tracemalloc.stop()
 
 print(solution.mass.value)
 print(solution.cg.value)
+print(beam_1_displacement.value)
 
-# import matplotlib.pyplot as plt
-# plt.grid()
-# plt.plot(beam_1_def_mesh.value[:, 1], beam_1_def_mesh.value[:, 2], color='black', linewidth=2)
-# plt.scatter(beam_1_def_mesh.value[:, 1], beam_1_def_mesh.value[:, 2], zorder=10, edgecolor='black', s=50, color='green')
-# plt.xlabel('Dr. Wang')
-# plt.ylabel('Dr. Wang')
-# plt.title('Dr. Bingran Wang, PhD, MD, MBA')
-# plt.show()
+import matplotlib.pyplot as plt
+plt.grid()
+plt.plot(beam_1_def_mesh.value[:, 1], beam_1_def_mesh.value[:, 2], color='black', linewidth=2)
+plt.scatter(beam_1_def_mesh.value[:, 1], beam_1_def_mesh.value[:, 2], zorder=10, edgecolor='black', s=50, color='green')
+plt.xlabel('Dr. Wang')
+plt.ylabel('Dr. Wang')
+plt.title('Dr. Bingran Wang, PhD, MD, MBA')
+plt.show()

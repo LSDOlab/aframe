@@ -43,7 +43,6 @@ class Frame:
             cp = (mesh[i + 1, :] - mesh[i, :]) / L
             ll, mm, nn = cp[0], cp[1], cp[2]
             D = (ll**2 + mm**2)**0.5
-            D = D + 1E-12
 
             block = csdl.Variable(value=np.zeros((3, 3)))
 
@@ -331,6 +330,7 @@ class Frame:
 
         num_unique_nodes = len(node_set)
         dimension = num_unique_nodes * 6
+
         index = {list(node_set)[i]: i for i in range(num_unique_nodes)}
 
         # construct the global stiffness and mass matrices
@@ -480,13 +480,13 @@ class Frame:
             local_stiffness, transformations = local_stiffness_storage[j], transformations_storage[j]
 
             element_beam_loads = csdl.Variable(value=np.zeros((beam.num_elements, 12)))
-            element_disp = csdl.Variable(value=np.zeros((12)))
+            # element_disp = csdl.Variable(value=np.zeros((12)))
 
             for i in range(beam.num_elements):
                 node_a_index = index[node_dictionary[beam.name][i]] * 6
                 node_b_index = index[node_dictionary[beam.name][i + 1]] * 6
 
-                # element_disp = csdl.Variable(value=np.zeros((12))) # save some memory by moving this upwards
+                element_disp = csdl.Variable(value=np.zeros((12))) # save some memory by moving this upwards
                 element_disp = element_disp.set(csdl.slice[0:6], U[node_a_index:node_a_index + 6])
                 element_disp = element_disp.set(csdl.slice[6:12], U[node_b_index:node_b_index + 6])
 
