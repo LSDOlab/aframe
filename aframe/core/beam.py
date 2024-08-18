@@ -1,13 +1,13 @@
 import numpy as np
-import pyframe as pf
+import aframe as af
 import csdl_alpha as csdl
 
 class Beam:
 
     def __init__(self, name:str, 
                  mesh:csdl.Variable, 
-                 material:'pf.Material', 
-                 cs:'pf.cs',
+                 material:'af.Material', 
+                 cs:'af.cs',
                  z=False):
         
         self.name = name

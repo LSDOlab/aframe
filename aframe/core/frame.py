@@ -1,7 +1,7 @@
 import numpy as np
-import pyframe as pf
-import scipy.sparse as sp
-import scipy.sparse.linalg as spla
+import aframe as af
+# import scipy.sparse as sp
+# import scipy.sparse.linalg as spla
 import csdl_alpha as csdl
 
 class Frame:
@@ -14,7 +14,7 @@ class Frame:
         self.U = None
 
 
-    def add_beam(self, beam:'pf.CSDLBeam'):
+    def add_beam(self, beam:'af.Beam'):
 
         self.beams.append(beam)
 
