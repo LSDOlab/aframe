@@ -1,4 +1,5 @@
-# A linear beam solver written in CSDL
+# A linear Euler-Bernoulli beam solver written in CSDL
+![example](https://github.com/user-attachments/assets/837ee2a2-7174-4929-a1e7-5c44e323b6df)
 
 <!---
 [![Python](https://img.shields.io/pypi/pyversions/lsdo_project_template)](https://img.shields.io/pypi/pyversions/lsdo_project_template)
