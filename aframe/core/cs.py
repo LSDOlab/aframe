@@ -141,7 +141,7 @@ class CSEllipse:
     def _iy(self):
         return np.pi / 4 * self.semi_major_axis * self.semi_minor_axis**3
     
-    
+
     def _iz(self):
         return np.pi / 4 * self.semi_major_axis**3 * self.semi_minor_axis
     
@@ -149,37 +149,6 @@ class CSEllipse:
     def stress(self, element_loads):
 
         pass
-
-
-
-
-
-# @dataclass
-# class CSEllipse:
-#     semi_major_axis: csdl.Variable
-#     semi_minor_axis: csdl.Variable
-
-#     @property
-#     def type(self):
-#         return 'ellipse'
-
-#     @property
-#     def area(self):
-#         return np.pi * self.semi_major_axis * self.semi_minor_axis
-    
-#     @property
-#     def ix(self):
-#         beta = 1 / ((1 + (self.semi_minor_axis / self.semi_major_axis)**2)**0.5)
-#         return (np.pi / 2) * self.semi_major_axis * self.semi_minor_axis**3 * beta
-
-#     @property
-#     def iy(self):
-#         return np.pi / 4 * self.semi_major_axis * self.semi_minor_axis**3
-    
-#     @property
-#     def iz(self):
-#         return np.pi / 4 * self.semi_major_axis**3 * self.semi_minor_axis
-
 
 
 
