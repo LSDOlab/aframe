@@ -248,14 +248,150 @@ class CSBox:
         # w_i = self.width - 2 * self.tweb
         # h_i = self.height - self.ttop - self.tbot
         # return (self.width**3 * self.height - w_i**3 * h_i) / 12
-    
-    def __post_init__(self):
 
-        if type(self.ttop) != csdl.Variable or type(self.tbot) != csdl.Variable:
-            print('ttop/tbot type is not csdl.Variable')
-        
-        if type(self.height) != csdl.Variable or type(self.width) != csdl.Variable:
-            print('height/width type is not csdl.Variable')
 
     def stress(self, element_loads):
-        pass
+
+        stress = csdl.Variable(value=np.zeros((element_loads.shape[0], 5)))
+
+        F_x1 = element_loads[:, 0]
+        # F_y1 = element_loads[:, 1]
+        F_z1 = element_loads[:, 2]
+        M_x1 = element_loads[:, 3]
+        M_y1 = element_loads[:, 4]
+        M_z1 = element_loads[:, 5]
+
+        F_x2 = element_loads[:, 6]
+        # F_y2 = element_loads[:, 7]
+        F_z2 = element_loads[:, 8]
+        M_x2 = element_loads[:, 9]
+        M_y2 = element_loads[:, 10]
+        M_z2 = element_loads[:, 11]
+
+
+        # average the nodal loads
+        F_x = (F_x1 + F_x2) / 2
+        # F_y = (F_y1 + F_y2) / 2
+        F_z = (F_z1 + F_z2) / 2
+        M_x = (M_x1 + M_x2) / 2
+        M_y = (M_y1 + M_y2) / 2
+        M_z = (M_z1 + M_z2) / 2
+
+        # the axial stress is common to all stress evaluation points
+        axial_stress = F_x / self.area
+
+
+        # compute the von-mises stress at point 0
+        z = -self.width / 2
+        y = self.height / 2
+        p = (z**2 + y**2)**0.5
+        p0_torsional_stress = M_x * p / self.ix
+        p0_bending_stress_y = M_y * y / self.iy
+        p0_bending_stress_z = M_z * z / self.iz
+        p0_axial_stress = axial_stress + p0_bending_stress_y + p0_bending_stress_z
+        p0__von_mises = ((p0_axial_stress)**2 + 3*(p0_torsional_stress)**2 + 1E-8)**0.5
+        stress = stress.set(csdl.slice[:, 0], p0__von_mises)
+
+        # compute the von-mises stress at point 1
+        z = self.width / 2
+        y = self.height / 2
+        p = (z**2 + y**2)**0.5
+        p1_torsional_stress = M_x * p / self.ix
+        p1_bending_stress_y = M_y * y / self.iy
+        p1_bending_stress_z = M_z * z / self.iz
+        p1_axial_stress = axial_stress + p1_bending_stress_y + p1_bending_stress_z
+        p1_von_mises = ((p1_axial_stress)**2 + 3*(p1_torsional_stress)**2 + 1E-8)**0.5
+        stress = stress.set(csdl.slice[:, 1], p1_von_mises)
+
+        # compute the von-mises stress at point 2
+        z = self.width / 2
+        y = -self.height / 2
+        p = (z**2 + y**2)**0.5
+        p2_torsional_stress = M_x * p / self.ix
+        p2_bending_stress_y = M_y * y / self.iy
+        p2_bending_stress_z = M_z * z / self.iz
+        p2_axial_stress = axial_stress + p2_bending_stress_y + p2_bending_stress_z
+        p2_von_mises = ((p2_axial_stress)**2 + 3*(p2_torsional_stress)**2 + 1E-8)**0.5
+        stress = stress.set(csdl.slice[:, 2], p2_von_mises)
+
+        # compute the von-mises stress at point 3
+        z = -self.width / 2
+        y = -self.height / 2
+        p = (z**2 + y**2)**0.5
+        p3_torsional_stress = M_x * p / self.ix
+        p3_bending_stress_y = M_y * y / self.iy
+        p3_bending_stress_z = M_z * z / self.iz
+        p3_axial_stress = axial_stress + p3_bending_stress_y + p3_bending_stress_z
+        p3_von_mises = ((p3_axial_stress)**2 + 3*(p3_torsional_stress)**2 + 1E-8)**0.5
+        stress = stress.set(csdl.slice[:, 3], p3_von_mises)
+
+        # compute the von-mises stress at point 4
+        z = -self.width / 2
+        y = 0
+        p = (z**2 + y**2)**0.5
+        # approx first moment of area (Q) at point 4
+        tcap = (self.ttop + self.tbot) / 2
+        Q = self.width * tcap * (self.height / 2) + 2 * (self.height / 2) * self.tweb * (self.height / 4)
+        p4_torsional_stress = M_x * p / self.ix
+        p4_shear_stress = F_z * Q / (self.iy * 2 * self.tweb + 1e-8)
+        p4_bending_stress_y = M_y * y / self.iy
+        p4_bending_stress_z = M_z * z / self.iz
+        p4_axial_stress = axial_stress + p4_bending_stress_y + p4_bending_stress_z
+        p4_von_mises = ((p4_axial_stress)**2 + 3*(p4_torsional_stress + p4_shear_stress)**2 + 1E-8)**0.5
+        stress = stress.set(csdl.slice[:, 4], p4_von_mises)
+
+
+        return stress
+
+        
+
+        """
+        # the stress evaluation point coordinates
+                coordinate_list = []
+                coordinate_list.append((-width / 2, height / 2)) # point 0
+                coordinate_list.append((width / 2, height / 2)) # point 1
+                coordinate_list.append((width / 2, -height / 2)) # point 2
+                coordinate_list.append((-width / 2, -height / 2)) # point 3
+                coordinate_list.append((-width / 2, 0)) # point 4
+
+                # first moment of area (Q) at point 4
+                Q = width * ttop * (height / 2) + 2 * (height / 2) * tweb * (height / 4)
+
+                # box beam signum function for buckling computations
+                my_delta = M_y / ((M_y**2 + 1E-6)**0.5) # signum function
+
+                beam_stress = csdl.Variable(value=np.zeros((beam.num_elements, 5)))
+                s4bkl_top, s4bkl_bot = 0, 0
+                for i in range(5):
+                    coordinate = coordinate_list[i]
+                    z, y = coordinate[0], coordinate[1]
+                    p = (z**2 + y**2)**0.5
+
+                    normal_stress = F_x / beam.cs.area
+                    torsional_stress = M_x * p / beam.cs.ix
+                    bending_stress_y = M_y * y / beam.cs.iy
+                    bending_stress_z = M_z * z / beam.cs.iz
+
+                    axial_stress = normal_stress + bending_stress_y + bending_stress_z
+
+                    # ********************** shear stress stuff for point 4 *******************
+                    if i == 4:
+                        shear_stress = F_z * Q / (beam.cs.iy * 2 * tweb + 1e-8)
+                    else: 
+                        shear_stress = 0
+
+                    tau = torsional_stress + shear_stress
+
+                    von_mises = ((axial_stress)**2 + 3*(tau)**2 + 1E-8)**0.5
+                    beam_stress = beam_stress.set(csdl.slice[:, i], von_mises)
+
+                    # ************ signed buckling stress calculation *******************
+                    if i == 0 or i == 1: # average across the top two eval points
+                        s4bkl_top = s4bkl_top + 0.5 * (my_delta * ((axial_stress + bending_stress_y + bending_stress_z)**2)**0.5)
+
+                    if i == 2 or i == 3: # average across the bottom two eval points
+                        s4bkl_bot = s4bkl_bot + 0.5 * (-1 * my_delta * ((axial_stress + bending_stress_y + bending_stress_z)**2)**0.5)
+
+                # add the beam stress to the stress dictionary
+                stress[beam.name] = beam_stress
+                """
