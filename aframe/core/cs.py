@@ -114,6 +114,73 @@ class CSCircle:
 
 
 
+class CSEllipse:
+    def __init__(self, 
+                 semi_major_axis:csdl.Variable,
+                 semi_minor_axis:csdl.Variable
+                 ):
+        
+        self.semi_major_axis = semi_major_axis
+        self.semi_minor_axis = semi_minor_axis
+
+        self.area = self._area()
+        self.ix = self._ix()
+        self.iy = self._iy()
+        self.iz = self._iz()
+
+
+    def _area(self):
+        return np.pi * self.semi_major_axis * self.semi_minor_axis
+    
+
+    def _ix(self):
+        beta = 1 / ((1 + (self.semi_minor_axis / self.semi_major_axis)**2)**0.5)
+        return (np.pi / 2) * self.semi_major_axis * self.semi_minor_axis**3 * beta
+    
+
+    def _iy(self):
+        return np.pi / 4 * self.semi_major_axis * self.semi_minor_axis**3
+    
+    
+    def _iz(self):
+        return np.pi / 4 * self.semi_major_axis**3 * self.semi_minor_axis
+    
+
+    def stress(self, element_loads):
+
+        pass
+
+
+
+
+
+# @dataclass
+# class CSEllipse:
+#     semi_major_axis: csdl.Variable
+#     semi_minor_axis: csdl.Variable
+
+#     @property
+#     def type(self):
+#         return 'ellipse'
+
+#     @property
+#     def area(self):
+#         return np.pi * self.semi_major_axis * self.semi_minor_axis
+    
+#     @property
+#     def ix(self):
+#         beta = 1 / ((1 + (self.semi_minor_axis / self.semi_major_axis)**2)**0.5)
+#         return (np.pi / 2) * self.semi_major_axis * self.semi_minor_axis**3 * beta
+
+#     @property
+#     def iy(self):
+#         return np.pi / 4 * self.semi_major_axis * self.semi_minor_axis**3
+    
+#     @property
+#     def iz(self):
+#         return np.pi / 4 * self.semi_major_axis**3 * self.semi_minor_axis
+
+
 
 
 
@@ -252,6 +319,16 @@ class CSBox:
 
     def stress(self, element_loads):
 
+        """
+        0-----------------1
+        |                 |
+        |                 |
+        4                 |
+        |                 |
+        |                 |
+        3-----------------2
+        """
+
         stress = csdl.Variable(value=np.zeros((element_loads.shape[0], 5)))
 
         F_x1 = element_loads[:, 0]
@@ -343,55 +420,7 @@ class CSBox:
 
         return stress
 
-        
+    
+    def buckle(self, element_loads):
 
-        """
-        # the stress evaluation point coordinates
-                coordinate_list = []
-                coordinate_list.append((-width / 2, height / 2)) # point 0
-                coordinate_list.append((width / 2, height / 2)) # point 1
-                coordinate_list.append((width / 2, -height / 2)) # point 2
-                coordinate_list.append((-width / 2, -height / 2)) # point 3
-                coordinate_list.append((-width / 2, 0)) # point 4
-
-                # first moment of area (Q) at point 4
-                Q = width * ttop * (height / 2) + 2 * (height / 2) * tweb * (height / 4)
-
-                # box beam signum function for buckling computations
-                my_delta = M_y / ((M_y**2 + 1E-6)**0.5) # signum function
-
-                beam_stress = csdl.Variable(value=np.zeros((beam.num_elements, 5)))
-                s4bkl_top, s4bkl_bot = 0, 0
-                for i in range(5):
-                    coordinate = coordinate_list[i]
-                    z, y = coordinate[0], coordinate[1]
-                    p = (z**2 + y**2)**0.5
-
-                    normal_stress = F_x / beam.cs.area
-                    torsional_stress = M_x * p / beam.cs.ix
-                    bending_stress_y = M_y * y / beam.cs.iy
-                    bending_stress_z = M_z * z / beam.cs.iz
-
-                    axial_stress = normal_stress + bending_stress_y + bending_stress_z
-
-                    # ********************** shear stress stuff for point 4 *******************
-                    if i == 4:
-                        shear_stress = F_z * Q / (beam.cs.iy * 2 * tweb + 1e-8)
-                    else: 
-                        shear_stress = 0
-
-                    tau = torsional_stress + shear_stress
-
-                    von_mises = ((axial_stress)**2 + 3*(tau)**2 + 1E-8)**0.5
-                    beam_stress = beam_stress.set(csdl.slice[:, i], von_mises)
-
-                    # ************ signed buckling stress calculation *******************
-                    if i == 0 or i == 1: # average across the top two eval points
-                        s4bkl_top = s4bkl_top + 0.5 * (my_delta * ((axial_stress + bending_stress_y + bending_stress_z)**2)**0.5)
-
-                    if i == 2 or i == 3: # average across the bottom two eval points
-                        s4bkl_bot = s4bkl_bot + 0.5 * (-1 * my_delta * ((axial_stress + bending_stress_y + bending_stress_z)**2)**0.5)
-
-                # add the beam stress to the stress dictionary
-                stress[beam.name] = beam_stress
-                """
+        pass
