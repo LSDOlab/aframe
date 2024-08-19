@@ -12,6 +12,8 @@ class Frame:
         self.acc = None
         self.displacement = {}
         self.U = None
+        self.cg = None
+        self.mass = None
 
 
     def add_beam(self, beam:'af.Beam'):
@@ -75,14 +77,21 @@ class Frame:
         return dim, num
     
 
-    def compute_mass(self):
+    def _mass_properties(self):
 
         # mass properties
         mass = 0
+        rmvec = 0
         for beam in self.beams:
-            mass += beam._mass()
+            beam_mass, beam_rmvec = beam._mass()
+            mass += beam_mass
+            rmvec += beam_rmvec
 
-        return mass
+        cg = rmvec / mass
+        self.cg = cg
+        self.mass = mass
+
+        return None
     
 
     def compute_stress(self):
@@ -212,5 +221,8 @@ class Frame:
             reshaped_U = csdl.transpose(csdl.vstack([U[map_u_to_d_x], U[map_u_to_d_y], U[map_u_to_d_z]]))
             self.displacement[beam.name] = self.displacement[beam.name].set(csdl.slice[:, :], reshaped_U)
 
+
+        # mass properties
+        self._mass_properties()
 
         return None

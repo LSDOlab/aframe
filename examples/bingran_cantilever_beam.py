@@ -44,6 +44,9 @@ beam_1_displacement = frame.displacement[beam_1.name]
 # displaced mesh
 beam_1_def_mesh = beam_1_mesh + beam_1_displacement
 
+# cg
+cg = frame.cg
+
 # stress
 stress = frame.compute_stress()
 beam_1_strain = stress[beam_1.name]
@@ -64,7 +67,7 @@ print(tracemalloc.get_traced_memory())
 
 tracemalloc.stop()
 
-
+print(cg.value)
 print(beam_1_displacement.value)
 
 import matplotlib.pyplot as plt

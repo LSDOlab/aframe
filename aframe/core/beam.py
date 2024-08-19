@@ -386,5 +386,10 @@ class Beam:
         element_masses = area * lengths * rho
         beam_mass = csdl.sum(element_masses)
 
-        return beam_mass
+        rmvec = 0
+        for i in range(self.num_elements):
+            cg = (self.mesh[i + 1, :] + self.mesh[i, :]) / 2
+            rmvec += cg * element_masses[i]
+
+        return beam_mass, rmvec
 

@@ -39,7 +39,7 @@ disp = frame.displacement['beam_1']
 disp.set_as_constraint(upper=0.5)
 
 
-mass = frame.compute_mass()
+mass = frame.mass
 mass.set_as_objective(scaler=1)
 
 recorder.stop()
