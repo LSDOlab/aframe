@@ -8,6 +8,7 @@ recorder.start()
 
 num_beam_nodes = 9
 
+# Setting the beam nodes (num_nodes, 3) where 3 refers to x, y, z coordinates
 beam_nodes = csdl.Variable(
     value=np.array([
         [-3.53927E+00,2.96057E-05,-2.63734E+00],
@@ -22,6 +23,7 @@ beam_nodes = csdl.Variable(
     ])
 )
 
+# Thicknesses (num_beam_nodes-1)
 tbot = csdl.Variable(value=np.array([
     4.7226865E-03,
     4.3909194E-03,
@@ -46,6 +48,7 @@ ttop = csdl.Variable(value=np.array([
 
 tweb = csdl.Variable(value=3.00E-04 * np.ones((num_beam_nodes-1, )))
 
+# beam width
 width = csdl.Variable(value=np.array([
     8.087064E-01,
     7.670528E-01,
@@ -57,6 +60,7 @@ width = csdl.Variable(value=np.array([
     2.467123E-01,
 ]))
 
+# beam height
 height = csdl.Variable(value=np.array([
     2.6502895E-01,
     2.5133992E-01,
@@ -68,6 +72,7 @@ height = csdl.Variable(value=np.array([
     1.0655984E-01,
 ]))
 
+# Beam nodal forces (num_nodes, 3) (x, y, z)
 # beam_forces = np.array([
 #     [3.028972E+02,1.940171E+02,-4.005064E+03],
 #     [5.575601E+02,3.279875E+02,-6.741551E+03],
@@ -92,6 +97,8 @@ beam_forces = np.array([
     [0,0,-1.475417E+03],
 ])
 
+# Setting the loads (num_beam_nodes, 6) where the first three loads are the forces and the last three are moments;
+#  here we don't apply any moments so the [:, 3:] section of the loads array will be zero
 beam_loads = np.zeros((num_beam_nodes, 6))
 beam_loads[:, 0:3] = beam_forces
 
