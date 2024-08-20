@@ -108,12 +108,36 @@ class Frame:
 
             stress[beam.name] = beam_stress
         return stress
+    
 
+    def _displacements(self):
+        U = self.U
+        # find the displacements
+        for beam in self.beams:
+            self.displacement[beam.name] = csdl.Variable(value=np.zeros((beam.num_nodes, 3)))
+            map = beam.map
+
+            map_u_to_d_x, map_u_to_d_y, map_u_to_d_z = [], [], []
+            for i in range(beam.num_nodes):
+                idx = map[i]
+                map_u_to_d_x.append(idx)
+                map_u_to_d_y.append(idx + 1)
+                map_u_to_d_z.append(idx + 2)
+                # extract the (x, y, z) nodal displacement
+                # displacement[beam.name] = displacement[beam.name].set(csdl.slice[i, :], U[idx:idx+3])
+
+            reshaped_U = csdl.transpose(csdl.vstack([U[map_u_to_d_x], U[map_u_to_d_y], U[map_u_to_d_z]]))
+            self.displacement[beam.name] = self.displacement[beam.name].set(csdl.slice[:, :], reshaped_U)
+
+        return None
+    
 
     def solve(self, do_residual=False, U=None, U_dotdot=None):
 
         dim, num = self._utils()
-        
+
+        # mass properties
+        self._mass_properties()
         
         # create the global stiffness matrix
         # and the global mass matrix
@@ -204,30 +228,18 @@ class Frame:
         if do_residual:
             R = K * U + M * U_dotdot - F
             self.residual = R
-        else:
-            U = csdl.solve_linear(K, F)
             self.U = U
 
+            # find the displacements
+            self._displacements()
+
+        else:
+            UU = csdl.solve_linear(K, F)
+            self.U = UU
+            self.residual = csdl.matvec(K, UU) - F
 
             # find the displacements
-            for beam in self.beams:
-                self.displacement[beam.name] = csdl.Variable(value=np.zeros((beam.num_nodes, 3)))
-                map = beam.map
+            self._displacements()
 
-                map_u_to_d_x, map_u_to_d_y, map_u_to_d_z = [], [], []
-                for i in range(beam.num_nodes):
-                    idx = map[i]
-                    map_u_to_d_x.append(idx)
-                    map_u_to_d_y.append(idx + 1)
-                    map_u_to_d_z.append(idx + 2)
-                    # extract the (x, y, z) nodal displacement
-                    # displacement[beam.name] = displacement[beam.name].set(csdl.slice[i, :], U[idx:idx+3])
-
-                reshaped_U = csdl.transpose(csdl.vstack([U[map_u_to_d_x], U[map_u_to_d_y], U[map_u_to_d_z]]))
-                self.displacement[beam.name] = self.displacement[beam.name].set(csdl.slice[:, :], reshaped_U)
-
-
-        # mass properties
-        self._mass_properties()
 
         return None
