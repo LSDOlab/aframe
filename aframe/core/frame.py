@@ -226,7 +226,7 @@ class Frame:
 
         # solve the system of equations
         if do_residual:
-            R = K * U + M * U_dotdot - F
+            R = csdl.matvec(K, U) + csdl.matvec(M, U_dotdot) - F
             self.residual = R
             self.U = U
 
