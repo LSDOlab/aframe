@@ -11,10 +11,11 @@ class Frame:
         self.joints = []
         self.acc = None
         self.displacement = {}
-        self.U = None
         self.cg = None
         self.mass = None
         self.residual = None
+        self.dim = None
+        self.num = None
 
 
     def add_beam(self, beam:'af.Beam'):
@@ -81,15 +82,13 @@ class Frame:
     def _mass_properties(self):
 
         # mass properties
-        mass = 0
-        rmvec = 0
+        mass, rmvec = 0, 0
         for beam in self.beams:
             beam_mass, beam_rmvec = beam._mass()
             mass += beam_mass
             rmvec += beam_rmvec
 
-        cg = rmvec / mass
-        self.cg = cg
+        self.cg = rmvec / mass
         self.mass = mass
 
         return None
@@ -110,8 +109,8 @@ class Frame:
         return stress
     
 
-    def _displacements(self):
-        U = self.U
+    def _displacements(self, U):
+
         # find the displacements
         for beam in self.beams:
             self.displacement[beam.name] = csdl.Variable(value=np.zeros((beam.num_nodes, 3)))
@@ -132,17 +131,12 @@ class Frame:
         return None
     
 
-    def solve(self, do_residual=False, U=None, U_dotdot=None):
+    def _global_matrices(self):
 
-        dim, num = self._utils()
-
-        # mass properties
-        self._mass_properties()
-        
         # create the global stiffness matrix
         # and the global mass matrix
-        K = csdl.Variable(value=np.zeros((dim, dim)))
-        M = csdl.Variable(value=np.zeros((dim, dim)))
+        K = csdl.Variable(value=np.zeros((self.dim, self.dim)))
+        M = csdl.Variable(value=np.zeros((self.dim, self.dim)))
 
         for beam in self.beams:
             transformed_stiffness_matrices = beam.transformed_stiffness
@@ -167,9 +161,13 @@ class Frame:
                 M = M.set(csdl.slice[idxb:idxb+6, idxa:idxa+6], M[idxb:idxb+6, idxa:idxa+6] + mass_matrix[6:, :6])
                 M = M.set(csdl.slice[idxb:idxb+6, idxb:idxb+6], M[idxb:idxb+6, idxb:idxb+6] + mass_matrix[6:, 6:])
 
+        return K, M
+    
+
+    def _global_loads(self, M):
 
         # assemble the global loads vector
-        F = csdl.Variable(value=np.zeros((dim)))
+        F = csdl.Variable(value=np.zeros((self.dim)))
         for beam in self.beams:
             loads = beam.loads # shape: (n, 6)
             map = beam.map # shape: (n,)
@@ -185,7 +183,7 @@ class Frame:
         acc = self.acc
         if acc is not None:
             # expanded_acc = np.tile(self.acc, num)
-            expanded_acc = csdl.expand(acc, (num, 6), action='i->ji').flatten()
+            expanded_acc = csdl.expand(acc, (self.num, 6), action='i->ji').flatten()
             primary_inertial_loads = csdl.matvec(M, expanded_acc)
             F += primary_inertial_loads
 
@@ -201,8 +199,10 @@ class Frame:
                         idx = map[i]
                         F = F.set(csdl.slice[idx:idx+6], F[idx:idx+6] + extra_inertial_loads[i, :])
 
+        return F
+    
 
-
+    def _boundary_conditions(self, K, M, F):
 
         # apply boundary conditions
         indices = []
@@ -219,8 +219,39 @@ class Frame:
         K = K.set(csdl.slice[indices, :], 0)
         K = K.set(csdl.slice[:, indices], 0)
         K = K.set(csdl.slice[indices, indices], 1)
+        # zero the row/column then put a 1 in the diagonal
+        M = M.set(csdl.slice[indices, :], 0)
+        M = M.set(csdl.slice[:, indices], 0)
+        M = M.set(csdl.slice[indices, indices], 1)
         # zero the corresponding load index as well
         F = F.set(csdl.slice[indices], 0)
+
+        return K, M, F
+    
+
+    def dynamic_residual(self):
+        pass
+        # return residual
+    
+
+    def solve(self, do_residual=False, U=None, U_dotdot=None):
+
+        # helper functions
+        dim, num = self._utils()
+        self.dim = dim
+        self.num = num
+
+        # calculate the mass properties
+        self._mass_properties()
+        
+        # create the global stiffness/mass matrices
+        K, M = self._global_matrices()
+
+        # assemble the global loads vector
+        F = self._global_loads(M)
+
+        # apply boundary conditions
+        K, M, F = self._boundary_conditions(K, M, F)
 
 
 
@@ -228,18 +259,16 @@ class Frame:
         if do_residual:
             R = csdl.matvec(K, U) + csdl.matvec(M, U_dotdot) - F
             self.residual = R
-            self.U = U
 
             # find the displacements
-            self._displacements()
+            self._displacements(U)
 
         else:
-            UU = csdl.solve_linear(K, F)
-            self.U = UU
-            self.residual = csdl.matvec(K, UU) - F
+            U = csdl.solve_linear(K, F)
+            self.residual = csdl.matvec(K, U) - F
 
             # find the displacements
-            self._displacements()
+            self._displacements(U)
 
 
         return None
