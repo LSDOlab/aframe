@@ -18,23 +18,23 @@ class CSTube:
         self.precomp = np.pi * (self.outer_radius**4 - self.inner_radius**4)
 
     @property
-    def area(self):
+    def area(self)->csdl.Variable:
         return np.pi * (self.outer_radius**2 - self.inner_radius**2)
     
     @property
-    def ix(self):
+    def ix(self)->csdl.Variable:
         return self.precomp / 2
     
     @property
-    def iy(self):
+    def iy(self)->csdl.Variable:
         return self.precomp / 4
     
     @property
-    def iz(self):
+    def iz(self)->csdl.Variable:
         return self.precomp / 4
     
 
-    def stress(self, element_loads):
+    def stress(self, element_loads)->csdl.Variable:
 
         F_x1 = element_loads[:, 0]
         # F_y1 = element_loads[:, 1]
@@ -91,23 +91,23 @@ class CSCircle:
         self.iz = self._iz()
 
     # @property
-    def _area(self):
+    def _area(self)->csdl.Variable:
         return np.pi * self.radius**2
     
     # @property
-    def _ix(self):
+    def _ix(self)->csdl.Variable:
         return (1 / 2) * self.precomp
     
     # @property
-    def _iy(self):
+    def _iy(self)->csdl.Variable:
         return (1 / 4) * self.precomp
     
     # @property
-    def _iz(self):
+    def _iz(self)->csdl.Variable:
         return (1 / 4) * self.precomp
     
 
-    def stress(self, element_loads):
+    def stress(self, element_loads)->csdl.Variable:
 
         pass
 
@@ -129,20 +129,20 @@ class CSEllipse:
         self.iz = self._iz()
 
 
-    def _area(self):
+    def _area(self)->csdl.Variable:
         return np.pi * self.semi_major_axis * self.semi_minor_axis
     
 
-    def _ix(self):
+    def _ix(self)->csdl.Variable:
         beta = 1 / ((1 + (self.semi_minor_axis / self.semi_major_axis)**2)**0.5)
         return (np.pi / 2) * self.semi_major_axis * self.semi_minor_axis**3 * beta
     
 
-    def _iy(self):
+    def _iy(self)->csdl.Variable:
         return np.pi / 4 * self.semi_major_axis * self.semi_minor_axis**3
     
 
-    def _iz(self):
+    def _iz(self)->csdl.Variable:
         return np.pi / 4 * self.semi_major_axis**3 * self.semi_minor_axis
     
 
@@ -175,7 +175,7 @@ class CSBox:
         self.ix = self._ix()
 
     # @property
-    def _neutral_axis(self):
+    def _neutral_axis(self)->tuple:
         Atop = self.ttop * (self.width - 2 * self.tweb)
         Abot = self.tbot * (self.width - 2 * self.tweb)
 
@@ -185,17 +185,17 @@ class CSBox:
         return (centroid_y, centroid_z)
     
     # @property
-    def type(self):
+    def type(self)->str:
         return 'box'
 
     # @property
-    def _area(self):
+    def _area(self)->csdl.Variable:
         w_i = self.width - 2 * self.tweb
         h_i = self.height - self.ttop - self.tbot
         return self.width * self.height - w_i * h_i
     
     # @property
-    def _ix(self):
+    def _ix(self)->csdl.Variable:
         ix = self.iy + self.iz
         return ix
 
@@ -206,7 +206,7 @@ class CSBox:
         # return numerator / denominator
 
     # @property
-    def _iy(self):
+    def _iy(self)->csdl.Variable:
         neutral_axis = self.neutral_axis
         cy_neutral = neutral_axis[0]
         cz_neutral = neutral_axis[1]
@@ -245,7 +245,7 @@ class CSBox:
         return iy_total
     
     # @property
-    def _iz(self):
+    def _iz(self)->csdl.Variable:
         neutral_axis = self.neutral_axis
         cy_neutral = neutral_axis[0]
         cz_neutral = neutral_axis[1]
@@ -286,7 +286,7 @@ class CSBox:
         # return (self.width**3 * self.height - w_i**3 * h_i) / 12
 
 
-    def stress(self, element_loads):
+    def stress(self, element_loads)->csdl.Variable:
 
         """
         0-----------------1
@@ -390,6 +390,6 @@ class CSBox:
         return stress
 
     
-    def buckle(self, element_loads):
+    def buckle(self, element_loads)->csdl.Variable:
 
         pass

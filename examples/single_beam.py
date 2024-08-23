@@ -52,7 +52,7 @@ recorder.stop()
 sim = csdl.experimental.JaxSimulator(recorder=recorder)
 sim.run()
 """
-prob = CSDLAlphaProblem(problem_name='lander', simulator=sim)
+prob = CSDLAlphaProblem(problem_name='single_beam', simulator=sim)
 optimizer = SLSQP(prob, solver_options={'maxiter': 300, 'ftol': 1e-6, 'disp': True})
 optimizer.solve()
 optimizer.print_results()

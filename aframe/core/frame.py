@@ -39,7 +39,7 @@ class Frame:
             raise ValueError("acc is not None")
         
     
-    def _utils(self):
+    def _utils(self)->tuple[int, int]:
 
         idx = 0
         for beam in self.beams:
@@ -94,7 +94,7 @@ class Frame:
         return None
     
 
-    def compute_stress(self):
+    def compute_stress(self)->dict[csdl.Variable]:
 
         # calculate the elemental loads and stresses
         stress = {}
@@ -110,6 +110,11 @@ class Frame:
     
 
     def _displacements(self, U):
+        """
+        parse the global displacement vector
+        and assign the displacements to each beam
+        in the displacement dictionary
+        """
 
         # find the displacements
         for beam in self.beams:
@@ -131,10 +136,11 @@ class Frame:
         return None
     
 
-    def _global_matrices(self):
+    def _global_matrices(self)->tuple[csdl.Variable, csdl.Variable]:
+        """
+        create the global stiffness/mass matrices
+        """
 
-        # create the global stiffness matrix
-        # and the global mass matrix
         K = csdl.Variable(value=np.zeros((self.dim, self.dim)))
         M = csdl.Variable(value=np.zeros((self.dim, self.dim)))
 
@@ -164,7 +170,12 @@ class Frame:
         return K, M
     
 
-    def _global_loads(self, M):
+    def _global_loads(self, M)->csdl.Variable:
+        """
+        assemble the global loads vector
+        by summing the elemental loads
+        and adding any inertial loads
+        """
 
         # assemble the global loads vector
         F = csdl.Variable(value=np.zeros((self.dim)))
@@ -202,7 +213,13 @@ class Frame:
         return F
     
 
-    def _boundary_conditions(self, K, M, F):
+    def _boundary_conditions(self, K, M, F)->tuple[csdl.Variable, csdl.Variable, csdl.Variable]:
+        """
+        apply boundary conditions
+        by zeroing the rows and columns
+        of the global stiffness/mass matrices
+        and putting 1s in the diagonal
+        """
 
         # apply boundary conditions
         indices = []
@@ -229,12 +246,48 @@ class Frame:
         return K, M, F
     
 
-    def dynamic_residual(self):
-        pass
-        # return residual
+    def dynamic_residual(self, U, U_dot, U_dotdot, damp=False)->csdl.Variable:
+        """
+        a function for Andrew Fletcher
+        """
+        # helper functions
+        dim, num = self._utils()
+        self.dim = dim
+        self.num = num
+
+        # calculate the mass properties
+        self._mass_properties()
+        
+        # create the global stiffness/mass matrices
+        K, M = self._global_matrices()
+
+        # assemble the global loads vector
+        F = self._global_loads(M)
+
+        # apply boundary conditions
+        K, M, F = self._boundary_conditions(K, M, F)
+
+        if damp: C = self._rayleigh_damping(K, M)
+        else: C = csdl.Variable(value=np.zeros((self.dim, self.dim)))
+
+        R = csdl.matvec(K, U) + csdl.matvec(C, U_dot) + csdl.matvec(M, U_dotdot) - F
+        self.residual = R
+
+        # find the displacements
+        self._displacements(U)
+
+        return R
+    
+
+    def _rayleigh_damping(self, K, M, alpha=1E-4, beta=1E-2)->csdl.Variable:
+        C = alpha * M + beta * K
+        return C
     
 
     def solve(self, do_residual=False, U=None, U_dotdot=None):
+        """
+        solve the system of equations
+        """
 
         # helper functions
         dim, num = self._utils()

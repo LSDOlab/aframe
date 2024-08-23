@@ -48,7 +48,7 @@ class Beam:
         self.loads = load
 
     
-    def _lengths(self, mesh):
+    def _lengths(self, mesh)->tuple[csdl.Variable, csdl.Variable, csdl.Variable, csdl.Variable, csdl.Variable]:
         # Compute the squared differences
         diffs = mesh[1:] - mesh[:-1]
         # Sum the squared differences along the rows and take the square root
@@ -66,7 +66,7 @@ class Beam:
         return lengths, ll, mm, nn, D
 
         
-    def _local_stiffness_matrices(self):
+    def _local_stiffness_matrices(self)->csdl.Variable:
 
         A = self.cs.area
         E, G = self.material.E, self.material.G
@@ -153,7 +153,7 @@ class Beam:
         return local_stiffness
     
 
-    def _local_mass_matrices(self):
+    def _local_mass_matrices(self)->csdl.Variable:
         
         A = self.cs.area
         rho = self.material.density
@@ -225,7 +225,7 @@ class Beam:
         return local_mass
 
 
-    def _transforms(self):
+    def _transforms(self)->csdl.Variable:
         """
         no longer used
         use vectorized_transforms() instead
@@ -266,7 +266,7 @@ class Beam:
         return T
 
 
-    def _vectorized_transforms(self):
+    def _vectorized_transforms(self)->csdl.Variable:
         """
         a vectorized version of the transforms() method
         thanks Mark
@@ -312,7 +312,7 @@ class Beam:
         return T
 
 
-    def _transform_stiffness_matrices(self):
+    def _transform_stiffness_matrices(self)->csdl.Variable:
         transforms = self.transforms
         local_stiffness_matrices = self.local_stiffness
 
@@ -334,7 +334,7 @@ class Beam:
         return transformed_stiffness_matrices
     
 
-    def _transform_mass_matrices(self):
+    def _transform_mass_matrices(self)->csdl.Variable:
         transforms = self.transforms
         local_mass_matrices = self.local_mass
 
@@ -356,7 +356,7 @@ class Beam:
         return transformed_mass_matrices
     
 
-    def _recover_loads(self, U):
+    def _recover_loads(self, U)->csdl.Variable:
 
         map = self.map
         displacements = csdl.Variable(value=np.zeros((self.num_elements, 12)))
@@ -377,7 +377,7 @@ class Beam:
         return loads
     
 
-    def _mass(self):
+    def _mass(self)->tuple[csdl.Variable, csdl.Variable]:
 
         lengths = self.lengths
         rho = self.material.density
