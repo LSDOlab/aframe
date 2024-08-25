@@ -3,12 +3,13 @@ import aframe as af
 # import scipy.sparse as sp
 # import scipy.sparse.linalg as spla
 import csdl_alpha as csdl
+from typing import List
 
 class Frame:
     def __init__(self):
 
-        self.beams = []
-        self.joints = []
+        self.beams: List[af.Beam] = []
+        self.joints: List[dict] = []
         self.acc = None
         self.displacement = {}
         self.cg = None
@@ -23,12 +24,14 @@ class Frame:
         self.beams.append(beam)
 
 
-    def add_joint(self, members:list, nodes:list):
+    def add_joint(self, 
+                  members:list, 
+                  nodes:List[int]):
         
         self.joints.append({'members': members, 'nodes': nodes})
 
 
-    def add_acc(self, acc:np.array):
+    def add_acc(self, acc:csdl.Variable):
 
         if acc.shape != (6,):
             raise ValueError("acc must have shape 6")
@@ -109,7 +112,7 @@ class Frame:
         return stress
     
 
-    def _displacements(self, U):
+    def _displacements(self, U:csdl.Variable)->None:
         """
         parse the global displacement vector
         and assign the displacements to each beam
@@ -170,7 +173,8 @@ class Frame:
         return K, M
     
 
-    def _global_loads(self, M)->csdl.Variable:
+    def _global_loads(self, 
+                      M:csdl.Variable)->csdl.Variable:
         """
         assemble the global loads vector
         by summing the elemental loads
@@ -193,7 +197,6 @@ class Frame:
         # add any inertial loads
         acc = self.acc
         if acc is not None:
-            # expanded_acc = np.tile(self.acc, num)
             expanded_acc = csdl.expand(acc, (self.num, 6), action='i->ji').flatten()
             primary_inertial_loads = csdl.matvec(M, expanded_acc)
             F += primary_inertial_loads
@@ -213,23 +216,31 @@ class Frame:
         return F
     
 
-    def _boundary_conditions(self, K, M, F)->tuple[csdl.Variable, csdl.Variable, csdl.Variable]:
+    def _boundary_conditions(self, 
+                             K:csdl.Variable, 
+                             M:csdl.Variable, 
+                             F:csdl.Variable)->tuple[csdl.Variable, csdl.Variable, csdl.Variable]:
         """
         apply boundary conditions
         by zeroing the rows and columns
         of the global stiffness/mass matrices
         and putting 1s in the diagonal
         """
-
         # apply boundary conditions
         indices = []
         for beam in self.beams:
             map = beam.map
 
-            for node in beam.boundary_conditions:
+            # the fixed boundary conditions
+            for node in beam.fixed_boundary_conditions:
                 idx = map[node]
                 for i in range(6):
-                    # if dof[i] == 1:
+                    indices.append(idx + i)
+
+            # the pinned boundary conditions
+            for node in beam.pinned_boundary_conditions:
+                idx = map[node]
+                for i in range(3):
                     indices.append(idx + i)
 
         # zero the row/column then put a 1 in the diagonal
@@ -246,7 +257,11 @@ class Frame:
         return K, M, F
     
 
-    def dynamic_residual(self, U, U_dot, U_dotdot, damp=False)->csdl.Variable:
+    def dynamic_residual(self, 
+                         U:csdl.Variable, 
+                         U_dot:csdl.Variable, 
+                         U_dotdot:csdl.Variable, 
+                         damp=False)->csdl.Variable:
         """
         a function for Andrew Fletcher
         """
@@ -279,12 +294,16 @@ class Frame:
         return R
     
 
-    def _rayleigh_damping(self, K, M, alpha=1E-4, beta=1E-2)->csdl.Variable:
+    def _rayleigh_damping(self, 
+                          K:csdl.Variable, 
+                          M:csdl.Variable,
+                          alpha=1E-4, 
+                          beta=1E-2)->csdl.Variable:
         C = alpha * M + beta * K
         return C
     
 
-    def solve(self, do_residual=False, U=None, U_dotdot=None):
+    def solve(self):
         """
         solve the system of equations
         """
@@ -306,22 +325,11 @@ class Frame:
         # apply boundary conditions
         K, M, F = self._boundary_conditions(K, M, F)
 
-
-
         # solve the system of equations
-        if do_residual:
-            R = csdl.matvec(K, U) + csdl.matvec(M, U_dotdot) - F
-            self.residual = R
+        U = csdl.solve_linear(K, F)
 
-            # find the displacements
-            self._displacements(U)
-
-        else:
-            U = csdl.solve_linear(K, F)
-            self.residual = csdl.matvec(K, U) - F
-
-            # find the displacements
-            self._displacements(U)
+        # find the displacements
+        self._displacements(U)
 
 
         return None

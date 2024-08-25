@@ -62,7 +62,8 @@ class CSTube:
         axial_stress = F_x / self.area
         shear_stress = M_x * self.radius / self.ix
 
-        max_moment = (M_y**2 + M_z**2 + 1E-12) ** 0.5
+        eps = 1E-12
+        max_moment = (M_y**2 + M_z**2 + eps) ** 0.5
         bending_stress = max_moment * self.radius / self.iy
 
         tensile_stress = axial_stress + bending_stress

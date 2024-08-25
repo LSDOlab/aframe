@@ -1,6 +1,8 @@
 import numpy as np
 import aframe as af
 import csdl_alpha as csdl
+from typing import List
+
 
 class Beam:
 
@@ -19,9 +21,10 @@ class Beam:
         self.num_elements = self.num_nodes - 1
         self.loads = None
         self.extra_inertial_mass = None
-        self.boundary_conditions = []
+        self.fixed_boundary_conditions: List[int] = []
+        self.pinned_boundary_conditions: List[int] = []
         # map the beam nodes to the global indices
-        self.map = []
+        self.map: List[int] = []
         # precompute lengths
         self.lengths, self.ll, self.mm, self.nn, self.D = self._lengths(mesh)
         # beam-specific functions
@@ -34,8 +37,14 @@ class Beam:
 
     def fix(self, node):
 
-        if node not in self.boundary_conditions:
-            self.boundary_conditions.append(node)
+        if node not in self.fixed_boundary_conditions and node not in self.pinned_boundary_conditions:
+            self.fixed_boundary_conditions.append(node)
+
+    
+    def pin(self, node):
+
+        if node not in self.pinned_boundary_conditions and node not in self.fixed_boundary_conditions:
+            self.pinned_boundary_conditions.append(node)
 
 
     def add_inertial_mass(self, mass, node):
