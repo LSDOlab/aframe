@@ -314,7 +314,8 @@ class Frame:
         self.num = num
 
         # calculate the mass properties
-        self._mass_properties()
+        if self.mass is None:
+            self._mass_properties()
         
         # create the global stiffness/mass matrices
         K, M = self._global_matrices()
