@@ -234,7 +234,7 @@ class Frame:
         # return residual
     
 
-    def solve(self, do_residual=False, U=None, U_dotdot=None):
+    def solve(self, do_residual=False, U=None, U_dot=None, U_dotdot=None):
 
         # helper functions
         dim, num = self._utils()
@@ -257,7 +257,19 @@ class Frame:
 
         # solve the system of equations
         if do_residual:
-            R = csdl.matvec(K, U) + csdl.matvec(M, U_dotdot) - F
+            # define alpha and beta for aluminum
+            # alpha, beta = 0.16, 0.4
+            # alpha, beta = 0.08, 0.2
+            # alpha, beta = 0.04, 0.1
+            # alpha, beta = 0.02, 0.05    # works for E=1e5
+            # alpha, beta = 0.01, 0.025
+            alpha, beta = 0.0075, 0.01875
+            # alpha, beta = 0.005, 0.0125
+            # alpha, beta = 0.002, 0.005  # Works for aluminum
+            # alpha, beta = 0.0002, 0.00005  # Works for aluminum
+            # alpha, beta = 0.0, 0.0  # Works for aluminum
+            D = alpha*K + beta*M
+            R = csdl.matvec(M, U_dotdot) + csdl.matvec(D, U_dot) + csdl.matvec(K, U) - F
             self.residual = R
 
             # find the displacements
