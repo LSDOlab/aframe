@@ -17,6 +17,7 @@ class Frame:
         self.residual = None
         self.dim = None
         self.num = None
+        self.U = None
 
 
     def add_beam(self, beam:'af.Beam'):
@@ -328,6 +329,7 @@ class Frame:
 
         # solve the system of equations
         U = csdl.solve_linear(K, F)
+        self.U = U
 
         # find the displacements
         self._displacements(U)
