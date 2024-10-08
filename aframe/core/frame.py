@@ -336,3 +336,25 @@ class Frame:
 
 
         return None
+    
+
+    def _soliman(self):
+        # helper functions
+        dim, num = self._utils()
+        self.dim = dim
+        self.num = num
+
+        # calculate the mass properties
+        if self.mass is None:
+            self._mass_properties()
+        
+        # create the global stiffness/mass matrices
+        K, M = self._global_matrices()
+
+        # assemble the global loads vector
+        F = self._global_loads(M)
+
+        # apply boundary conditions
+        K, M, F = self._boundary_conditions(K, M, F)
+
+        return K, M, F
