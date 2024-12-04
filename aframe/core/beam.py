@@ -84,7 +84,9 @@ class Beam:
         J = self.cs.ix
         L = self.lengths
 
-        local_stiffness = csdl.Variable(value=np.zeros((self.num_elements, 12, 12)))
+        # local_stiffness = csdl.Variable(value=np.zeros((self.num_elements, 12, 12)))
+        diag = csdl.Variable(value=np.zeros((self.num_elements, 12, 12)))
+        off_diag = csdl.Variable(value=np.zeros((self.num_elements, 12, 12)))
 
         # pre-computations for speed
         AEL = A*E/L
@@ -114,49 +116,65 @@ class Beam:
         EIyL4 = 4*EIyL
         EIyL2 = 2*EIyL
 
-        local_stiffness = local_stiffness.set(csdl.slice[:, 0, 0], AEL)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 1, 1], EIzL312)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 1, 5], EIzL26)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 5, 1], EIzL26)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 2, 2], EIyL312)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 2, 4], nEIyL26)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 4, 2], nEIyL26)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 3, 3], GJL)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 4, 4], EIyL4)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 5, 5], EIzL4)
+        diag = diag.set(csdl.slice[:, 0, 0], AEL)
+        diag = diag.set(csdl.slice[:, 1, 1], EIzL312)
+        diag = diag.set(csdl.slice[:, 2, 2], EIyL312)
+        diag = diag.set(csdl.slice[:, 3, 3], GJL)
+        diag = diag.set(csdl.slice[:, 4, 4], EIyL4)
+        diag = diag.set(csdl.slice[:, 5, 5], EIzL4)
+        diag = diag.set(csdl.slice[:, 6, 6], AEL)
+        diag = diag.set(csdl.slice[:, 7, 7], EIzL312)
+        diag = diag.set(csdl.slice[:, 8, 8], EIyL312)
+        diag = diag.set(csdl.slice[:, 9, 9], GJL)
+        diag = diag.set(csdl.slice[:, 10, 10], EIyL4)
+        diag = diag.set(csdl.slice[:, 11, 11], EIzL4)
+        
 
-        local_stiffness = local_stiffness.set(csdl.slice[:, 0, 6], nAEL)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 1, 7], nEIzL312)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 1, 11], EIzL26)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 2, 8], nEIyL312)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 2, 10], nEIyL26)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 3, 9], nGJL)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 4, 8], EIyL26)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 4, 10], EIyL2)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 5, 7], nEIzL26)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 5, 11], EIzL2)
+        off_diag = off_diag.set(csdl.slice[:, 1, 5], EIzL26)
+        # local_stiffness = local_stiffness.set(csdl.slice[:, 5, 1], EIzL26)
 
-        local_stiffness = local_stiffness.set(csdl.slice[:, 6, 0], nAEL)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 7, 1], nEIzL312)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 7, 5], nEIzL26)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 8, 2], nEIyL312)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 8, 4], EIyL26)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 9, 3], nGJL)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 10, 2], nEIyL26)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 10, 4], EIyL2)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 11, 1], EIzL26)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 11, 5], EIzL2)
+        off_diag = off_diag.set(csdl.slice[:, 2, 4], nEIyL26)
+        # local_stiffness = local_stiffness.set(csdl.slice[:, 4, 2], nEIyL26)
 
-        local_stiffness = local_stiffness.set(csdl.slice[:, 6, 6], AEL)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 7, 7], EIzL312)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 7, 11], nEIzL26)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 11, 7], nEIzL26)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 8, 8], EIyL312)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 8, 10], EIyL26)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 10, 8], EIyL26)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 9, 9], GJL)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 10, 10], EIyL4)
-        local_stiffness = local_stiffness.set(csdl.slice[:, 11, 11], EIzL4)
+        off_diag = off_diag.set(csdl.slice[:, 0, 6], nAEL)
+        # local_stiffness = local_stiffness.set(csdl.slice[:, 6, 0], nAEL)
+
+        off_diag = off_diag.set(csdl.slice[:, 1, 7], nEIzL312)
+        # local_stiffness = local_stiffness.set(csdl.slice[:, 7, 1], nEIzL312)
+
+        off_diag = off_diag.set(csdl.slice[:, 1, 11], EIzL26)
+        # local_stiffness = local_stiffness.set(csdl.slice[:, 11, 1], EIzL26)
+
+        off_diag = off_diag.set(csdl.slice[:, 2, 8], nEIyL312)
+        # local_stiffness = local_stiffness.set(csdl.slice[:, 8, 2], nEIyL312)
+
+        off_diag = off_diag.set(csdl.slice[:, 2, 10], nEIyL26)
+        # local_stiffness = local_stiffness.set(csdl.slice[:, 10, 2], nEIyL26)
+
+        off_diag = off_diag.set(csdl.slice[:, 3, 9], nGJL)
+        # local_stiffness = local_stiffness.set(csdl.slice[:, 9, 3], nGJL)
+
+        off_diag = off_diag.set(csdl.slice[:, 4, 8], EIyL26)
+        # local_stiffness = local_stiffness.set(csdl.slice[:, 8, 4], EIyL26)
+
+        off_diag = off_diag.set(csdl.slice[:, 4, 10], EIyL2)
+        # local_stiffness = local_stiffness.set(csdl.slice[:, 10, 4], EIyL2)
+
+        off_diag = off_diag.set(csdl.slice[:, 5, 7], nEIzL26)
+        # local_stiffness = local_stiffness.set(csdl.slice[:, 7, 5], nEIzL26)
+
+        off_diag = off_diag.set(csdl.slice[:, 5, 11], EIzL2)
+        # local_stiffness = local_stiffness.set(csdl.slice[:, 11, 5], EIzL2)
+
+        off_diag = off_diag.set(csdl.slice[:, 7, 11], nEIzL26)
+        # local_stiffness = local_stiffness.set(csdl.slice[:, 11, 7], nEIzL26)
+
+        off_diag = off_diag.set(csdl.slice[:, 8, 10], EIyL26)
+        # local_stiffness = local_stiffness.set(csdl.slice[:, 10, 8], EIyL26)
+
+
+        local_stiffness = diag + off_diag + csdl.einsum(off_diag, action='ijk->ikj') # symmetric
+
 
 
         return local_stiffness
@@ -187,66 +205,68 @@ class Beam:
         rx2 = J / A
         ncoef35rx2 = ncoef35 * rx2
 
-        local_mass = csdl.Variable(value=np.zeros((self.num_elements, 12, 12)))
+        # local_mass = csdl.Variable(value=np.zeros((self.num_elements, 12, 12)))
+        mdiag = csdl.Variable(value=np.zeros((self.num_elements, 12, 12)))
+        moff_diag = csdl.Variable(value=np.zeros((self.num_elements, 12, 12)))
 
-        local_mass = local_mass.set(csdl.slice[:, 0, 0], coef70)
-        local_mass = local_mass.set(csdl.slice[:, 1, 1], coef78)
-        local_mass = local_mass.set(csdl.slice[:, 2, 2], coef78)
+        mdiag = mdiag.set(csdl.slice[:, 0, 0], coef70)
+        mdiag = mdiag.set(csdl.slice[:, 1, 1], coef78)
+        mdiag = mdiag.set(csdl.slice[:, 2, 2], coef78)
         # local_mass = local_mass.set(csdl.slice[:, 3, 3], coef78 * rx2)
-        local_mass = local_mass.set(csdl.slice[:, 3, 3], coef70 * rx2)
-        local_mass = local_mass.set(csdl.slice[:, 4, 4], coef8aa2)
-        local_mass = local_mass.set(csdl.slice[:, 5, 5], coef8aa2)
-        local_mass = local_mass.set(csdl.slice[:, 6, 6], coef70)
-        local_mass = local_mass.set(csdl.slice[:, 7, 7], coef78)
-        local_mass = local_mass.set(csdl.slice[:, 8, 8], coef78)
-        local_mass = local_mass.set(csdl.slice[:, 9, 9], coef70 * rx2)
-        local_mass = local_mass.set(csdl.slice[:, 10, 10], coef8aa2)
-        local_mass = local_mass.set(csdl.slice[:, 11, 11], coef8aa2)
+        mdiag = mdiag.set(csdl.slice[:, 3, 3], coef70 * rx2)
+        mdiag = mdiag.set(csdl.slice[:, 4, 4], coef8aa2)
+        mdiag = mdiag.set(csdl.slice[:, 5, 5], coef8aa2)
+        mdiag = mdiag.set(csdl.slice[:, 6, 6], coef70)
+        mdiag = mdiag.set(csdl.slice[:, 7, 7], coef78)
+        mdiag = mdiag.set(csdl.slice[:, 8, 8], coef78)
+        mdiag = mdiag.set(csdl.slice[:, 9, 9], coef70 * rx2)
+        mdiag = mdiag.set(csdl.slice[:, 10, 10], coef8aa2)
+        mdiag = mdiag.set(csdl.slice[:, 11, 11], coef8aa2)
 
 
-        local_mass = local_mass.set(csdl.slice[:, 2, 4], ncoef22aa)
+        moff_diag = moff_diag.set(csdl.slice[:, 2, 4], ncoef22aa)
         # local_mass = local_mass.set(csdl.slice[:, 4, 2], ncoef22aa)
 
-        local_mass = local_mass.set(csdl.slice[:, 1, 5], coef22aa)
+        moff_diag = moff_diag.set(csdl.slice[:, 1, 5], coef22aa)
         # local_mass = local_mass.set(csdl.slice[:, 5, 1], coef22aa)
 
-        local_mass = local_mass.set(csdl.slice[:, 0, 6], coef35)
+        moff_diag = moff_diag.set(csdl.slice[:, 0, 6], coef35)
         # local_mass = local_mass.set(csdl.slice[:, 6, 0], coef35)
 
-        local_mass = local_mass.set(csdl.slice[:, 1, 7], coef27)
+        moff_diag = moff_diag.set(csdl.slice[:, 1, 7], coef27)
         # local_mass = local_mass.set(csdl.slice[:, 7, 1], coef27)
 
-        local_mass = local_mass.set(csdl.slice[:, 5, 7], coef13aa)
+        moff_diag = moff_diag.set(csdl.slice[:, 5, 7], coef13aa)
         # local_mass = local_mass.set(csdl.slice[:, 7, 5], coef13aa)
 
-        local_mass = local_mass.set(csdl.slice[:, 2, 8], coef27)
+        moff_diag = moff_diag.set(csdl.slice[:, 2, 8], coef27)
         # local_mass = local_mass.set(csdl.slice[:, 8, 2], coef27)
 
-        local_mass = local_mass.set(csdl.slice[:, 4, 8], ncoef13aa)
+        moff_diag = moff_diag.set(csdl.slice[:, 4, 8], ncoef13aa)
         # local_mass = local_mass.set(csdl.slice[:, 8, 4], ncoef13aa)
 
-        local_mass = local_mass.set(csdl.slice[:, 3, 9], ncoef35rx2)
+        moff_diag = moff_diag.set(csdl.slice[:, 3, 9], ncoef35rx2)
         # local_mass = local_mass.set(csdl.slice[:, 9, 3], ncoef35rx2)
 
-        local_mass = local_mass.set(csdl.slice[:, 2, 10], coef13aa)
+        moff_diag = moff_diag.set(csdl.slice[:, 2, 10], coef13aa)
         # local_mass = local_mass.set(csdl.slice[:, 10, 2], coef13aa)
 
-        local_mass = local_mass.set(csdl.slice[:, 4, 10], ncoef6aa2)
+        moff_diag = moff_diag.set(csdl.slice[:, 4, 10], ncoef6aa2)
         # local_mass = local_mass.set(csdl.slice[:, 10, 4], ncoef6aa2)
 
-        local_mass = local_mass.set(csdl.slice[:, 8, 10], coef22aa)
+        moff_diag = moff_diag.set(csdl.slice[:, 8, 10], coef22aa)
         # local_mass = local_mass.set(csdl.slice[:, 10, 8], coef22aa)
 
-        local_mass = local_mass.set(csdl.slice[:, 1, 11], ncoef13aa)
+        moff_diag = moff_diag.set(csdl.slice[:, 1, 11], ncoef13aa)
         # local_mass = local_mass.set(csdl.slice[:, 11, 1], ncoef13aa)
 
-        local_mass = local_mass.set(csdl.slice[:, 5, 11], ncoef6aa2)
+        moff_diag = moff_diag.set(csdl.slice[:, 5, 11], ncoef6aa2)
         # local_mass = local_mass.set(csdl.slice[:, 11, 5], ncoef6aa2)
 
-        local_mass = local_mass.set(csdl.slice[:, 7, 11], ncoef22aa)
+        moff_diag = moff_diag.set(csdl.slice[:, 7, 11], ncoef22aa)
         # local_mass = local_mass.set(csdl.slice[:, 11, 7], ncoef22aa)
 
-        local_mass = local_mass + csdl.einsum(local_mass, action='ijk->ikj') # symmetric
+        local_mass = mdiag + moff_diag + csdl.einsum(moff_diag, action='ijk->ikj') # symmetric
 
 
         return local_mass
