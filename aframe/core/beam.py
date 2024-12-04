@@ -192,43 +192,61 @@ class Beam:
         local_mass = local_mass.set(csdl.slice[:, 0, 0], coef70)
         local_mass = local_mass.set(csdl.slice[:, 1, 1], coef78)
         local_mass = local_mass.set(csdl.slice[:, 2, 2], coef78)
-        local_mass = local_mass.set(csdl.slice[:, 3, 3], coef78 * rx2)
-        local_mass = local_mass.set(csdl.slice[:, 2, 4], ncoef22aa)
-        local_mass = local_mass.set(csdl.slice[:, 4, 2], ncoef22aa)
+        # local_mass = local_mass.set(csdl.slice[:, 3, 3], coef78 * rx2)
+        local_mass = local_mass.set(csdl.slice[:, 3, 3], coef70 * rx2)
         local_mass = local_mass.set(csdl.slice[:, 4, 4], coef8aa2)
-        local_mass = local_mass.set(csdl.slice[:, 1, 5], coef22aa)
-        local_mass = local_mass.set(csdl.slice[:, 5, 1], coef22aa)
         local_mass = local_mass.set(csdl.slice[:, 5, 5], coef8aa2)
-        local_mass = local_mass.set(csdl.slice[:, 0, 6], coef35)
-        local_mass = local_mass.set(csdl.slice[:, 6, 0], coef35)
         local_mass = local_mass.set(csdl.slice[:, 6, 6], coef70)
-        local_mass = local_mass.set(csdl.slice[:, 1, 7], coef27)
-        local_mass = local_mass.set(csdl.slice[:, 7, 1], coef27)
-        local_mass = local_mass.set(csdl.slice[:, 5, 7], coef13aa)
-        local_mass = local_mass.set(csdl.slice[:, 7, 5], coef13aa)
         local_mass = local_mass.set(csdl.slice[:, 7, 7], coef78)
-        local_mass = local_mass.set(csdl.slice[:, 2, 8], coef27)
-        local_mass = local_mass.set(csdl.slice[:, 8, 2], coef27)
-        local_mass = local_mass.set(csdl.slice[:, 4, 8], ncoef13aa)
-        local_mass = local_mass.set(csdl.slice[:, 8, 4], ncoef13aa)
         local_mass = local_mass.set(csdl.slice[:, 8, 8], coef78)
-        local_mass = local_mass.set(csdl.slice[:, 3, 9], ncoef35rx2)
-        local_mass = local_mass.set(csdl.slice[:, 9, 3], ncoef35rx2)
         local_mass = local_mass.set(csdl.slice[:, 9, 9], coef70 * rx2)
-        local_mass = local_mass.set(csdl.slice[:, 2, 10], coef13aa)
-        local_mass = local_mass.set(csdl.slice[:, 10, 2], coef13aa)
-        local_mass = local_mass.set(csdl.slice[:, 4, 10], ncoef6aa2)
-        local_mass = local_mass.set(csdl.slice[:, 10, 4], ncoef6aa2)
-        local_mass = local_mass.set(csdl.slice[:, 8, 10], coef22aa)
-        local_mass = local_mass.set(csdl.slice[:, 10, 8], coef22aa)
         local_mass = local_mass.set(csdl.slice[:, 10, 10], coef8aa2)
-        local_mass = local_mass.set(csdl.slice[:, 1, 11], ncoef13aa)
-        local_mass = local_mass.set(csdl.slice[:, 11, 1], ncoef13aa)
-        local_mass = local_mass.set(csdl.slice[:, 5, 11], ncoef6aa2)
-        local_mass = local_mass.set(csdl.slice[:, 11, 5], ncoef6aa2)
-        local_mass = local_mass.set(csdl.slice[:, 7, 11], ncoef22aa)
-        local_mass = local_mass.set(csdl.slice[:, 11, 7], ncoef22aa)
         local_mass = local_mass.set(csdl.slice[:, 11, 11], coef8aa2)
+
+
+        local_mass = local_mass.set(csdl.slice[:, 2, 4], ncoef22aa)
+        # local_mass = local_mass.set(csdl.slice[:, 4, 2], ncoef22aa)
+
+        local_mass = local_mass.set(csdl.slice[:, 1, 5], coef22aa)
+        # local_mass = local_mass.set(csdl.slice[:, 5, 1], coef22aa)
+
+        local_mass = local_mass.set(csdl.slice[:, 0, 6], coef35)
+        # local_mass = local_mass.set(csdl.slice[:, 6, 0], coef35)
+
+        local_mass = local_mass.set(csdl.slice[:, 1, 7], coef27)
+        # local_mass = local_mass.set(csdl.slice[:, 7, 1], coef27)
+
+        local_mass = local_mass.set(csdl.slice[:, 5, 7], coef13aa)
+        # local_mass = local_mass.set(csdl.slice[:, 7, 5], coef13aa)
+
+        local_mass = local_mass.set(csdl.slice[:, 2, 8], coef27)
+        # local_mass = local_mass.set(csdl.slice[:, 8, 2], coef27)
+
+        local_mass = local_mass.set(csdl.slice[:, 4, 8], ncoef13aa)
+        # local_mass = local_mass.set(csdl.slice[:, 8, 4], ncoef13aa)
+
+        local_mass = local_mass.set(csdl.slice[:, 3, 9], ncoef35rx2)
+        # local_mass = local_mass.set(csdl.slice[:, 9, 3], ncoef35rx2)
+
+        local_mass = local_mass.set(csdl.slice[:, 2, 10], coef13aa)
+        # local_mass = local_mass.set(csdl.slice[:, 10, 2], coef13aa)
+
+        local_mass = local_mass.set(csdl.slice[:, 4, 10], ncoef6aa2)
+        # local_mass = local_mass.set(csdl.slice[:, 10, 4], ncoef6aa2)
+
+        local_mass = local_mass.set(csdl.slice[:, 8, 10], coef22aa)
+        # local_mass = local_mass.set(csdl.slice[:, 10, 8], coef22aa)
+
+        local_mass = local_mass.set(csdl.slice[:, 1, 11], ncoef13aa)
+        # local_mass = local_mass.set(csdl.slice[:, 11, 1], ncoef13aa)
+
+        local_mass = local_mass.set(csdl.slice[:, 5, 11], ncoef6aa2)
+        # local_mass = local_mass.set(csdl.slice[:, 11, 5], ncoef6aa2)
+
+        local_mass = local_mass.set(csdl.slice[:, 7, 11], ncoef22aa)
+        # local_mass = local_mass.set(csdl.slice[:, 11, 7], ncoef22aa)
+
+        local_mass = local_mass + csdl.einsum(local_mass, action='ijk->ikj') # symmetric
 
 
         return local_mass
