@@ -329,10 +329,6 @@ class Frame:
         # apply boundary conditions
         K, M, F = self._boundary_conditions(K, M, F)
 
-
-        print('rank: ', np.linalg.matrix_rank(K.value))
-        print('shape: ', K.shape)
-
         # solve the system of equations
         U = csdl.solve_linear(K, F)
         self.U = U
