@@ -47,7 +47,9 @@ class Frame:
 
         idx = 0
         for beam in self.beams:
-            beam.map.extend(range(idx, idx + beam.num_nodes))
+            beam.map = []
+            # beam.map.extend(range(idx, idx + beam.num_nodes))
+            beam.map = list(range(idx, idx + beam.num_nodes))
             idx += beam.num_nodes
 
         # re-assign joint nodes
@@ -326,6 +328,10 @@ class Frame:
 
         # apply boundary conditions
         K, M, F = self._boundary_conditions(K, M, F)
+
+
+        print('rank: ', np.linalg.matrix_rank(K.value))
+        print('shape: ', K.shape)
 
         # solve the system of equations
         U = csdl.solve_linear(K, F)
