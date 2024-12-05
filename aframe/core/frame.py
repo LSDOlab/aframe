@@ -43,7 +43,9 @@ class Frame:
 
         idx = 0
         for beam in self.beams:
-            beam.map.extend(range(idx, idx + beam.num_nodes))
+            beam.map = []
+            # beam.map.extend(range(idx, idx + beam.num_nodes))
+            beam.map = list(range(idx, idx + beam.num_nodes))
             idx += beam.num_nodes
 
         # re-assign joint nodes
