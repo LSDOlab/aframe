@@ -203,6 +203,7 @@ class Beam:
         coef8aa2 = coef * 8 * aa2
         ncoef6aa2 = -coef * 6 * aa2
         rx2 = J / A
+        coef70rx2 = coef70 * rx2
         ncoef35rx2 = ncoef35 * rx2
 
         # local_mass = csdl.Variable(value=np.zeros((self.num_elements, 12, 12)))
@@ -213,13 +214,13 @@ class Beam:
         mdiag = mdiag.set(csdl.slice[:, 1, 1], coef78)
         mdiag = mdiag.set(csdl.slice[:, 2, 2], coef78)
         # local_mass = local_mass.set(csdl.slice[:, 3, 3], coef78 * rx2)
-        mdiag = mdiag.set(csdl.slice[:, 3, 3], coef70 * rx2)
+        mdiag = mdiag.set(csdl.slice[:, 3, 3], coef70rx2)
         mdiag = mdiag.set(csdl.slice[:, 4, 4], coef8aa2)
         mdiag = mdiag.set(csdl.slice[:, 5, 5], coef8aa2)
         mdiag = mdiag.set(csdl.slice[:, 6, 6], coef70)
         mdiag = mdiag.set(csdl.slice[:, 7, 7], coef78)
         mdiag = mdiag.set(csdl.slice[:, 8, 8], coef78)
-        mdiag = mdiag.set(csdl.slice[:, 9, 9], coef70 * rx2)
+        mdiag = mdiag.set(csdl.slice[:, 9, 9], coef70rx2)
         mdiag = mdiag.set(csdl.slice[:, 10, 10], coef8aa2)
         mdiag = mdiag.set(csdl.slice[:, 11, 11], coef8aa2)
 
