@@ -3,7 +3,6 @@ import numpy as np
 import csdl_alpha as csdl
 from modopt import CSDLAlphaProblem
 from modopt import SLSQP
-import pickle
 
 recorder = csdl.Recorder(inline=True)
 recorder.start()
@@ -55,14 +54,11 @@ sim = csdl.experimental.JaxSimulator(recorder=recorder)
 sim.run()
 prob = CSDLAlphaProblem(problem_name='single_beam', simulator=sim)
 
-with open('prob.pkl', 'wb') as f:
-    pickle.dump(prob, f)
 
-"""
 optimizer = SLSQP(prob, solver_options={'maxiter': 300, 'ftol': 1e-6, 'disp': True})
 optimizer.solve()
 optimizer.print_results()
-"""
+
 
 print(radius.value)
 print(disp.value)
