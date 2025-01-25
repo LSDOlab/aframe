@@ -55,7 +55,7 @@ sim.run()
 prob = CSDLAlphaProblem(problem_name='single_beam', simulator=sim)
 
 
-optimizer = SLSQP(prob, solver_options={'maxiter': 300, 'ftol': 1e-6, 'disp': True})
+optimizer = SLSQP(prob, solver_options={'maxiter': 300, 'ftol': 1e-6, 'disp': True}, turn_off_outputs=True)
 optimizer.solve()
 optimizer.print_results()
 
