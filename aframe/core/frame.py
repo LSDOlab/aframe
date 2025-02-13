@@ -6,41 +6,59 @@ import csdl_alpha as csdl
 from typing import List
 
 class Frame:
-    def __init__(self):
-
-        self.beams: List[af.Beam] = []
-        self.joints: List[dict] = []
-        self.acc = None
-        self.displacement = {}
-        self.cg = None
-        self.mass = None
-        self.residual = None
-        self.dim = None
-        self.num = None
-        self.U = None
-
-
-    def add_beam(self, beam:'af.Beam'):
-
-        self.beams.append(beam)
-
-
-    def add_joint(self, 
-                  members:list, 
-                  nodes:List[int]):
+    def __init__(self,
+                 beams:List['af.Beam'],
+                 joints:List[dict] = [],
+                 acc:csdl.Variable = None,):
         
-        self.joints.append({'members': members, 'nodes': nodes})
-
-
-    def add_acc(self, acc:csdl.Variable):
-
-        if acc.shape != (6,):
+        if acc is not None and acc.shape != (6,):
             raise ValueError("acc must have shape 6")
 
-        if self.acc is None:
-            self.acc = acc
-        else:
-            raise ValueError("acc is not None")
+        # self.beams: List[af.Beam] = []
+        self.beams = beams
+        # self.joints: List[dict] = []
+        self.joints = joints
+        self.acc = acc
+        self.displacement = {}
+        # self.residual = None
+        self.U = None
+
+        # mass properties
+        self.cg, self.mass = self._mass_properties()
+
+        # helper function
+        self.dim, self.num = self._utils()
+
+        # create stiffness and mass matrices
+        self.K, self.M = self._global_matrices()
+
+        # create the global loads vector
+        self.F = self._global_loads(self.M)
+
+        # apply boundary conditions by zeroing the rows and columns
+        self.K, self.M, self.F = self._boundary_conditions(self.K, self.M, self.F)
+
+
+    # def add_beam(self, beam:'af.Beam'):
+    #     self.beams.append(beam)
+
+
+    # def add_joint(self, 
+    #               members:list, 
+    #               nodes:List[int]):
+        
+    #     self.joints.append({'members': members, 'nodes': nodes})
+
+
+    # def add_acc(self, acc:csdl.Variable):
+
+    #     if acc.shape != (6,):
+    #         raise ValueError("acc must have shape 6")
+
+    #     if self.acc is None:
+    #         self.acc = acc
+    #     else:
+    #         raise ValueError("acc is not None")
         
     
     def _utils(self)->tuple[int, int]:
@@ -85,7 +103,7 @@ class Frame:
         return dim, num
     
 
-    def _mass_properties(self):
+    def _mass_properties(self)->tuple[csdl.Variable, csdl.Variable]:
 
         # mass properties
         mass, rmvec = 0, 0
@@ -94,10 +112,8 @@ class Frame:
             mass += beam_mass
             rmvec += beam_rmvec
 
-        self.cg = rmvec / mass
-        self.mass = mass
-
-        return None
+        cg = rmvec / mass
+        return cg, mass
     
 
     def compute_stress(self)->dict[csdl.Variable]:
@@ -264,46 +280,24 @@ class Frame:
                          U:csdl.Variable, 
                          U_dot:csdl.Variable, 
                          U_dotdot:csdl.Variable, 
-                         damp=False)->csdl.Variable:
-        """
-        a function for Andrew Fletcher
-        """
-        # helper functions
-        dim, num = self._utils()
-        self.dim = dim
-        self.num = num
+                         damp=False,
+                         alpha=1E-4, 
+                         beta=1E-2)->csdl.Variable:
 
         # calculate the mass properties
         self._mass_properties()
-        
-        # create the global stiffness/mass matrices
-        K, M = self._global_matrices()
 
-        # assemble the global loads vector
-        F = self._global_loads(M)
-
-        # apply boundary conditions
-        K, M, F = self._boundary_conditions(K, M, F)
-
-        if damp: C = self._rayleigh_damping(K, M)
+        if damp: C = alpha * self.M + beta * self.K
         else: C = csdl.Variable(value=np.zeros((self.dim, self.dim)))
 
-        R = csdl.matvec(K, U) + csdl.matvec(C, U_dot) + csdl.matvec(M, U_dotdot) - F
-        self.residual = R
+        R = csdl.matvec(self.K, U) + csdl.matvec(C, U_dot) + csdl.matvec(self.M, U_dotdot) - self.F
+        # self.residual = R
 
         # find the displacements
         self._displacements(U)
 
         return R
-    
 
-    def _rayleigh_damping(self, 
-                          K:csdl.Variable, 
-                          M:csdl.Variable,
-                          alpha=1E-4, 
-                          beta=1E-2)->csdl.Variable:
-        C = alpha * M + beta * K
-        return C
     
 
     def solve(self):
@@ -311,27 +305,12 @@ class Frame:
         solve the system of equations
         """
 
-        # helper functions
-        dim, num = self._utils()
-        self.dim = dim
-        self.num = num
-
         # calculate the mass properties
         if self.mass is None:
             self._mass_properties()
-        
-        # create the global stiffness/mass matrices
-        K, M = self._global_matrices()
-
-        # assemble the global loads vector
-        F = self._global_loads(M)
-
-        # apply boundary conditions
-        K, M, F = self._boundary_conditions(K, M, F)
 
         # solve the system of equations
-        U = csdl.solve_linear(K, F)
-        self.U = U
+        self.U = U = csdl.solve_linear(self.K, self.F)
 
         # find the displacements
         self._displacements(U)
@@ -341,22 +320,9 @@ class Frame:
     
 
     def _soliman(self):
-        # helper functions
-        dim, num = self._utils()
-        self.dim = dim
-        self.num = num
 
         # calculate the mass properties
         if self.mass is None:
             self._mass_properties()
-        
-        # create the global stiffness/mass matrices
-        K, M = self._global_matrices()
 
-        # assemble the global loads vector
-        F = self._global_loads(M)
-
-        # apply boundary conditions
-        K, M, F = self._boundary_conditions(K, M, F)
-
-        return K, M, F
+        return self.K, self.M, self.F

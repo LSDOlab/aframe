@@ -322,7 +322,6 @@ class Beam:
     def _vectorized_transforms(self)->csdl.Variable:
         """
         a vectorized version of the transforms() method
-        thanks Mark
         """
         ll = self.ll
         mm = self.mm

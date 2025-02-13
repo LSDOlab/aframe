@@ -33,8 +33,7 @@ beam_1.fix(node=0)
 beam_1.add_load(beam_1_loads)
 
 # instantiate the frame model and add all beams and joints
-frame = af.Frame()
-frame.add_beam(beam_1)
+frame = af.Frame(beams=[beam_1])
 
 # evaluating the frame model returns a solution dataclass
 frame.solve()
