@@ -284,9 +284,6 @@ class Frame:
                          alpha=1E-4, 
                          beta=1E-2)->csdl.Variable:
 
-        # calculate the mass properties
-        self._mass_properties()
-
         if damp: C = alpha * self.M + beta * self.K
         else: C = csdl.Variable(value=np.zeros((self.dim, self.dim)))
 
@@ -301,13 +298,7 @@ class Frame:
     
 
     def solve(self):
-        """
-        solve the system of equations
-        """
-
-        # calculate the mass properties
-        if self.mass is None:
-            self._mass_properties()
+        # solve the system of equations
 
         # solve the system of equations
         self.U = U = csdl.solve_linear(self.K, self.F)
@@ -320,9 +311,5 @@ class Frame:
     
 
     def _soliman(self):
-
-        # calculate the mass properties
-        if self.mass is None:
-            self._mass_properties()
 
         return self.K, self.M, self.F
