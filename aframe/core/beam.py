@@ -34,26 +34,30 @@ class Beam:
         self.transformed_stiffness = self._transform_stiffness_matrices()
         self.transformed_mass = self._transform_mass_matrices()
 
+        self.mass = csdl.sum(self.cs.area * self.lengths * self.material.density)
 
-    def fix(self, node):
+
+    def fix(self, node: int):
 
         if node not in self.fixed_boundary_conditions and node not in self.pinned_boundary_conditions:
             self.fixed_boundary_conditions.append(node)
 
     
-    def pin(self, node):
+    def pin(self, node: int):
 
         if node not in self.pinned_boundary_conditions and node not in self.fixed_boundary_conditions:
             self.pinned_boundary_conditions.append(node)
 
 
-    def add_inertial_mass(self, mass, node):
+    def add_inertial_mass(self, 
+                          mass: csdl.Variable, 
+                          node: int):
         extra_mass = csdl.Variable(value=np.zeros(self.num_nodes))
         extra_mass = extra_mass.set(csdl.slice[node], mass)
         self.extra_inertial_mass = extra_mass
 
 
-    def add_load(self, load):
+    def add_load(self, load: csdl.Variable):
         self.loads = load
 
     

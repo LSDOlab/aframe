@@ -40,11 +40,12 @@ frame.solve()
 
 # displacement
 beam_1_displacement = frame.displacement[beam_1.name]
-beam_1_displacement.set_as_constraint(upper=0.1)
+# beam_1_displacement.set_as_constraint(upper=0.1)
 
 # displaced mesh
 beam_1_def_mesh = beam_1_mesh + beam_1_displacement
 
+beam_1_displacement.set_as_constraint(upper=0.1)
 # cg
 cg = frame.cg
 

@@ -3,7 +3,7 @@ import aframe as af
 # import scipy.sparse as sp
 # import scipy.sparse.linalg as spla
 import csdl_alpha as csdl
-from typing import List
+from typing import List, Dict
 
 class Frame:
     def __init__(self,
@@ -19,7 +19,7 @@ class Frame:
         # self.joints: List[dict] = []
         self.joints = joints
         self.acc = acc
-        self.displacement = {}
+        self.displacement: Dict[str, csdl.Variable] = {}
         # self.residual = None
         self.U = None
 
@@ -298,7 +298,6 @@ class Frame:
     
 
     def solve(self):
-        # solve the system of equations
 
         # solve the system of equations
         self.U = U = csdl.solve_linear(self.K, self.F)
@@ -308,8 +307,3 @@ class Frame:
 
 
         return None
-    
-
-    def _soliman(self):
-
-        return self.K, self.M, self.F
