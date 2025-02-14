@@ -51,10 +51,8 @@ class Beam:
 
     def add_inertial_mass(self, 
                           mass: csdl.Variable, 
-                          node: int):
-        extra_mass = csdl.Variable(value=np.zeros(self.num_nodes))
-        extra_mass = extra_mass.set(csdl.slice[node], mass)
-        self.extra_inertial_mass = extra_mass
+                          ):
+        self.extra_inertial_mass = mass
 
 
     def add_load(self, load: csdl.Variable):
