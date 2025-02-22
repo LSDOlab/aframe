@@ -49,11 +49,12 @@ beam_1.add_load(beam_1_loads)
 beam_2 = af.Beam(name='beam_2', mesh=beam_2_mesh, material=aluminum, cs=beam_2_cs)
 beam_2.add_load(beam_2_loads)
 
+
+# create a joint
+joint_1 = af.Joint(members=[beam_1, beam_2], nodes=[20, 20])
+
 # instantiate the frame model and add all beams and joints
-frame = af.Frame()
-frame.add_beam(beam_1)
-frame.add_beam(beam_2)
-frame.add_joint(members=[beam_1, beam_2], nodes=[20, 20])
+frame = af.Frame(beams=[beam_1, beam_2], joints=[joint_1])
 
 frame.solve()
 

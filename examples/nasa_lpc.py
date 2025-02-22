@@ -104,8 +104,9 @@ beam = af.Beam(name='beam', mesh=beam_nodes, material=aluminum, cs=beam_cs)
 beam.fix(node=0)
 beam.add_load(beam_loads_csdl)
 
-frame = af.Frame()
-frame.add_beam(beam)
+
+frame = af.Frame(beams=[beam])
+
 
 frame.solve()
 
@@ -117,10 +118,6 @@ stress = frame.compute_stress()
 beam_stress = stress[beam.name]
 print(beam_stress.value)
 
-# buckling
-# bot_bkl = solution.get_bkl(beam)["bot"]
-# top_bkl = solution.get_bkl(beam)["top"]
-
 recorder.stop()
 
 
@@ -128,8 +125,7 @@ recorder.stop()
 print("displacement", beam_displacement.value)
 # print(np.linalg.norm(beam_displacement.value, axis=1))
 print("stress", np.max(beam_stress.value, axis=1))
-# print("bot_bkl", bot_bkl.value)
-# print("top_bkl", bot_bkl.value)
+
 
 import matplotlib.pyplot as plt
 plt.plot(beam_displacement.value)

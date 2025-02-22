@@ -3,6 +3,11 @@ import numpy as np
 import aframe as af
 
 
+
+# Aurora PAV V&V case
+# uses box beams
+
+
 # start recorder
 recorder = csdl.Recorder(inline=True)
 recorder.start()
@@ -51,15 +56,20 @@ beam.fix(node=10)
 beam.add_load(loads)
 
 
-frame = af.Frame()
-frame.add_beam(beam)
+frame = af.Frame(beams=[beam])
 
+# solve the linear system
 frame.solve()
 
-# displacement
+# get the displacement
 displacement = frame.displacement[beam.name]
+
+# return stress at all the stress evaluation points for each element
+stress = frame.compute_stress()[beam.name]
 
 
 recorder.stop()
 
-print(displacement.value * 39.3700787)
+print('result: ', displacement.value * 39.3700787)
+
+print('stress: ', stress.value)

@@ -8,7 +8,7 @@ from typing import List, Dict
 class Frame:
     def __init__(self,
                  beams:List['af.Beam'],
-                 joints:List[dict] = [],
+                 joints:List['af.Joint'] = [],
                  acc:csdl.Variable = None,):
         
         if acc is not None and acc.shape != (6,):
@@ -72,8 +72,8 @@ class Frame:
 
         # re-assign joint nodes
         for joint in self.joints:
-            members = joint['members']
-            nodes = joint['nodes']
+            members = joint.members #joint['members']
+            nodes = joint.nodes #joint['nodes']
             index = members[0].map[nodes[0]]
 
             for i, member in enumerate(members):

@@ -3,6 +3,9 @@ import numpy as np
 import aframe as af
 
 
+# because Marius says aframe fails for 1 element beams
+# this script runs, so he is clearly wrong
+
 recorder = csdl.Recorder(inline=True)
 recorder.start()
 
@@ -65,16 +68,16 @@ beam_3 = af.Beam(name='beam_3', mesh=beam_3_mesh, material=aluminum, cs=beam_2_c
 
 beam_4 = af.Beam(name='beam_4', mesh=beam_4_mesh, material=aluminum, cs=beam_2_cs)
 
-# instantiate the frame model and add all beams and joints
-frame = af.Frame()
-frame.add_beam(beam_1)
-frame.add_beam(beam_2)
-frame.add_beam(beam_3)
-frame.add_beam(beam_4)
-frame.add_joint(members=[beam_1, beam_2], nodes=[1, 0])
-frame.add_joint(members=[beam_2, beam_3], nodes=[1, 0])
-frame.add_joint(members=[beam_3, beam_4], nodes=[1, 0])
 
+joint_1 = af.Joint(members=[beam_1, beam_2], nodes=[1, 0])
+joint_2 = af.Joint(members=[beam_2, beam_3], nodes=[1, 0])
+joint_3 = af.Joint(members=[beam_3, beam_4], nodes=[1, 0])
+
+# instantiate the frame model and add all beams and joints
+frame = af.Frame(beams=[beam_1, beam_2, beam_3, beam_4], joints=[joint_1, joint_2, joint_3])
+
+
+# solve the linear system
 frame.solve()
 
 beam_1_displacement = frame.displacement[beam_1.name]
@@ -84,6 +87,8 @@ beam_4_displacement = frame.displacement[beam_4.name]
 cg = frame.cg
 
 recorder.stop()
+
+
 print(beam_1_displacement.value)
 print(beam_2_displacement.value)
 print(beam_3_displacement.value)

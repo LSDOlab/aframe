@@ -1,10 +1,10 @@
 import csdl_alpha as csdl
 import numpy as np
 import aframe as af
-
+import matplotlib.pyplot as plt
 
 # start recorder
-recorder = csdl.Recorder(inline=False)
+recorder = csdl.Recorder(inline=True)
 recorder.start()
 
 # create a 1D beam 1 mesh
@@ -32,45 +32,40 @@ beam_1.fix(node=0)
 beam_1.add_load(beam_1_loads)
 
 # instantiate the frame model and add all beams and joints
-frame = af.Frame()
-frame.add_beam(beam_1)
+frame = af.Frame(beams=[beam_1])
 
-# evaluating the frame model returns a solution dataclass
+# solve the linear system
 frame.solve()
 
-# displacement
+# get the displacement
 beam_1_displacement = frame.displacement[beam_1.name]
 
-# displaced mesh
+# make the displaced mesh
 beam_1_def_mesh = beam_1_mesh + beam_1_displacement
 
-# cg
+# get the cg
 cg = frame.cg
 
 # stress
 stress = frame.compute_stress()
-beam_1_strain = stress[beam_1.name]
+beam_1_stess = stress[beam_1.name]
 
 # finish up
 recorder.stop()
 # recorder.visualize_graph(trim_loops=True)
 
 
-import tracemalloc
-tracemalloc.start()
 
-sim = csdl.experimental.PySimulator(recorder)
+# sim = csdl.experimental.PySimulator(recorder)
 # sim = csdl.experimental.JaxSimulator(recorder=recorder)
-sim.run()
+# sim.run()
 
-print(tracemalloc.get_traced_memory())
 
-tracemalloc.stop()
 
-print(cg.value)
-print(beam_1_displacement.value)
+print('cg: ', cg.value)
+print('displacement: ', beam_1_displacement.value)
 
-import matplotlib.pyplot as plt
+
 plt.grid()
 plt.plot(beam_1_def_mesh.value[:, 1], beam_1_def_mesh.value[:, 2], color='black', linewidth=2)
 plt.scatter(beam_1_def_mesh.value[:, 1], beam_1_def_mesh.value[:, 2], zorder=10, edgecolor='black', s=50, color='green')
