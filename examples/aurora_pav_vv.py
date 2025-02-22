@@ -65,6 +65,15 @@ frame.solve()
 displacement = frame.displacement[beam.name]
 
 # return stress at all the stress evaluation points for each element
+"""
+        0-----------------1
+        |                 |
+        |                 |
+        4                 |
+        |                 |
+        |                 |
+        3-----------------2
+"""
 stress = frame.compute_stress()[beam.name]
 
 
