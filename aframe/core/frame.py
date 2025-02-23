@@ -12,7 +12,11 @@ class Frame:
                  acc:csdl.Variable = None,):
         
         if acc is not None and acc.shape != (6,):
-            raise ValueError("acc must have shape 6")
+            raise ValueError("acc must have shape (6,)")
+        
+        # check if beams list is empty
+        if not beams:
+            raise ValueError("beams must be added to the frame")
 
         # self.beams: List[af.Beam] = []
         self.beams = beams

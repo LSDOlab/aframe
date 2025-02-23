@@ -39,11 +39,17 @@ class Beam:
 
     def fix(self, node: int):
 
+        if node < 0 or node > self.num_nodes - 1:
+            raise ValueError('fixed nodes must be between 0 and num_nodes - 1')
+
         if node not in self.fixed_boundary_conditions and node not in self.pinned_boundary_conditions:
             self.fixed_boundary_conditions.append(node)
 
     
     def pin(self, node: int):
+
+        if node < 0 or node > self.num_nodes - 1:
+            raise ValueError('pinned nodes must be between 0 and num_nodes - 1')
 
         if node not in self.pinned_boundary_conditions and node not in self.fixed_boundary_conditions:
             self.pinned_boundary_conditions.append(node)
@@ -56,6 +62,10 @@ class Beam:
 
 
     def add_load(self, load: csdl.Variable):
+
+        if load.shape != (self.num_nodes, 6):
+            raise ValueError('load must have shape (num_beam_nodes, 6)')
+        
         self.loads = load
 
     

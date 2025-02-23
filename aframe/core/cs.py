@@ -10,6 +10,10 @@ class CSTube:
                  radius:csdl.Variable,
                  thickness:csdl.Variable
                  ):
+
+        # check that radius and thickness have the same shape
+        if radius.shape != thickness.shape:
+            raise ValueError('tube radius and thickness must have the same shape')
         
         self.radius = radius
         self.thickness = thickness
@@ -162,6 +166,10 @@ class CSBox:
                  height:csdl.Variable,
                  width:csdl.Variable
                  ):
+        
+        # check that ttop, tbot, tweb, height and width have the same shape
+        if ttop.shape != tbot.shape or ttop.shape != tweb.shape or ttop.shape != height.shape or ttop.shape != width.shape:
+            raise ValueError('box beam ttop, tbot, tweb, height and width must have the same shape')
         
         self.ttop = ttop
         self.tbot = tbot
