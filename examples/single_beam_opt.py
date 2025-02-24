@@ -52,7 +52,7 @@ beam_1_def_mesh = beam_1_mesh + beam_1_displacement
 beam_1_displacement.set_as_constraint(upper=0.1)
 
 # get the cg of the beam
-cg = frame.cg
+cg = beam_1.cg
 
 # set a min mass objective
 mass = beam_1.mass

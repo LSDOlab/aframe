@@ -24,11 +24,7 @@ class Frame:
         self.joints = joints
         self.acc = acc
         self.displacement: Dict[str, csdl.Variable] = {}
-        # self.residual = None
         self.U = None
-
-        # mass properties
-        self.cg, self.mass = self._mass_properties()
 
         # helper function
         self.dim, self.num = self._utils()
@@ -41,6 +37,8 @@ class Frame:
 
         # apply boundary conditions by zeroing the rows and columns
         self.K, self.M, self.F = self._boundary_conditions(self.K, self.M, self.F)
+
+
 
 
     # def add_beam(self, beam:'af.Beam'):
@@ -107,14 +105,13 @@ class Frame:
         return dim, num
     
 
-    def _mass_properties(self)->tuple[csdl.Variable, csdl.Variable]:
+    def compute_mass_properties(self)->tuple[csdl.Variable, csdl.Variable]:
 
         # mass properties
         mass, rmvec = 0, 0
         for beam in self.beams:
-            beam_mass, beam_rmvec = beam._mass()
-            mass += beam_mass
-            rmvec += beam_rmvec
+            mass += beam.mass
+            rmvec += beam.rmvec
 
         cg = rmvec / mass
         return cg, mass
@@ -211,7 +208,7 @@ class Frame:
             map = beam.map # shape: (n,)
 
             if loads is not None:
-
+                
                 for i in range(beam.num_nodes):
                     idx = map[i]
                     F = F.set(csdl.slice[idx:idx+6], F[idx:idx+6] + loads[i, :])
@@ -280,24 +277,24 @@ class Frame:
         return K, M, F
     
 
-    def dynamic_residual(self, 
-                         U:csdl.Variable, 
-                         U_dot:csdl.Variable, 
-                         U_dotdot:csdl.Variable, 
-                         damp=False,
-                         alpha=1E-4, 
-                         beta=1E-2)->csdl.Variable:
+    # def dynamic_residual(self, 
+    #                      U:csdl.Variable, 
+    #                      U_dot:csdl.Variable, 
+    #                      U_dotdot:csdl.Variable, 
+    #                      damp=False,
+    #                      alpha=1E-4, 
+    #                      beta=1E-2)->csdl.Variable:
 
-        if damp: C = alpha * self.M + beta * self.K
-        else: C = csdl.Variable(value=np.zeros((self.dim, self.dim)))
+    #     if damp: C = alpha * self.M + beta * self.K
+    #     else: C = csdl.Variable(value=np.zeros((self.dim, self.dim)))
 
-        R = csdl.matvec(self.K, U) + csdl.matvec(C, U_dot) + csdl.matvec(self.M, U_dotdot) - self.F
-        # self.residual = R
+    #     R = csdl.matvec(self.K, U) + csdl.matvec(C, U_dot) + csdl.matvec(self.M, U_dotdot) - self.F
+    #     # self.residual = R
 
-        # find the displacements
-        self._displacements(U)
+    #     # find the displacements
+    #     self._displacements(U)
 
-        return R
+    #     return R
 
     
 

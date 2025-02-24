@@ -34,7 +34,17 @@ class Beam:
         self.transformed_stiffness = self._transform_stiffness_matrices()
         self.transformed_mass = self._transform_mass_matrices()
 
-        self.mass = csdl.sum(self.cs.area * self.lengths * self.material.density)
+
+        element_masses = self.cs.area * self.lengths * self.material.density
+        self.mass = csdl.sum(element_masses)
+
+        cg2 = (self.mesh[1:, :] + self.mesh[:-1, :]) / 2
+        element_masses_expanded = csdl.expand(element_masses, (self.num_elements, 3), action='i->ij')
+        rmvec = csdl.sum(cg2 * element_masses_expanded, axes=(0,))
+
+        self.rmvec = rmvec
+        self.cg = rmvec / self.mass
+
 
 
     def fix(self, node: int):
@@ -441,21 +451,21 @@ class Beam:
         return loads
     
 
-    def _mass(self)->tuple[csdl.Variable, csdl.Variable]:
+    # def _mass(self)->tuple[csdl.Variable, csdl.Variable]:
 
-        lengths = self.lengths
-        rho = self.material.density
-        area = self.cs.area
+    #     lengths = self.lengths
+    #     rho = self.material.density
+    #     area = self.cs.area
 
-        element_masses = area * lengths * rho
-        beam_mass = csdl.sum(element_masses)
+    #     element_masses = area * lengths * rho
+    #     beam_mass = csdl.sum(element_masses)
 
-        cg2 = (self.mesh[1:, :] + self.mesh[:-1, :]) / 2
+    #     cg2 = (self.mesh[1:, :] + self.mesh[:-1, :]) / 2
 
-        rmvec = 0
-        for i in range(self.num_elements):
-            cg = (self.mesh[i + 1, :] + self.mesh[i, :]) / 2
-            rmvec += cg * element_masses[i]
+    #     rmvec = 0
+    #     for i in range(self.num_elements):
+    #         cg = (self.mesh[i + 1, :] + self.mesh[i, :]) / 2
+    #         rmvec += cg * element_masses[i]
 
-        return beam_mass, rmvec
+    #     return beam_mass, rmvec
 

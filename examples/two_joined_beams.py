@@ -60,8 +60,7 @@ frame.solve()
 
 beam_1_displacement = frame.displacement[beam_1.name]
 beam_2_displacement = frame.displacement[beam_2.name]
-cg = frame.cg
+
 
 recorder.stop()
 print(beam_1_displacement.value)
-print('cg: ', cg.value)

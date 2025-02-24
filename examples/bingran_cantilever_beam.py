@@ -44,7 +44,11 @@ beam_1_displacement = frame.displacement[beam_1.name]
 beam_1_def_mesh = beam_1_mesh + beam_1_displacement
 
 # get the cg
-cg = frame.cg
+mass, cg = frame.compute_mass_properties()
+
+# get the beam mass
+beam_1_mass = beam_1.mass
+beam_1_cg = beam_1.cg
 
 # stress
 stress = frame.compute_stress()
@@ -63,6 +67,7 @@ recorder.stop()
 
 
 print('cg: ', cg.value)
+print('beam cg: ', beam_1_cg.value)
 print('displacement: ', beam_1_displacement.value)
 
 
