@@ -84,12 +84,3 @@ plt.xlabel('y (m)')
 plt.ylabel('z (m)')
 plt.title('Cantilever Beam Optimization Result')
 plt.show()
-
-
-# compiling 'run_forward' function ... (2123 nodes)
-# GPU not found: 'Unknown backend: 'gpu' requested, but no platforms that are instances of gpu are present. Platforms present are: cpu', falling back to CPU
-# compiling 'compute_optimization_derivatives' function ... (5860 nodes)
-
-# compiling 'run_forward' function ... (2120 nodes)
-# GPU not found: 'Unknown backend: 'gpu' requested, but no platforms that are instances of gpu are present. Platforms present are: cpu', falling back to CPU
-# compiling 'compute_optimization_derivatives' function ... (5855 nodes)
