@@ -9,23 +9,23 @@ recorder.start()
 # create a 1D beam 1 mesh
 num_nodes_1 = 21
 beam_1_mesh = np.zeros((num_nodes_1, 3))
-beam_1_mesh[:, 1] = np.linspace(-20, 20, num_nodes_1)
+beam_1_mesh[:, 0] = np.linspace(0, 20, num_nodes_1)
 beam_1_mesh = csdl.Variable(value=beam_1_mesh)
 
 # create a 1D beam 2 mesh
 num_nodes_2 = 21
 beam_2_mesh = np.zeros((num_nodes_2, 3))
-beam_2_mesh[:, 0] = np.linspace(-20, 20, num_nodes_2)
+beam_2_mesh[:, 0] = np.linspace(0, 20, num_nodes_2)
 beam_2_mesh = csdl.Variable(value=beam_2_mesh)
 
 # create beam 1 loads
 beam_1_loads = np.zeros((num_nodes_1, 6))
-beam_1_loads[:, 2] = 20000
+beam_1_loads[:, 2] = 2000
 beam_1_loads = csdl.Variable(value=beam_1_loads)
 
 # create beam 2 loads
 beam_2_loads = np.zeros((num_nodes_2, 6))
-beam_2_loads[:, 2] = 20000
+beam_2_loads[:, 2] = 1000
 beam_2_loads = csdl.Variable(value=beam_2_loads)
 
 aluminum = af.Material(name='aluminum', E=69E9, G=26E9, density=2700)
@@ -42,7 +42,7 @@ beam_2_cs = af.CSTube(radius=beam_2_radius, thickness=beam_2_thickness)
 
 # create beam 1 with boundary conditions and loads
 beam_1 = af.Beam(name='beam_1', mesh=beam_1_mesh, material=aluminum, cs=beam_1_cs)
-beam_1.fix(10)
+beam_1.fix(0)
 beam_1.add_load(beam_1_loads)
 
 # create beam 2 with boundary conditions and loads
@@ -63,4 +63,5 @@ beam_2_displacement = frame.displacement[beam_2.name]
 
 
 recorder.stop()
-print(beam_1_displacement.value)
+print('beam 1 displacement (m): ', beam_1_displacement.value)
+print('beam 2 displacement (m): ', beam_2_displacement.value)

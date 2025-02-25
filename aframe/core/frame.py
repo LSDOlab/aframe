@@ -141,7 +141,7 @@ class Frame:
 
         # find the displacements
         for beam in self.beams:
-            self.displacement[beam.name] = csdl.Variable(value=np.zeros((beam.num_nodes, 3)))
+            # self.displacement[beam.name] = csdl.Variable(value=np.zeros((beam.num_nodes, 3)))
             map = beam.map
 
             map_u_to_d_x, map_u_to_d_y, map_u_to_d_z = [], [], []
@@ -154,7 +154,8 @@ class Frame:
                 # displacement[beam.name] = displacement[beam.name].set(csdl.slice[i, :], U[idx:idx+3])
 
             reshaped_U = csdl.transpose(csdl.vstack([U[map_u_to_d_x], U[map_u_to_d_y], U[map_u_to_d_z]]))
-            self.displacement[beam.name] = self.displacement[beam.name].set(csdl.slice[:, :], reshaped_U)
+            # self.displacement[beam.name] = self.displacement[beam.name].set(csdl.slice[:, :], reshaped_U)
+            self.displacement[beam.name] = reshaped_U
 
         return None
     
