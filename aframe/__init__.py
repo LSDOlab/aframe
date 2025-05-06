@@ -1,6 +1,7 @@
 from aframe.core.cs import *
 from aframe.core.frame import *
 from aframe.core.material import *
+from aframe.core import material
 from aframe.core.beam import Beam
 from aframe.core.sim import *
 from aframe.core.joint import *
