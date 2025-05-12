@@ -263,7 +263,7 @@ class Frame:
                 idx = map[node]
                 for i in range(3):
                     indices.append(idx + i)
-
+        indices = list(set(indices))
         # zero the row/column then put a 1 in the diagonal
         K = K.set(csdl.slice[indices, :], 0)
         K = K.set(csdl.slice[:, indices], 0)
