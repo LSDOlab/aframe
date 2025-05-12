@@ -30,7 +30,7 @@ lines = []
 #     lines.append(pv.Line(mesh_points[0], mesh_points[1]))
 
 
-num_nodes = 6
+num_nodes = 11
 
 # Subdivide edges into multiple points
 for (start_idx, end_idx) in edges:
@@ -131,7 +131,7 @@ beams[0].fix(1)
 
 
 beam_loads = np.zeros((num_nodes, 6))
-beam_loads[:, 1] = 5
+beam_loads[:, 1] = 2
 beam_loads = csdl.Variable(value=beam_loads)
 beams[16].add_load(beam_loads)
 
@@ -141,20 +141,15 @@ frame = af.Frame(beams=beams, joints=joints)
 frame.solve()
 
 
-new_meshes = []
-for beam in beams:
-    beam_displacement = frame.displacement[beam.name]
-    new_mesh = beam.mesh + beam_displacement
-    new_meshes.append(new_mesh)
-
-
 
 recorder.stop()
 
 
-
-for i, mesh in enumerate(new_meshes):
-    new_meshes[i] = mesh.value
+new_meshes = []
+for beam in beams:
+    beam_displacement = frame.displacement[beam.name].value
+    new_mesh = beam.mesh.value + beam_displacement
+    new_meshes.append(new_mesh)
 
 
 
@@ -187,30 +182,31 @@ for mesh in new_meshes:
 
 plotter = pv.Plotter()
 for line in lines:
-    plotter.add_mesh(line, color='blue', line_width=2)
+    plotter.add_mesh(line, color='blue', line_width=2, opacity=0.2)
 for line in deformed_lines:
     plotter.add_mesh(line, color='red', line_width=2)
 
 
 
 # Plot nodes as small spheres or points
-node_radius = 0.3
+node_radius = 0.4
 
-# Original nodes in green
+# Original nodes
 for mesh in meshes:
     for point in mesh:
         sphere = pv.Sphere(radius=node_radius, center=point)
-        plotter.add_mesh(sphere, color='green')
+        plotter.add_mesh(sphere, color='blue', opacity=0.2)
 
-# Deformed nodes in orange
+# Deformed nodes
 for mesh in new_meshes:
     for point in mesh:
         sphere = pv.Sphere(radius=node_radius, center=point)
-        plotter.add_mesh(sphere, color='orange')
+        plotter.add_mesh(sphere, color='red')
+
 
 
 
 
 plotter.add_axes()
-plotter.show_grid()
+# plotter.show_grid()
 plotter.show()
