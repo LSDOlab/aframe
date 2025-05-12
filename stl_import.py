@@ -24,25 +24,40 @@ for tri in triangles:
 meshes = []
 lines = []
 
-for i, (start_idx, end_idx) in enumerate(edges):
-    mesh_points = np.array([points[start_idx], points[end_idx]])
+# for i, (start_idx, end_idx) in enumerate(edges):
+#     mesh_points = np.array([points[start_idx], points[end_idx]])
+#     meshes.append(mesh_points)
+#     lines.append(pv.Line(mesh_points[0], mesh_points[1]))
+
+
+num_nodes = 6
+
+# Subdivide edges into multiple points
+for (start_idx, end_idx) in edges:
+    p0 = points[start_idx]
+    p1 = points[end_idx]
+    
+    # Linearly spaced nodes between p0 and p1
+    mesh_points = np.linspace(p0, p1, num=num_nodes)
     meshes.append(mesh_points)
-    lines.append(pv.Line(mesh_points[0], mesh_points[1]))
+    
+    # Add line only for visualization (2-point line)
+    lines.append(pv.Line(p0, p1))
 
 
-# plot the lines
-plotter = pv.Plotter()
-for line in lines:
-    plotter.add_mesh(line, color='blue', line_width=3)
+# # plot the lines
+# plotter = pv.Plotter()
+# for line in lines:
+#     plotter.add_mesh(line, color='blue', line_width=3)
 
-plotter.add_axes()
-plotter.show_grid()
-plotter.show()
+# plotter.add_axes()
+# plotter.show_grid()
+# plotter.show()
 
-# check for duplicate beam meshes
-tuple_list = [tuple(arr.flatten()) for arr in meshes]
-has_duplicates = len(meshes) != len(set(tuple_list))
-print("Duplicates found!" if has_duplicates else "No duplicates.")
+# # check for duplicate beam meshes
+# tuple_list = [tuple(arr.flatten()) for arr in meshes]
+# has_duplicates = len(meshes) != len(set(tuple_list))
+# print("Duplicates found!" if has_duplicates else "No duplicates.")
 
 
 
@@ -115,8 +130,8 @@ beams[0].fix(0)
 beams[0].fix(1)
 
 
-beam_loads = np.zeros((2, 6))
-beam_loads[:, 1] = 20
+beam_loads = np.zeros((num_nodes, 6))
+beam_loads[:, 1] = 5
 beam_loads = csdl.Variable(value=beam_loads)
 beams[16].add_load(beam_loads)
 
@@ -138,26 +153,63 @@ recorder.stop()
 
 
 
-for mesh in new_meshes:
-    mesh = mesh.value
+for i, mesh in enumerate(new_meshes):
+    new_meshes[i] = mesh.value
 
 
 
-# Create PyVista lines from deformed meshes
+# # Create PyVista lines from deformed meshes
+# deformed_lines = []
+
+# for new_mesh in new_meshes:
+#     deformed_lines.append(pv.Line(new_mesh.value[0], new_mesh.value[-1]))
+
+# # Plot both original and deformed meshes
+# plotter = pv.Plotter()
+# # Original in blue
+# for line in lines:
+#     plotter.add_mesh(line, color='blue', line_width=2)
+
+# # Deformed in red
+# for line in deformed_lines:
+#     plotter.add_mesh(line, color='red', line_width=2)
+
+# plotter.add_axes()
+# plotter.show_grid()
+# plotter.show()
+
+
+# --- PLOT DEFORMED MESH ---
 deformed_lines = []
+for mesh in new_meshes:
+    for i in range(len(mesh) - 1):
+        deformed_lines.append(pv.Line(mesh[i], mesh[i+1]))
 
-for new_mesh in new_meshes:
-    deformed_lines.append(pv.Line(new_mesh.value[0], new_mesh.value[1]))
-
-# Plot both original and deformed meshes
 plotter = pv.Plotter()
-# Original in blue
 for line in lines:
     plotter.add_mesh(line, color='blue', line_width=2)
-
-# Deformed in red
 for line in deformed_lines:
     plotter.add_mesh(line, color='red', line_width=2)
+
+
+
+# Plot nodes as small spheres or points
+node_radius = 0.3
+
+# Original nodes in green
+for mesh in meshes:
+    for point in mesh:
+        sphere = pv.Sphere(radius=node_radius, center=point)
+        plotter.add_mesh(sphere, color='green')
+
+# Deformed nodes in orange
+for mesh in new_meshes:
+    for point in mesh:
+        sphere = pv.Sphere(radius=node_radius, center=point)
+        plotter.add_mesh(sphere, color='orange')
+
+
+
 
 plotter.add_axes()
 plotter.show_grid()
