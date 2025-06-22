@@ -14,8 +14,8 @@ n = meshes.shape[1]
 
 aluminum = af.Material(name='aluminum', E=69E9, G=26E9, density=2700)
 
-dummy_load = np.zeros((n, 6))
-dummy_load[:, 2] = -10000
+# dummy_load = np.zeros((n, 6))
+# dummy_load[:, 2] = -10000
 
 recorder = csdl.Recorder(inline=True)
 recorder.start()
@@ -40,7 +40,7 @@ for i in range(28):
     # # if i in [20, 21, 22, 23]:
     # #     beam.add_load(dummy_load)
 
-    inertial_mass = csdl.Variable(value=np.ones(n) * 5)
+    inertial_mass = csdl.Variable(value=np.ones(n) * 1)
     if i in [24, 25, 26, 27]:  # add mass to top frame
         beam.add_inertial_mass(inertial_mass)
 
@@ -217,5 +217,30 @@ plotter.add_mesh(eng, color='orange')
 # top tank
 sph = pv.Sphere(center=(0, 0, 5.25), radius=1.5)
 plotter.add_mesh(sph, color='beige', opacity=0.5)
+
+
+
+
+
+
+
+
+
+
+# Load image as texture
+texture = pv.read_texture("examples/ucsd_lunar_lander/lunar_surface.jpg")
+
+# Create a plane for the texture
+width, height = 1.5e1, 1.5e1  # Scale in x and y
+plane = pv.Plane(center=(0, 0, -0.2), direction=(0, 0, 1),
+                 i_size=width, j_size=height, i_resolution=1, j_resolution=1)
+
+# Add to plotter
+plotter.add_mesh(plane, texture=texture)
+
+
+
+
+
 
 plotter.show()
