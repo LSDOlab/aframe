@@ -236,7 +236,7 @@ plane = pv.Plane(center=(0, 0, -0.2), direction=(0, 0, 1),
                  i_size=width, j_size=height, i_resolution=1, j_resolution=1)
 
 # Add to plotter
-plotter.add_mesh(plane, texture=texture)
+plotter.add_mesh(plane, texture=texture, opacity=0.9)
 
 
 
