@@ -151,10 +151,7 @@ beam = af.Beam(name='beam', mesh=beam_nodes, material=aluminum, cs=beam_cs)
 beam.fix(node=0)
 beam.add_load(beam_loads_csdl)
 
-frame = af.Frame()
-frame.add_beam(beam)
-
-# evaluating the frame model returns a solution dataclass
+frame = af.Frame(beams=[beam])
 frame.solve()
 
 stress = frame.compute_stress()

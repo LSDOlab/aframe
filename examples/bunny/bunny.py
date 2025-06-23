@@ -5,7 +5,7 @@ import aframe as af
 import pyvista as pv
 
 
-mesh = meshio.read('bunny.stl')
+mesh = meshio.read('examples/bunny/bunny.stl')
 points = mesh.points
 
 triangles = mesh.cells_dict['triangle']
@@ -176,20 +176,25 @@ for beam in beams:
 
 # --- PLOT DEFORMED MESH ---
 deformed_lines = []
+midpoints = []
 for mesh in new_meshes:
     for i in range(len(mesh) - 1):
-        deformed_lines.append(pv.Line(mesh[i], mesh[i+1]))
+        line = pv.Line(mesh[i], mesh[i+1])
+        deformed_lines.append(line)
+        points = line.points
+        midpoint = (points[0] + points[1]) / 2
+        midpoints.append(midpoint.flatten())
 
 plotter = pv.Plotter()
 for line in lines:
-    plotter.add_mesh(line, color='blue', line_width=2, opacity=0.2)
+    plotter.add_mesh(line, color='blue', line_width=3, opacity=0.4)
 for line in deformed_lines:
-    plotter.add_mesh(line, color='red', line_width=2)
+    plotter.add_mesh(line, color='red', line_width=3)
 
 
 
 # Plot nodes as small spheres or points
-node_radius = 0.4
+node_radius = 0.5
 
 # Original nodes
 for mesh in meshes:
@@ -205,8 +210,11 @@ for mesh in new_meshes:
 
 
 
+labels = [str(i) for i in range(len(midpoints))]
+plotter.add_point_labels(midpoints, labels, font_size=14, text_color="black")
+
 
 
 plotter.add_axes()
-# plotter.show_grid()
+plotter.show_grid()
 plotter.show()
