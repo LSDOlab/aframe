@@ -157,7 +157,10 @@ def plot_cyl(plotter,
 
 
 
-plotter = pv.Plotter()
+# plotter = pv.Plotter()
+plotter = pv.Plotter(off_screen=True) # use this when saving images
+
+
 
 for i, beam in enumerate(frame.beams):
     mesh0 = beam.mesh
@@ -243,4 +246,5 @@ plotter.add_mesh(plane, texture=texture, opacity=0.9)
 
 
 
-plotter.show()
+# plotter.show()
+plotter.screenshot('lunar_lander.png', transparent_background=False, window_size=[3000, 2000])
