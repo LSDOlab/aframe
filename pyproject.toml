@@ -1,0 +1,53 @@
+[build-system]
+requires = ['setuptools']
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = 'aframe'
+description = 'Aframe enables the optimization of multitudinous structures using frame elements. It has a great API.'
+readme = 'README.md'
+requires-python = '>=3.9'
+# license = {file = 'LICENSE.txt'}
+license = {text = 'LGPLv3+'}
+authors = [
+  {name = 'Nicholas Orndorff', email = 'norndorff@ucsd.edu'},
+]
+maintainers = [
+  {name = 'Nicholas Orndorff', email = 'norndorff@ucsd.edu'},
+]
+keywords=[  
+    'optimization', 'structures',
+    ]
+dynamic = ["version"]
+dependencies = [
+    'numpy>=1.24,<2',
+    "matplotlib>=3.4,<4",
+]
+classifiers=[
+    'Development Status :: 4 - Beta',
+    # 'Development Status :: 5 - Production/Stable',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)',
+    'Operating System :: OS Independent',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Science/Research',
+    'Intended Audience :: Education',
+    'Natural Language :: English',
+    'Topic :: Education',
+    'Topic :: Education :: Computer Aided Instruction (CAI)',
+    'Topic :: Scientific/Engineering',
+    'Topic :: Scientific/Engineering :: Mathematics',
+]
+
+[project.urls]
+"Homepage/Repository" = "https://github.com/LSDOlab/aframe"
+
+[tool.setuptools.dynamic]
+version = {attr = "aframe.__version__"}
+
+[tool.setuptools]
+package-dir = {"" = "."}
