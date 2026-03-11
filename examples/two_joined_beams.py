@@ -28,7 +28,7 @@ beam_2_loads = np.zeros((num_nodes_2, 6))
 beam_2_loads[:, 2] = 1000
 beam_2_loads = csdl.Variable(value=beam_2_loads)
 
-aluminum = af.Material(name='aluminum', E=69E9, G=26E9, density=2700)
+# aluminum = af.Material(name='aluminum', E=69E9, G=26E9, density=2700)
 
 # create cs properties for beam 1
 beam_1_radius = csdl.Variable(value=np.ones(num_nodes_1 - 1) * 0.5)
@@ -41,12 +41,12 @@ beam_2_thickness = csdl.Variable(value=np.ones(num_nodes_2 - 1) * 0.001)
 beam_2_cs = af.CSTube(radius=beam_2_radius, thickness=beam_2_thickness)
 
 # create beam 1 with boundary conditions and loads
-beam_1 = af.Beam(name='beam_1', mesh=beam_1_mesh, material=aluminum, cs=beam_1_cs)
+beam_1 = af.Beam(name='beam_1', mesh=beam_1_mesh, E=69E9, G=26E9, density=2700, cs=beam_1_cs)
 beam_1.fix(0)
 beam_1.add_load(beam_1_loads)
 
 # create beam 2 with boundary conditions and loads
-beam_2 = af.Beam(name='beam_2', mesh=beam_2_mesh, material=aluminum, cs=beam_2_cs)
+beam_2 = af.Beam(name='beam_2', mesh=beam_2_mesh, E=69E9, G=26E9, density=2700, cs=beam_2_cs)
 beam_2.add_load(beam_2_loads)
 
 

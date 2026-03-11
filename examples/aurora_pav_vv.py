@@ -45,13 +45,13 @@ nodal_loads[:, 2] = np.array([178.525,225.7911,255.3446,254.0379,264.366,274.624
                             274.68,264.4084,254.1061,255.3735,225.8431,178.5819]) * 4.44822162
 loads = csdl.Variable(value=nodal_loads)
 
-aluminum = af.Material(name='aluminum', E=7.3E10, G=27E9, density=2768)
+# aluminum = af.Material(name='aluminum', E=7.3E10, G=27E9, density=2768)
 
 
 beam_cs = af.CSBox(ttop=tcap, tbot=tcap, tweb=tweb, height=beam_height, width=beam_width)
 
 
-beam = af.Beam(name='beam_1', mesh=beam_mesh, material=aluminum, cs=beam_cs)
+beam = af.Beam(name='beam_1', mesh=beam_mesh, E=7.3E10, G=27E9, density=2768, cs=beam_cs)
 beam.fix(node=10)
 beam.add_load(loads)
 

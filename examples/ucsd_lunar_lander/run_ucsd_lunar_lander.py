@@ -12,7 +12,7 @@ with open('examples/ucsd_lunar_lander/lunar_lander_meshes.pkl', 'rb') as file:
 
 n = meshes.shape[1]
 
-aluminum = af.Material(name='aluminum', E=69E9, G=26E9, density=2700)
+# aluminum = af.Material(name='aluminum', E=69E9, G=26E9, density=2700)
 
 # dummy_load = np.zeros((n, 6))
 # dummy_load[:, 2] = -10000
@@ -26,7 +26,7 @@ for i in range(28):
     thickness = csdl.Variable(value=np.ones(n - 1) * 0.001)
     beam_radius = csdl.Variable(value=np.ones(n - 1) * radius[i])
     cs = af.CSTube(radius=beam_radius, thickness=thickness)
-    beam = af.Beam(name='beam_'+str(i), mesh=meshes[i, :, :], material=aluminum, cs=cs)
+    beam = af.Beam(name='beam_'+str(i), mesh=meshes[i, :, :], E=69E9, G=26E9, density=2700, cs=cs)
 
     if i in [0, 4, 6, 10]: # fix the feet
         beam.fix(0)

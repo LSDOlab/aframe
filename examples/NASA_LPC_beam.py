@@ -99,8 +99,8 @@ beam_loads_csdl = csdl.Variable(value=beam_loads)
 
 beam_cs = af.CSBox(height=height, width=width, ttop=ttop, tbot=tbot, tweb=tweb)
 
-aluminum = af.Material(name='aluminum', E=69E9, G=26E9, density=2700)
-beam = af.Beam(name='beam', mesh=beam_nodes, material=aluminum, cs=beam_cs)
+# aluminum = af.Material(name='aluminum', E=69E9, G=26E9, density=2700)
+beam = af.Beam(name='beam', mesh=beam_nodes, E=69E9, G=26E9, density=2700, cs=beam_cs)
 beam.fix(node=0)
 beam.add_load(beam_loads_csdl)
 

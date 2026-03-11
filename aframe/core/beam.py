@@ -8,13 +8,20 @@ class Beam:
 
     def __init__(self, name:str, 
                  mesh:csdl.Variable, 
-                 material:'af.Material', 
+                #  material:'af.Material', 
+                 E:float,
+                 G:float,
+                 density:float,
                  cs:'af.cs',
                  z=False):
         
         self.name = name
         self.mesh = mesh
-        self.material = material
+        # self.material = material
+        self.E = E
+        self.G = G
+        self.density = density
+
         self.cs = cs
         self.z = z
         self.num_nodes = mesh.shape[0]
@@ -35,7 +42,7 @@ class Beam:
         self.transformed_mass = self._transform_mass_matrices()
 
 
-        element_masses = self.cs.area * self.lengths * self.material.density
+        element_masses = self.cs.area * self.lengths * self.density
         self.mass = csdl.sum(element_masses)
 
         cg2 = (self.mesh[1:, :] + self.mesh[:-1, :]) / 2
@@ -100,7 +107,7 @@ class Beam:
     def _local_stiffness_matrices(self)->csdl.Variable:
 
         A = self.cs.area
-        E, G = self.material.E, self.material.G
+        E, G = self.E, self.G
         Iz = self.cs.iz
         Iy = self.cs.iy
         J = self.cs.ix
@@ -205,7 +212,7 @@ class Beam:
     def _local_mass_matrices(self)->csdl.Variable:
         
         A = self.cs.area
-        rho = self.material.density
+        rho = self.density
         J = self.cs.ix
         L = self.lengths
 
@@ -454,7 +461,7 @@ class Beam:
     # def _mass(self)->tuple[csdl.Variable, csdl.Variable]:
 
     #     lengths = self.lengths
-    #     rho = self.material.density
+    #     rho = self.density
     #     area = self.cs.area
 
     #     element_masses = area * lengths * rho

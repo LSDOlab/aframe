@@ -63,7 +63,7 @@ for (start_idx, end_idx) in edges:
 
 
 
-material = af.Material(name='default_material', E=69e9, G=26e9, density=2700)
+# material = af.Material(name='default_material', E=69e9, G=26e9, density=2700)
 
 recorder = csdl.Recorder(inline=True)
 recorder.start()
@@ -98,9 +98,9 @@ for i, mesh1 in enumerate(meshes):
     beam_name = f'beam_{i}'
 
     if is_vertical:
-        beam = af.Beam(name=beam_name, mesh=beam_mesh, material=material, cs=cs, z=True)
+        beam = af.Beam(name=beam_name, mesh=beam_mesh, E=69e9, G=26e9, density=2700, cs=cs, z=True)
     else:
-        beam = af.Beam(name=beam_name, mesh=beam_mesh, material=material, cs=cs)
+        beam = af.Beam(name=beam_name, mesh=beam_mesh, E=69e9, G=26e9, density=2700, cs=cs)
 
 
     # beam.fix(0) # for now
