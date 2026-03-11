@@ -20,9 +20,6 @@ beam_1_loads = np.zeros((num_nodes_1, 6))
 beam_1_loads[:, 2] = 20000
 beam_1_loads = csdl.Variable(value=beam_1_loads)
 
-# create a material
-# aluminum = af.Material(name='aluminum', E=69E9, G=26E9, density=2700)
-
 # create cs properties for beam 1
 beam_1_radius = csdl.Variable(value=np.ones(num_nodes_1 - 1) * 0.5)
 beam_1_radius.set_as_design_variable(lower=1E-3, scaler=1E1)

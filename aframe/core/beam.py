@@ -8,7 +8,6 @@ class Beam:
 
     def __init__(self, name:str, 
                  mesh:csdl.Variable, 
-                #  material:'af.Material', 
                  E:float,
                  G:float,
                  density:float,
@@ -17,7 +16,6 @@ class Beam:
         
         self.name = name
         self.mesh = mesh
-        # self.material = material
         self.E = E
         self.G = G
         self.density = density
