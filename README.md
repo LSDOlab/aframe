@@ -8,6 +8,8 @@
 **aframe** is a linear finite-element solver for 3D beams and frames, written in
 [CSDL](https://github.com/LSDOlab/CSDL_alpha). The code is written entirely in CSDL, so it is fully differentiable and well-suited for gradient-based design optimization and analysis.
 
+📖 **Documentation:** [lsdolab.github.io/aframe](https://lsdolab.github.io/aframe/)
+
 **Features**
 - 3D Euler-Bernoulli beam elements with 6 dofs per node and consistent mass matrices
 - Frames of many beams connected by rigid joints, with fixed and pinned supports
