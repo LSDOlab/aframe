@@ -3,8 +3,8 @@
   <img src="https://github.com/user-attachments/assets/02c7aae8-5a49-4ff5-8a16-f2b6295dab02" alt="aframe" width="450">
 </p>
 
-[![Tests](https://github.com/LSDOlab/aframe/actions/workflows/actions.yml/badge.svg)](https://github.com/LSDOlab/aframe/actions/workflows/actions.yml)
-[![Docs](https://github.com/LSDOlab/aframe/actions/workflows/docs.yml/badge.svg)](https://lsdolab.github.io/aframe/)
+[![Tests](https://github.com/LSDOlab/aframe/actions/workflows/actions.yml/badge.svg?branch=main)](https://github.com/LSDOlab/aframe/actions/workflows/actions.yml)
+[![Docs](https://github.com/LSDOlab/aframe/actions/workflows/docs.yml/badge.svg?branch=main)](https://lsdolab.github.io/aframe/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/LSDOlab/aframe/blob/main/LICENSE.txt)
 
 **aframe** is a linear finite-element solver for 3D beams and frames, written in
