@@ -20,10 +20,12 @@ dependencies = [
 [project.optional-dependencies]
 plot = ["pyvista", "matplotlib"]
 dev = ["pytest"]
+docs = ["pdoc>=14"]
 
 [project.urls]
 Homepage = "https://github.com/LSDOlab/aframe"
 Repository = "https://github.com/LSDOlab/aframe"
+Documentation = "https://lsdolab.github.io/aframe/"
 
 [tool.setuptools.dynamic]
 version = { attr = "aframe.__version__" }

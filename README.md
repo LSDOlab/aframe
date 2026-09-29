@@ -2,7 +2,8 @@
 ![aframe](https://github.com/user-attachments/assets/02c7aae8-5a49-4ff5-8a16-f2b6295dab02)
 
 [![Tests](https://github.com/LSDOlab/aframe/actions/workflows/actions.yml/badge.svg)](https://github.com/LSDOlab/aframe/actions/workflows/actions.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.txt)
+[![Docs](https://github.com/LSDOlab/aframe/actions/workflows/docs.yml/badge.svg)](https://lsdolab.github.io/aframe/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/LSDOlab/aframe/blob/main/LICENSE.txt)
 
 **aframe** is a linear finite-element solver for 3D beams and frames, written in
 [CSDL](https://github.com/LSDOlab/CSDL_alpha). The code is written entirely in CSDL, so it is fully differentiable and well-suited for gradient-based design optimization and analysis.
@@ -20,7 +21,11 @@ aframe requires Python 3.9+ and [CSDL_alpha](https://github.com/LSDOlab/CSDL_alp
 ```bash
 pip install git+https://github.com/LSDOlab/CSDL_alpha.git
 git clone https://github.com/LSDOlab/aframe.git
+pip install -e ./aframe
 ```
+Add extras as needed: `pip install -e "./aframe[plot]"` for the PyVista/Matplotlib plotting
+helpers, `[dev]` for the tests and `[docs]` to build the documentation. Install `jax` to use
+CSDL's JAX backend.
 
 # Quick start: a cantilever beam
 A 10 m aluminum tube, clamped at the root, with a 1 kN tip load:
@@ -230,7 +235,7 @@ optimizer.print_results()
 ```
 
 `csdl.experimental.PySimulator(recorder)` runs the same model without JAX. See
-[`examples/single_beam_opt.py`](examples/single_beam_opt.py) for a complete script.
+[`examples/single_beam_opt.py`](https://github.com/LSDOlab/aframe/blob/main/examples/single_beam_opt.py) for a complete script.
 
 # Plotting
 With the `plot` extra, the PyVista helpers draw beams into a `pyvista.Plotter`. For
@@ -258,18 +263,28 @@ plotter.show()
   quickly with model size; models of up to a few thousand dofs (several hundred nodes) solve in
   seconds.
 
+# Documentation
+The API documentation is at **https://lsdolab.github.io/aframe/**. It is generated from the
+docstrings with [pdoc](https://pdoc.dev) and republished on every push to `main`. To build it
+locally:
+```bash
+pip install -e ".[plot,docs]"
+python docs/make_docs.py
+```
+and open `site/index.html`.
+
 # Examples
-The [`examples`](examples) folder has complete scripts:
+The [`examples`](https://github.com/LSDOlab/aframe/tree/main/examples) folder has complete scripts:
 
 | Script | What it shows |
 |---|---|
-| [`two_joined_beams.py`](examples/two_joined_beams.py) | Two tube beams connected by a joint |
-| [`bingran_cantilever_beam.py`](examples/bingran_cantilever_beam.py) | A tube cantilever with stresses and mass properties |
-| [`single_beam_opt.py`](examples/single_beam_opt.py) | Minimum-mass optimization with a displacement constraint (modOpt) |
-| [`NASA_LPC_beam.py`](examples/NASA_LPC_beam.py), [`aurora_pav_vv.py`](examples/aurora_pav_vv.py) | Wing-box (`CSBox`) beams under spanwise load distributions |
-| [`1_element_beam_test.py`](examples/1_element_beam_test.py) | Frames of single-element beams |
-| [`ucsd_lunar_lander/`](examples/ucsd_lunar_lander) | A lunar lander frame with many joints, plotted with PyVista |
-| [`bunny/`](examples/bunny) | A frame generated from the edges of an STL mesh |
+| [`two_joined_beams.py`](https://github.com/LSDOlab/aframe/blob/main/examples/two_joined_beams.py) | Two tube beams connected by a joint |
+| [`bingran_cantilever_beam.py`](https://github.com/LSDOlab/aframe/blob/main/examples/bingran_cantilever_beam.py) | A tube cantilever with stresses and mass properties |
+| [`single_beam_opt.py`](https://github.com/LSDOlab/aframe/blob/main/examples/single_beam_opt.py) | Minimum-mass optimization with a displacement constraint (modOpt) |
+| [`NASA_LPC_beam.py`](https://github.com/LSDOlab/aframe/blob/main/examples/NASA_LPC_beam.py), [`aurora_pav_vv.py`](https://github.com/LSDOlab/aframe/blob/main/examples/aurora_pav_vv.py) | Wing-box (`CSBox`) beams under spanwise load distributions |
+| [`1_element_beam_test.py`](https://github.com/LSDOlab/aframe/blob/main/examples/1_element_beam_test.py) | Frames of single-element beams |
+| [`ucsd_lunar_lander/`](https://github.com/LSDOlab/aframe/tree/main/examples/ucsd_lunar_lander) | A lunar lander frame with many joints, plotted with PyVista |
+| [`bunny/`](https://github.com/LSDOlab/aframe/tree/main/examples/bunny) | A frame generated from the edges of an STL mesh |
 
 # License
 This project is licensed under the terms of the **MIT License**.

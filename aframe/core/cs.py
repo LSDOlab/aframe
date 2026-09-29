@@ -341,7 +341,7 @@ class CSBoxMarius(CSBox):
     """
     Box with user-supplied section properties.
 
-    .. deprecated:: use ``CSBox.from_properties`` (same arguments).
+    Deprecated: use ``CSBox.from_properties``, which takes the same arguments.
     """
 
     def __init__(self,

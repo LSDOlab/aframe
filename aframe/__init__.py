@@ -1,4 +1,9 @@
-"""aframe: a differentiable linear 3D beam/frame solver written in CSDL."""
+"""
+aframe: a differentiable linear 3D beam/frame solver written in CSDL.
+
+.. include:: ../README.md
+   :start-line: 1
+"""
 from aframe.core.cs import CrossSection, CSTube, CSCircle, CSEllipse, CSBox, CSBoxMarius
 from aframe.core.beam import Beam
 from aframe.core.joint import Joint
