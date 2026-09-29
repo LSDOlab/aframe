@@ -1,5 +1,7 @@
 # aframe
-![aframe](https://github.com/user-attachments/assets/02c7aae8-5a49-4ff5-8a16-f2b6295dab02)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/02c7aae8-5a49-4ff5-8a16-f2b6295dab02" alt="aframe" width="450">
+</p>
 
 [![Tests](https://github.com/LSDOlab/aframe/actions/workflows/actions.yml/badge.svg)](https://github.com/LSDOlab/aframe/actions/workflows/actions.yml)
 [![Docs](https://github.com/LSDOlab/aframe/actions/workflows/docs.yml/badge.svg)](https://lsdolab.github.io/aframe/)
