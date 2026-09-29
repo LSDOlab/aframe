@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aframe"
+dynamic = ["version"]
+description = "A differentiable linear 3D beam/frame solver written in CSDL"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE.txt"]
+authors = [{ name = "Nicholas Orndorff", email = "norndorff@ucsd.edu" }]
+requires-python = ">=3.9"
+dependencies = [
+    "numpy",
+    # not on PyPI: pip install git+https://github.com/LSDOlab/CSDL_alpha.git
+    "csdl_alpha",
+]
+
+[project.optional-dependencies]
+plot = ["pyvista", "matplotlib"]
+dev = ["pytest"]
+
+[project.urls]
+Homepage = "https://github.com/LSDOlab/aframe"
+Repository = "https://github.com/LSDOlab/aframe"
+
+[tool.setuptools.dynamic]
+version = { attr = "aframe.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["aframe*"]
+exclude = ["aframe.core.old*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
